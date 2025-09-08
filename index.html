@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Focal X - Node.js Bootcamp Lecture Portal</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .footer {
+            padding-top: 30px;
+            text-align: center;
+        }
+
+        .footer a {
+            color: black;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1000px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .coach {
+            background-color: white;
+            width: 80px;
+            border-radius: 0 0 50% 0;
+            color: black;
+            padding: 10px;
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+        
+        header {
+            background: #2c3e50;
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .lectures-container {
+            padding: 30px;
+        }
+        
+        h2 {
+            color: #2c3e50;
+            margin-bottom: 25px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #3498db;
+            text-align: center;
+            font-size: 1.8rem;
+        }
+        
+        .lectures-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .lectures-table th, .lectures-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .lectures-table th {
+            background-color: #3498db;
+            color: white;
+            font-weight: 600;
+        }
+        
+        .lectures-table tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        
+        .lectures-table tr:hover {
+            background-color: #e8f4fc;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .lecture-link {
+            color: #2c3e50;
+            text-decoration: none;
+            display: block;
+            padding: 15px;
+            font-weight: 500;
+        }
+        
+        .lecture-link:hover {
+            color: #3498db;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .status-completed {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .status-upcoming {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        
+        .status-in-progress {
+            background-color: #cce5ff;
+            color: #004085;
+        }
+        
+        .search-box {
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        @media (max-width: 768px) {
+            .lectures-table {
+                display: block;
+                overflow-x: auto;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .container {
+                border-radius: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="coach">Moones Mezher</div>
+    <div class="container">
+        <header>
+            <h1>Focal X - Node.js Bootcamp</h1>
+            <p class="subtitle">Lecture Portal - Browse All Lectures</p>
+        </header>
+        
+        <div class="lectures-container">
+            <h2>Available Lectures</h2>
+            
+            <input type="text" class="search-box" placeholder="Search lectures..." id="searchInput">
+            
+            <table class="lectures-table">
+                <thead>
+                    <tr>
+                        <th>Lecture #</th>
+                        <th>Title</th>
+                        <th>Topics</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr onclick="window.location.href='lecture1.html'">
+                        <td>01</td>
+                        <td><a href="lecture1.html" class="lecture-link">JavaScript Fundamentals</a></td>
+                        <td>Variables, Data Types, Scopes, Operators</td>
+                        <td><span class="status-badge status-completed">Completed</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2025 <a rel="noopener" href="https://focal-x.com/" target="_blank">Focal X</a> All Rights Reserved</p>
+    </footer>
+
+    <script>
+        // Simple search functionality
+        document.getElementById('searchInput').addEventListener('keyup', function() {
+            const searchText = this.value.toLowerCase();
+            const rows = document.querySelectorAll('.lectures-table tbody tr');
+            
+            rows.forEach(row => {
+                const title = row.cells[1].textContent.toLowerCase();
+                const topics = row.cells[2].textContent.toLowerCase();
+                
+                if (title.includes(searchText) || topics.includes(searchText)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
