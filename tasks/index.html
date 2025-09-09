@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Focal X - Node.js Bootcamp Lecture Portal</title>
+    <title>Focal X - Node.js Bootcamp Tasks</title>
     <style>
         * {
             margin: 0;
@@ -63,14 +63,6 @@
             color: white;
             padding: 30px;
             text-align: center;
-        }
-
-        header div {
-            padding-top: 20px;
-        }
-
-        header div a {
-            color: white;
         }
         
         h1 {
@@ -193,38 +185,29 @@
     <div class="container">
         <header>
             <h1>Focal X V9 - Node.js Bootcamp</h1>
-            <p class="subtitle">Lecture Portal - Browse All Lectures</p>
-            <div>
-                <a href="tasks/index.html" target="_blank" rel="noopener noreferrer">Tasks</a>
-            </div>
+            <p class="subtitle">Task Portal - Browse All Tasks</p>
         </header>
         
         <div class="lectures-container">
-            <h2>Available Lectures</h2>
+            <h2>Available Tasks</h2>
             
-            <input type="text" class="search-box" placeholder="Search lectures..." id="searchInput">
+            <input type="text" class="search-box" placeholder="Search tasks..." id="searchInput">
             
             <table class="lectures-table">
                 <thead>
                     <tr>
-                        <th>Lecture #</th>
+                        <th>Task #</th>
                         <th>Title</th>
-                        <th>Topics</th>
-                        <th>Status</th>
+                        <th>Start</th>
+                        <th>End</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr onclick="window.location.href='lecture1.html'">
+                    <tr onclick="window.location.href='task1.html'">
                         <td>01</td>
-                        <td><a href="lecture1.html" class="lecture-link">JavaScript Fundamentals 1</a></td>
-                        <td>Variables, Data Types, Scopes, Operators</td>
-                        <td><span class="status-badge status-completed">Completed</span></td>
-                    </tr>
-                    <tr onclick="window.location.href='lecture2.html'">
-                        <td>02</td>
-                        <td><a href="lecture2.html" class="lecture-link">JavaScript Fundamentals 2</a></td>
-                        <td>Functions, Loops</td>
-                        <td><span class="status-badge status-completed">Completed</span></td>
+                        <td><a href="task1.html" class="lecture-link">Employee Salary Calculator</a></td>
+                        <td>9/9/2025</td>
+                        <td>13/9/2025</td>
                     </tr>
                 </tbody>
             </table>
