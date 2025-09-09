@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Focal X - JavaScript Functions</title>
+    <link rel="shortcut icon" href="../logo.jpg" type="image/x-icon">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .footer {
+            padding-top: 30px;
+        }
+
+        .footer a {
+            color: black;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .coach {
+            background-color: white;
+            width: 80px;
+            border-radius: 0 0 50% 0;
+            color: black;
+            padding: 10px;
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+        
+        header {
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 20px;
+        }
+        
+        .lecture-content {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        h2 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #3498db;
+            font-size: 1.5rem;
+        }
+        
+        h3 {
+            color: #2980b9;
+            margin: 20px 0 12px;
+            font-size: 1.2rem;
+        }
+        
+        pre {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 12px;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin: 12px 0;
+            font-size: 0.9rem;
+        }
+        
+        code {
+            font-family: 'Fira Code', monospace;
+        }
+        
+        .tabs {
+            display: flex;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .tab {
+            padding: 8px 15px;
+            cursor: pointer;
+            background: #f1f1f1;
+            border: 1px solid #ddd;
+            border-bottom: none;
+            border-radius: 5px 5px 0 0;
+            margin-right: 5px;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+        
+        .tab.active {
+            background: #6f42c1;
+            color: white;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 12px 0;
+            font-size: 0.9rem;
+        }
+        
+        .comparison-table th, .comparison-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        
+        .comparison-table th {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        .comparison-table tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        
+        .info-box {
+            background: #e8f4fc;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            border-left: 5px solid #3498db;
+        }
+        
+        .best-practice {
+            background: #d4edda;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            border-left: 5px solid #28a745;
+        }
+        
+        @media (max-width: 900px) {
+            .content {
+                padding: 15px;
+            }
+            
+            .tabs {
+                flex-direction: column;
+            }
+            
+            .tab {
+                margin-right: 0;
+                margin-bottom: 5px;
+                border-radius: 5px;
+                border: 1px solid #ddd;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <p class="coach">Moones Mezher</p>
+        <header>
+            <h1 id="lecture-title">Focal X - Node.js Bootcamp</h1>
+            <p class="subtitle" id="lecture-subtitle">JavaScript Functions: Declaration, Expression, Arrow, HOF, and IIFE</p>
+        </header>
+        
+        <div class="content">
+            <div class="lecture-content">
+                <h2>JavaScript Functions</h2>
+                <div class="tabs">
+                    <div class="tab active" onclick="switchTab(0)">Comparison</div>
+                    <div class="tab" onclick="switchTab(1)">Declaration</div>
+                    <div class="tab" onclick="switchTab(2)">Expression</div>
+                    <div class="tab" onclick="switchTab(3)">Arrow</div>
+                    <div class="tab" onclick="switchTab(4)">HOF</div>
+                    <div class="tab" onclick="switchTab(5)">IIFE</div>
+                </div>
+                
+                <div class="tab-content active" id="tab-0">
+                    <h3>Function Types Comparison</h3>
+                    <table class="comparison-table">
+                        <thead>
+                            <tr>
+                                <th>Feature</th>
+                                <th>Function Declaration</th>
+                                <th>Function Expression</th>
+                                <th>Arrow Function</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Hoisting</td>
+                                <td>Fully hoisted</td>
+                                <td>Not hoisted</td>
+                                <td>Not hoisted</td>
+                            </tr>
+                            <tr>
+                                <td>Syntax</td>
+                                <td>function name() {}</td>
+                                <td>const name = function() {}</td>
+                                <td>const name = () => {}</td>
+                            </tr>
+                            <tr>
+                                <td>this binding</td>
+                                <td>Dynamic</td>
+                                <td>Dynamic</td>
+                                <td>Lexical (from parent scope)</td>
+                            </tr>
+                            <tr>
+                                <td>Arguments object</td>
+                                <td>Yes</td>
+                                <td>Yes</td>
+                                <td>No</td>
+                            </tr>
+                            <tr>
+                                <td>Constructor</td>
+                                <td>Yes</td>
+                                <td>Yes</td>
+                                <td>No</td>
+                            </tr>
+                            <tr>
+                                <td>Implicit return</td>
+                                <td>No</td>
+                                <td>No</td>
+                                <td>Yes (when without {})</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <div class="info-box">
+                        <h4>Key Differences</h4>
+                        <ul>
+                            <li><strong>Function Declaration</strong>: Hoisted, can be called before declaration</li>
+                            <li><strong>Function Expression</strong>: Not hoisted, must be defined before calling</li>
+                            <li><strong>Arrow Function</strong>: No own 'this', shorter syntax, cannot be used as constructors</li>
+                            <li><strong>HOF (Higher-Order Function)</strong>: Functions that take other functions as arguments or return functions</li>
+                            <li><strong>IIFE (Immediately Invoked Function Expression)</strong>: Functions that are executed immediately after definition</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="tab-content" id="tab-1">
+                    <h3>Function Declaration</h3>
+                    <pre><code>// Function Declaration (hoisted)
+function greet(name) {
+    return "Hello, " + name + "!";
+}
+
+// Can be called before declaration (due to hoisting)
+console.log(greet("Moones")); // "Hello, Moones!"
+
+// Function with default parameters
+function calculateArea(width, height = 10) {
+    return width * height;
+}
+
+console.log(calculateArea(5)); // 50
+console.log(calculateArea(5, 7)); // 35</code></pre>
+                    
+                    <div class="info-box">
+                        <h4>Characteristics</h4>
+                        <ul>
+                            <li>Hoisted to the top of their scope</li>
+                            <li>Can be called before they are defined</li>
+                            <li>Have their own 'this' context</li>
+                            <li>Can be used as constructors with the 'new' keyword</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="tab-content" id="tab-2">
+                    <h3>Function Expression</h3>
+                    <pre><code>// Function Expression (not hoisted)
+const greet = function(name) {
+    return "Hello, " + name + "!";
+};
+
+console.log(greet("Moones")); // "Hello, Moones!"
+
+// Cannot be called before declaration
+// console.log(greet2("Moones")); // Error: greet2 is not defined
+const greet2 = function(name) {
+    return "Hi, " + name + "!";
+};
+
+// Named function expression
+const factorial = function fac(n) {
+    return n < 2 ? 1 : n * fac(n - 1);
+};
+
+console.log(factorial(5)); // 120</code></pre>
+                    
+                    <div class="info-box">
+                        <h4>Characteristics</h4>
+                        <ul>
+                            <li>Not hoisted - must be defined before calling</li>
+                            <li>Can be anonymous or named</li>
+                            <li>Often used as callback functions</li>
+                            <li>Can be assigned to variables or passed as arguments</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="tab-content" id="tab-3">
+                    <h3>Arrow Functions</h3>
+                    <pre><code>// Arrow Function (not hoisted, lexical this)
+const greet = (name) => {
+    return "Hello, " + name + "!";
+};
+
+// Single parameter - parentheses optional
+const square = x => x * x;
+
+// Multiple parameters - parentheses required
+const multiply = (a, b) => a * b;
+
+// No parameters - parentheses required
+const sayHello = () => "Hello World!";
+
+// Returning object literal - requires parentheses
+const createUser = (name, age) => ({ name, age });
+
+console.log(greet("Moones")); // "Hello, Moones!"
+console.log(square(5)); // 25
+console.log(multiply(4, 7)); // 28
+console.log(createUser("Moones", 30)); // {name: "Moones", age: 30}
+
+// 'this' behavior example
+const person = {
+    name: "Moones",
+    tasks: ["Task 1", "Task 2", "Task 3"],
+    showTasks: function() {
+        this.tasks.forEach(task => {
+            // 'this' refers to the person object (lexical scope)
+            console.log(this.name + " needs to do: " + task);
+        });
+    }
+};
+
+person.showTasks();</code></pre>
+                    
+                    <div class="info-box">
+                        <h4>Characteristics</h4>
+                        <ul>
+                            <li>Shorter syntax than function expressions</li>
+                            <li>No binding of 'this' - uses 'this' from enclosing scope</li>
+                            <li>Cannot be used as constructors</li>
+                            <li>No arguments object (use rest parameters instead)</li>
+                            <li>Implicit return when without curly braces</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="tab-content" id="tab-4">
+                    <h3>Higher-Order Functions (HOF)</h3>
+                    <pre><code>// Functions that accept other functions as arguments
+function calculate(a, b, operation) {
+    return operation(a, b);
+}
+
+const add = (a, b) => a + b;
+const subtract = (a, b) => a - b;
+
+console.log(calculate(10, 5, add)); // 15
+console.log(calculate(10, 5, subtract)); // 5
+
+// Functions that return functions
+function multiplier(factor) {
+    return function(x) {
+        return x * factor;
+    };
+}
+
+const double = multiplier(2);
+const triple = multiplier(3);
+
+console.log(double(5)); // 10
+console.log(triple(5)); // 15
+
+// Array methods as HOFs
+const numbers = [1, 2, 3, 4, 5];
+
+// map - transforms each element
+const squared = numbers.map(x => x * x);
+console.log(squared); // [1, 4, 9, 16, 25]
+
+// filter - selects elements based on condition
+const evens = numbers.filter(x => x % 2 === 0);
+console.log(evens); // [2, 4]
+
+// reduce - reduces array to a single value
+const sum = numbers.reduce((acc, curr) => acc + curr, 0);
+console.log(sum); // 15</code></pre>
+                    
+                    <div class="info-box">
+                        <h4>Characteristics</h4>
+                        <ul>
+                            <li>Accept functions as parameters</li>
+                            <li>Return functions as results</li>
+                            <li>Enable functional programming patterns</li>
+                            <li>Common in JavaScript (map, filter, reduce, etc.)</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="tab-content" id="tab-5">
+                    <h3>Immediately Invoked Function Expressions (IIFE)</h3>
+                    <pre><code>// Basic IIFE
+(function() {
+    console.log("IIFE executed immediately!");
+})();
+
+// IIFE with parameters
+(function(name) {
+    console.log("Hello, " + name + "!");
+})("Moones");
+
+// IIFE that returns a value
+const result = (function(a, b) {
+    return a + b;
+})(5, 10);
+
+console.log(result); // 15
+
+// IIFE with arrow function
+(() => {
+    console.log("Arrow function IIFE");
+})();
+
+// Module pattern with IIFE
+const calculator = (function() {
+    let memory = 0;
+    
+    return {
+        add: function(a, b) {
+            return a + b;
+        },
+        subtract: function(a, b) {
+            return a - b;
+        },
+        store: function(value) {
+            memory = value;
+        },
+        recall: function() {
+            return memory;
+        },
+        clear: function() {
+            memory = 0;
+        }
+    };
+})();
+
+console.log(calculator.add(5, 3)); // 8
+calculator.store(10);
+console.log(calculator.recall()); // 10
+calculator.clear();
+console.log(calculator.recall()); // 0</code></pre>
+                    
+                    <div class="info-box">
+                        <h4>Characteristics</h4>
+                        <ul>
+                            <li>Executed immediately after definition</li>
+                            <li>Creates a private scope</li>
+                            <li>Avoids polluting the global namespace</li>
+                            <li>Often used in module patterns</li>
+                            <li>Can be used with arrow functions</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="best-practice">
+                        <h4>Best Practices</h4>
+                        <ol>
+                            <li>Use function declarations for functions you need to hoist</li>
+                            <li>Use arrow functions for short callbacks and when you need lexical 'this'</li>
+                            <li>Use function expressions for callbacks and when function needs to be assigned</li>
+                            <li>Use IIFE to create private scopes and avoid global pollution</li>
+                            <li>Leverage HOFs for functional programming patterns</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2025 <a rel="noopener" href="https://focal-x.com/" target="_blank">Focal X</a> All Right Reserved</p>
+    </footer>
+
+    <script>
+        // Tab switching functionality
+        function switchTab(tabIndex) {
+            // Remove active class from all tabs
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            // Add active class to clicked tab
+            tabs[tabIndex].classList.add('active');
+            
+            // Hide all tab content
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(content => content.classList.remove('active'));
+            
+            // Show selected tab content
+            document.getElementById('tab-' + tabIndex).classList.add('active');
+        }
+    </script>
+</body>
+</html>

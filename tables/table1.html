@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Focal X - JavaScript Variables</title>
+    <link rel="shortcut icon" href="../logo.jpg" type="image/x-icon">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .footer {
+            padding-top: 30px;
+        }
+
+        .footer a {
+            color: black;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .coach {
+            background-color: white;
+            width: 80px;
+            border-radius: 0 0 50% 0;
+            color: black;
+            padding: 10px;
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+        
+        header {
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 20px;
+        }
+        
+        .lecture-content {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        h2 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #3498db;
+            font-size: 1.5rem;
+        }
+        
+        h3 {
+            color: #2980b9;
+            margin: 20px 0 12px;
+            font-size: 1.2rem;
+        }
+        
+        pre {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 12px;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin: 12px 0;
+            font-size: 0.9rem;
+        }
+        
+        code {
+            font-family: 'Fira Code', monospace;
+        }
+        
+        .tabs {
+            display: flex;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .tab {
+            padding: 8px 15px;
+            cursor: pointer;
+            background: #f1f1f1;
+            border: 1px solid #ddd;
+            border-bottom: none;
+            border-radius: 5px 5px 0 0;
+            margin-right: 5px;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+        
+        .tab.active {
+            background: #6f42c1;
+            color: white;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 12px 0;
+            font-size: 0.9rem;
+        }
+        
+        .comparison-table th, .comparison-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        
+        .comparison-table th {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        .comparison-table tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        
+        .info-box {
+            background: #e8f4fc;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            border-left: 5px solid #3498db;
+        }
+        
+        .best-practice {
+            background: #d4edda;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            border-left: 5px solid #28a745;
+        }
+        
+        @media (max-width: 900px) {
+            .content {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <p class="coach">Moones Mezher</p>
+        <header>
+            <h1 id="lecture-title">Focal X - Node.js Bootcamp</h1>
+            <p class="subtitle" id="lecture-subtitle">JavaScript Variables: const, let, and var</p>
+        </header>
+        
+        <div class="content">
+            <div class="lecture-content">
+                <h2>Variables Comparison</h2>
+                <div class="tabs">
+                    <div class="tab active" onclick="switchTab(0)">Comparison</div>
+                    <div class="tab" onclick="switchTab(1)">Examples</div>
+                    <div class="tab" onclick="switchTab(2)">Scoping</div>
+                    <div class="tab" onclick="switchTab(3)">Best Practices</div>
+                </div>
+                
+                <div class="tab-content active" id="tab-0">
+                    <h3>const vs let vs var</h3>
+                    <table class="comparison-table">
+                        <thead>
+                            <tr>
+                                <th>Feature</th>
+                                <th>const</th>
+                                <th>let</th>
+                                <th>var</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Redeclaration</td>
+                                <td>Not allowed</td>
+                                <td>Not allowed</td>
+                                <td>Allowed</td>
+                            </tr>
+                            <tr>
+                                <td>Reassignment</td>
+                                <td>Not allowed</td>
+                                <td>Allowed</td>
+                                <td>Allowed</td>
+                            </tr>
+                            <tr>
+                                <td>Scope</td>
+                                <td>Block</td>
+                                <td>Block</td>
+                                <td>Function</td>
+                            </tr>
+                            <tr>
+                                <td>Hoisting</td>
+                                <td>Yes (not initialized)</td>
+                                <td>Yes (not initialized)</td>
+                                <td>Yes (initialized)</td>
+                            </tr>
+                            <tr>
+                                <td>Temporal Dead Zone</td>
+                                <td>Yes</td>
+                                <td>Yes</td>
+                                <td>No</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <div class="info-box">
+                        <h4>Key Differences</h4>
+                        <ul>
+                            <li><strong>const</strong>: Cannot be reassigned, must be initialized during declaration</li>
+                            <li><strong>let</strong>: Can be reassigned, block-scoped</li>
+                            <li><strong>var</strong>: Function-scoped, hoisted with initialization</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="tab-content" id="tab-1">
+                    <h3>Code Examples</h3>
+                    <pre><code>// const example
+const PI = 3.14159;
+// PI = 3.14; // This would cause an error
+
+// let example
+let counter = 0;
+counter = 1; // This is allowed
+
+// var example
+var name = "John";
+var name = "Doe"; // This is allowed (redeclaration)
+
+// Block scope example
+{
+  let blockScoped = "I'm block scoped";
+  var functionScoped = "I'm function scoped";
+}
+// console.log(blockScoped); // Error: blockScoped is not defined
+console.log(functionScoped); // This works</code></pre>
+                    
+                    <h3>Hoisting Examples</h3>
+                    <pre><code>// var is hoisted and initialized with undefined
+console.log(hoistedVar); // undefined
+var hoistedVar = "I'm hoisted";
+
+// let and const are hoisted but not initialized
+// console.log(hoistedLet); // ReferenceError
+// console.log(hoistedConst); // ReferenceError
+let hoistedLet = "I'm hoisted but not initialized";
+const hoistedConst = "Me too";</code></pre>
+                </div>
+                
+                <div class="tab-content" id="tab-2">
+                    <h3>Scoping Differences</h3>
+                    <pre><code>// Global scope
+var globalVar = "I'm global";
+let globalLet = "I'm also global";
+const globalConst = "Me too";
+
+function testScope() {
+  // Function scope
+  var functionVar = "I'm function scoped";
+  let functionLet = "I'm block scoped (within function)";
+  const functionConst = "Me too";
+  
+  if (true) {
+    // Block scope
+    var blockVar = "I'm still function scoped (hoisted)";
+    let blockLet = "I'm block scoped";
+    const blockConst = "Me too";
+    
+    console.log(blockVar); // Works
+    console.log(blockLet); // Works
+    console.log(blockConst); // Works
+  }
+  
+  console.log(blockVar); // Works (var is function scoped)
+  // console.log(blockLet); // Error: blockLet is not defined
+  // console.log(blockConst); // Error: blockConst is not defined
+}
+
+testScope();</code></pre>
+                    
+                    <div class="info-box">
+                        <h4>Scope Summary</h4>
+                        <ul>
+                            <li><strong>var</strong>: Function-scoped or globally-scoped</li>
+                            <li><strong>let & const</strong>: Block-scoped ({ } blocks)</li>
+                            <li>Variables declared with var are accessible throughout the function</li>
+                            <li>Variables declared with let/const are only accessible within their block</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="tab-content" id="tab-3">
+                    <h3>Best Practices</h3>
+                    
+                    <div class="best-practice">
+                        <h4>Modern JavaScript Variable Declaration</h4>
+                        <ol>
+                            <li>Use <strong>const</strong> by default for all variables</li>
+                            <li>Use <strong>let</strong> only when you need to reassign values</li>
+                            <li>Avoid using <strong>var</strong> in new code</li>
+                            <li>Declare variables as close as possible to their usage</li>
+                            <li>Initialize variables when you declare them</li>
+                        </ol>
+                    </div>
+                    
+                    <h4>When to Use Each</h4>
+                    <table class="comparison-table">
+                        <thead>
+                            <tr>
+                                <th>Situation</th>
+                                <th>Recommended</th>
+                                <th>Explanation</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Value won't change</td>
+                                <td>const</td>
+                                <td>Prevents accidental reassignment</td>
+                            </tr>
+                            <tr>
+                                <td>Loop counters</td>
+                                <td>let</td>
+                                <td>Value needs to change each iteration</td>
+                            </tr>
+                            <tr>
+                                <td>Variables in blocks</td>
+                                <td>let/const</td>
+                                <td>Block scoping prevents leaks</td>
+                            </tr>
+                            <tr>
+                                <td>Legacy code</td>
+                                <td>var</td>
+                                <td>Only for maintaining older codebases</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <div class="info-box">
+                        <h4>Why Avoid var?</h4>
+                        <ul>
+                            <li>Function scoping can lead to unexpected behavior</li>
+                            <li>Hoisting can make code harder to understand</li>
+                            <li>Redeclaration can cause bugs that are hard to track</li>
+                            <li>let and const provide better predictability</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2025 <a rel="noopener" href="https://focal-x.com/" target="_blank">Focal X</a> All Right Reserved</p>
+    </footer>
+
+    <script>
+        // Tab switching functionality
+        function switchTab(tabIndex) {
+            // Remove active class from all tabs
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            // Add active class to clicked tab
+            tabs[tabIndex].classList.add('active');
+            
+            // Hide all tab content
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(content => content.classList.remove('active'));
+            
+            // Show selected tab content
+            document.getElementById('tab-' + tabIndex).classList.add('active');
+        }
+    </script>
+</body>
+</html>

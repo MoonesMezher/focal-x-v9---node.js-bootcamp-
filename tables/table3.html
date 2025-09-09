@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Focal X - JavaScript Number & String Methods</title>
+    <link rel="shortcut icon" href="../logo.jpg" type="image/x-icon">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .footer {
+            padding-top: 30px;
+        }
+
+        .footer a {
+            color: black;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .coach {
+            background-color: white;
+            width: 80px;
+            border-radius: 0 0 50% 0;
+            color: black;
+            padding: 10px;
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+        
+        header {
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 20px;
+        }
+        
+        .lecture-content {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        h2 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #3498db;
+            font-size: 1.5rem;
+        }
+        
+        h3 {
+            color: #2980b9;
+            margin: 20px 0 12px;
+            font-size: 1.2rem;
+        }
+        
+        pre {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 12px;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin: 12px 0;
+            font-size: 0.9rem;
+        }
+        
+        code {
+            font-family: 'Fira Code', monospace;
+        }
+        
+        .tabs {
+            display: flex;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .tab {
+            padding: 8px 15px;
+            cursor: pointer;
+            background: #f1f1f1;
+            border: 1px solid #ddd;
+            border-bottom: none;
+            border-radius: 5px 5px 0 0;
+            margin-right: 5px;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+        
+        .tab.active {
+            background: #6f42c1;
+            color: white;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 12px 0;
+            font-size: 0.9rem;
+        }
+        
+        .comparison-table th, .comparison-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        
+        .comparison-table th {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        .comparison-table tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        
+        .info-box {
+            background: #e8f4fc;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            border-left: 5px solid #3498db;
+        }
+        
+        .best-practice {
+            background: #d4edda;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            border-left: 5px solid #28a745;
+        }
+        
+        @media (max-width: 900px) {
+            .content {
+                padding: 15px;
+            }
+            
+            .tabs {
+                flex-direction: column;
+            }
+            
+            .tab {
+                margin-right: 0;
+                margin-bottom: 5px;
+                border-radius: 5px;
+                border: 1px solid #ddd;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <p class="coach">Moones Mezher</p>
+        <header>
+            <h1 id="lecture-title">Focal X - Node.js Bootcamp</h1>
+            <p class="subtitle" id="lecture-subtitle">JavaScript Number and String Methods</p>
+        </header>
+        
+        <div class="content">
+            <div class="lecture-content">
+                <h2>JavaScript Number and String Methods</h2>
+                <div class="tabs">
+                    <div class="tab active" onclick="switchTab(0)">Overview</div>
+                    <div class="tab" onclick="switchTab(1)">Number Methods</div>
+                    <div class="tab" onclick="switchTab(2)">String Methods</div>
+                    <div class="tab" onclick="switchTab(3)">Examples</div>
+                </div>
+                
+                <div class="tab-content active" id="tab-0">
+                    <h3>Number and String Methods Overview</h3>
+                    <table class="comparison-table">
+                        <thead>
+                            <tr>
+                                <th>Category</th>
+                                <th>Number Methods</th>
+                                <th>String Methods</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Conversion</td>
+                                <td>toString(), toFixed()</td>
+                                <td>toString(), valueOf()</td>
+                            </tr>
+                            <tr>
+                                <td>Formatting</td>
+                                <td>toExponential(), toPrecision()</td>
+                                <td>toUpperCase(), toLowerCase()</td>
+                            </tr>
+                            <tr>
+                                <td>Extraction</td>
+                                <td>-</td>
+                                <td>slice(), substring(), substr()</td>
+                            </tr>
+                            <tr>
+                                <td>Searching</td>
+                                <td>-</td>
+                                <td>indexOf(), lastIndexOf(), includes()</td>
+                            </tr>
+                            <tr>
+                                <td>Manipulation</td>
+                                <td>-</td>
+                                <td>concat(), repeat(), replace()</td>
+                            </tr>
+                            <tr>
+                                <td>Whitespace</td>
+                                <td>-</td>
+                                <td>trim(), trimStart(), trimEnd()</td>
+                            </tr>
+                            <tr>
+                                <td>Padding</td>
+                                <td>-</td>
+                                <td>padStart(), padEnd()</td>
+                            </tr>
+                            <tr>
+                                <td>Character Access</td>
+                                <td>-</td>
+                                <td>charAt(), charCodeAt()</td>
+                            </tr>
+                            <tr>
+                                <td>Splitting</td>
+                                <td>-</td>
+                                <td>split()</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <div class="info-box">
+                        <h4>Key Differences</h4>
+                        <ul>
+                            <li><strong>Number Methods</strong>: Primarily focus on numeric representation and formatting</li>
+                            <li><strong>String Methods</strong>: Focus on text manipulation, searching, and extraction</li>
+                            <li>Numbers are primitive values but have object wrappers with useful methods</li>
+                            <li>Strings are immutable - methods return new strings rather than modifying the original</li>
+                            <li>Many string methods accept regular expressions for powerful pattern matching</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="tab-content" id="tab-1">
+                    <h3>Number Methods</h3>
+                    <pre><code>// toString() - converts number to string
+let num = 15;
+console.log(num.toString()); // "15"
+console.log(typeof num.toString()); // "string"
+console.log((10).toString(2)); // "1010" (binary representation)
+
+// toFixed() - formats number with fixed decimal places
+let pi = 3.14159;
+console.log(pi.toFixed(2)); // "3.14"
+console.log(pi.toFixed(0)); // "3"
+console.log(2.55.toFixed(1)); // "2.6" (rounds up)
+
+// toExponential() - returns string in exponential notation
+console.log(123456.toExponential()); // "1.23456e+5"
+console.log(123456.toExponential(2)); // "1.23e+5"
+
+// toPrecision() - formats to specified precision
+let num2 = 123.456;
+console.log(num2.toPrecision(5)); // "123.46"
+console.log(num2.toPrecision(2)); // "1.2e+2"
+
+// Number() - converts other types to numbers
+console.log(Number("123")); // 123
+console.log(Number("123.45")); // 123.45
+console.log(Number(true)); // 1
+console.log(Number("hello")); // NaN
+
+// parseInt() and parseFloat() - string parsing
+console.log(parseInt("123px")); // 123
+console.log(parseFloat("12.34em")); // 12.34
+console.log(parseInt("101", 2)); // 5 (binary parsing)
+
+// Number properties
+console.log(Number.MAX_SAFE_INTEGER); // 9007199254740991
+console.log(Number.MIN_SAFE_INTEGER); // -9007199254740991
+console.log(Number.POSITIVE_INFINITY); // Infinity</code></pre>
+                    
+                    <div class="info-box">
+                        <h4>Characteristics</h4>
+                        <ul>
+                            <li>Number methods don't change the original number (numbers are immutable)</li>
+                            <li>Most methods return string representations of the number</li>
+                            <li>Be cautious with floating point precision issues in JavaScript</li>
+                            <li>Use parseInt() with radix parameter for different number bases</li>
+                            <li>Check for NaN with isNaN() or Number.isNaN()</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="tab-content" id="tab-2">
+                    <h3>String Methods</h3>
+                    <pre><code>// charAt() - returns character at specified index
+let str = "JavaScript";
+console.log(str.charAt(0)); // "J"
+console.log(str.charAt(4)); // "S"
+
+// concat() - joins strings
+console.log("Hello".concat(" ", "World")); // "Hello World"
+
+// includes() - checks if string contains substring
+console.log("JavaScript".includes("Script")); // true
+console.log("JavaScript".includes("script")); // false (case-sensitive)
+
+// indexOf() and lastIndexOf() - find substring positions
+console.log("JavaScript".indexOf("a")); // 1
+console.log("JavaScript".lastIndexOf("a")); // 3
+
+// slice() - extracts section of string
+console.log("JavaScript".slice(0, 4)); // "Java"
+console.log("JavaScript".slice(4)); // "Script"
+console.log("JavaScript".slice(-6)); // "Script"
+
+// split() - splits string into array
+console.log("Hello World".split(" ")); // ["Hello", "World"]
+console.log("JavaScript".split("")); // ["J","a","v","a","S","c","r","i","p","t"]
+
+// substring() - similar to slice but with some differences
+console.log("JavaScript".substring(0, 4)); // "Java"
+console.log("JavaScript".substring(4)); // "Script"
+
+// toLowerCase() and toUpperCase() - case conversion
+console.log("JavaScript".toLowerCase()); // "javascript"
+console.log("JavaScript".toUpperCase()); // "JAVASCRIPT"
+
+// trim() - removes whitespace
+console.log("  Hello World  ".trim()); // "Hello World"
+console.log("  Hello World  ".trimStart()); // "Hello World  "
+console.log("  Hello World  ".trimEnd()); // "  Hello World"
+
+// replace() - replaces substring or pattern
+console.log("JavaScript".replace("Java", "Type")); // "TypeScript"
+console.log("Hello World".replace(/[aeiou]/g, "")); // "Hll Wrld" (remove vowels)
+
+// match() - finds matches against regex
+console.log("Hello 123 World".match(/\d+/)); // ["123"]
+console.log("Hello 123 World".match(/\d+/g)); // ["123"]
+
+// padStart() and padEnd() - padding
+console.log("5".padStart(3, "0")); // "005"
+console.log("Hello".padEnd(10, ".")); // "Hello....."</code></pre>
+                    
+                    <div class="info-box">
+                        <h4>Characteristics</h4>
+                        <ul>
+                            <li>Strings are immutable - methods return new strings</li>
+                            <li>Most methods are case-sensitive</li>
+                            <li>Many methods accept negative indices (counting from end)</li>
+                            <li>Regular expressions can be used with many string methods</li>
+                            <li>Template literals (backticks) offer advanced string interpolation</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="tab-content" id="tab-3">
+                    <h3>Practical Examples</h3>
+                    <pre><code>// Formatting currency
+function formatCurrency(amount) {
+    return "$" + amount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,");
+}
+console.log(formatCurrency(1234567.89)); // "$1,234,567.89"
+
+// Capitalizing words in a string
+function capitalizeWords(str) {
+    return str.toLowerCase().replace(/\b\w/g, char => char.toUpperCase());
+}
+console.log(capitalizeWords("hello world")); // "Hello World"
+
+// Validating email format
+function isValidEmail(email) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+}
+console.log(isValidEmail("test@example.com")); // true
+console.log(isValidEmail("invalid.email")); // false
+
+// Extracting digits from a string
+function extractDigits(str) {
+    return str.match(/\d+/g)?.join("") || "";
+}
+console.log(extractDigits("Order #1234 for $99.99")); // "12349999"
+
+// Truncating text with ellipsis
+function truncateText(text, maxLength) {
+    return text.length > maxLength ? text.slice(0, maxLength - 3) + "..." : text;
+}
+console.log(truncateText("This is a long text that needs truncation", 20)); 
+// "This is a long te..."
+
+// Converting string to camelCase
+function toCamelCase(str) {
+    return str.toLowerCase().replace(/[^a-zA-Z0-9]+(.)/g, (_, chr) => chr.toUpperCase());
+}
+console.log(toCamelCase("Hello world JavaScript")); // "helloWorldJavaScript"
+
+// Formatting phone number
+function formatPhoneNumber(phone) {
+    const numbers = phone.replace(/\D/g, "");
+    return numbers.replace(/(\d{3})(\d{3})(\d{4})/, "($1) $2-$3");
+}
+console.log(formatPhoneNumber("1234567890")); // "(123) 456-7890"
+
+// Counting words in a string
+function countWords(str) {
+    return str.trim().split(/\s+/).filter(word => word.length > 0).length;
+}
+console.log(countWords("Hello world, this is JavaScript!")); // 5</code></pre>
+                    
+                    <div class="info-box">
+                        <h4>Common Use Cases</h4>
+                        <ul>
+                            <li>Data validation and sanitization</li>
+                            <li>User input formatting</li>
+                            <li>Text processing and analysis</li>
+                            <li>Data extraction from strings</li>
+                            <li>Display formatting for numbers and text</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="best-practice">
+                        <h4>Best Practices</h4>
+                        <ol>
+                            <li>Use template literals for string concatenation instead of + operator</li>
+                            <li>Be mindful of case sensitivity when comparing strings</li>
+                            <li>Use parseInt() with radix parameter to avoid unexpected parsing</li>
+                            <li>Consider using Number.isNaN() instead of isNaN() for more precise checking</li>
+                            <li>Use regular expressions for complex string operations</li>
+                            <li>Be cautious with floating point precision in financial calculations</li>
+                            <li>Consider using libraries like Intl for advanced number formatting</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2025 <a rel="noopener" href="https://focal-x.com/" target="_blank">Focal X</a> All Right Reserved</p>
+    </footer>
+
+    <script>
+        // Tab switching functionality
+        function switchTab(tabIndex) {
+            // Remove active class from all tabs
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            // Add active class to clicked tab
+            tabs[tabIndex].classList.add('active');
+            
+            // Hide all tab content
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(content => content.classList.remove('active'));
+            
+            // Show selected tab content
+            document.getElementById('tab-' + tabIndex).classList.add('active');
+        }
+    </script>
+</body>
+</html>

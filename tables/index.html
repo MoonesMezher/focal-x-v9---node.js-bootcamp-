@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="shortcut icon" href="./logo.jpg" type="image/x-icon">
-    <title>Focal X - Node.js Bootcamp Lecture Portal</title>
+    <title>Focal X - Node.js Bootcamp Tables</title>
+    <link rel="shortcut icon" href="../logo.jpg" type="image/x-icon">
     <style>
         * {
             margin: 0;
@@ -64,17 +64,6 @@
             color: white;
             padding: 30px;
             text-align: center;
-        }
-
-        header div {
-            padding-top: 20px;
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-        }
-
-        header div a {
-            color: white;
         }
         
         h1 {
@@ -197,39 +186,39 @@
     <div class="container">
         <header>
             <h1>Focal X V9 - Node.js Bootcamp</h1>
-            <p class="subtitle">Lecture Portal - Browse All Lectures</p>
-            <div>
-                <a href="tasks/index.html" target="_blank" rel="noopener noreferrer">Tasks</a>
-                <a href="tables/index.html" target="_blank" rel="noopener noreferrer">Tables</a>
-            </div>
+            <p class="subtitle">Table Portal - Browse All Tables</p>
         </header>
         
         <div class="lectures-container">
-            <h2>Available Lectures</h2>
+            <h2>Available Tables</h2>
             
-            <input type="text" class="search-box" placeholder="Search lectures..." id="searchInput">
+            <input type="text" class="search-box" placeholder="Search tables..." id="searchInput">
             
             <table class="lectures-table">
                 <thead>
                     <tr>
-                        <th>Lecture #</th>
+                        <th>Table #</th>
                         <th>Title</th>
-                        <th>Topics</th>
-                        <th>Status</th>
+                        <th hidden>Status</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr onclick="window.location.href='lecture1.html'">
+                    <tr onclick="window.location.href='table1.html'">
                         <td>01</td>
-                        <td><a href="lecture1.html" class="lecture-link">JavaScript Fundamentals 1</a></td>
-                        <td>Variables, Data Types, Scopes, Operators</td>
-                        <td><span class="status-badge status-completed">Completed</span></td>
+                        <td><a href="table1.html" class="lecture-link">Variables</a></td>
+                        <td hidden>1</td>
                     </tr>
-                    <tr onclick="window.location.href='lecture2.html'">
+
+                    <tr onclick="window.location.href='table2.html'">
                         <td>02</td>
-                        <td><a href="lecture2.html" class="lecture-link">JavaScript Fundamentals 2</a></td>
-                        <td>Functions, Loops</td>
-                        <td><span class="status-badge status-completed">Completed</span></td>
+                        <td><a href="table2.html" class="lecture-link">Functions</a></td>
+                        <td hidden>2</td>
+                    </tr>
+
+                    <tr onclick="window.location.href='table3.html'">
+                        <td>03</td>
+                        <td><a href="table3.html" class="lecture-link">Number & String Methods</a></td>
+                        <td hidden>3</td>
                     </tr>
                 </tbody>
             </table>
