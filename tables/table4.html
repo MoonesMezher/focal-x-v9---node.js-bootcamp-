@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Focal X - JavaScript Array Methods</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .footer {
+            padding-top: 30px;
+        }
+
+        .footer a {
+            color: black;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .coach {
+            background-color: white;
+            width: 80px;
+            border-radius: 0 0 50% 0;
+            color: black;
+            padding: 10px;
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+        
+        header {
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 20px;
+        }
+        
+        .lecture-content {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        h2 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #3498db;
+            font-size: 1.5rem;
+        }
+        
+        h3 {
+            color: #2980b9;
+            margin: 20px 0 12px;
+            font-size: 1.2rem;
+        }
+        
+        pre {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 12px;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin: 12px 0;
+            font-size: 0.9rem;
+        }
+        
+        code {
+            font-family: 'Fira Code', monospace;
+        }
+        
+        .tabs {
+            display: flex;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .tab {
+            padding: 8px 15px;
+            cursor: pointer;
+            background: #f1f1f1;
+            border: 1px solid #ddd;
+            border-bottom: none;
+            border-radius: 5px 5px 0 0;
+            margin-right: 5px;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+        
+        .tab.active {
+            background: #6f42c1;
+            color: white;
+        }
+        
+        .tab-content {
+            display: none;
+            overflow: auto;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 12px 0;
+            font-size: 0.9rem;
+        }
+        
+        .comparison-table th, .comparison-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        
+        .comparison-table th {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        .comparison-table tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        
+        .info-box {
+            background: #e8f4fc;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            border-left: 5px solid #3498db;
+        }
+        
+        .best-practice {
+            background: #d4edda;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            border-left: 5px solid #28a745;
+        }
+        
+        .method-detail {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        
+        .method-detail h4 {
+            color: #6f42c1;
+            margin-bottom: 10px;
+        }
+        
+        .mutating {
+            background-color: #f8d7da;
+            border-left: 5px solid #dc3545;
+        }
+        
+        .non-mutating {
+            background-color: #d4edda;
+            border-left: 5px solid #28a745;
+        }
+        
+        .question {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .options {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+            margin: 12px 0;
+        }
+        
+        .option {
+            padding: 10px;
+            background: #e8f4fc;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+            font-size: 0.9rem;
+        }
+        
+        .option:hover {
+            background: #d1e9fa;
+        }
+        
+        .correct {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .incorrect {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .result {
+            margin-top: 12px;
+            padding: 12px;
+            border-radius: 5px;
+            display: none;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 900px) {
+            .content {
+                padding: 15px;
+            }
+            
+            .tabs {
+                flex-direction: column;
+            }
+            
+            .tab {
+                margin-right: 0;
+                margin-bottom: 5px;
+                border-radius: 5px;
+                border: 1px solid #ddd;
+            }
+            
+            .comparison-table {
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <p class="coach">Moones Mezher</p>
+        <header>
+            <h1 id="lecture-title">Focal X - Node.js Bootcamp</h1>
+            <p class="subtitle" id="lecture-subtitle">JavaScript Array Methods</p>
+        </header>
+        
+        <div class="content">
+            <div class="lecture-content">
+                <h2>JavaScript Array Methods</h2>
+                <div class="tabs">
+                    <div class="tab active" onclick="switchTab(0)">Overview</div>
+                    <div class="tab" onclick="switchTab(1)">Mutating Methods</div>
+                    <div class="tab" onclick="switchTab(2)">Non-Mutating Methods</div>
+                    <div class="tab" onclick="switchTab(3)">Examples</div>
+                    <div class="tab" onclick="switchTab(4)">Practice</div>
+                </div>
+                
+                <div class="tab-content active" id="tab-0">
+                    <h3>Array Methods Overview</h3>
+                    <table class="comparison-table">
+                        <thead>
+                            <tr>
+                                <th>Method</th>
+                                <th>Mutates Array</th>
+                                <th>Returns</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>push()</td>
+                                <td>Yes</td>
+                                <td>New length</td>
+                                <td>Adds elements to the end</td>
+                            </tr>
+                            <tr>
+                                <td>pop()</td>
+                                <td>Yes</td>
+                                <td>Removed element</td>
+                                <td>Removes last element</td>
+                            </tr>
+                            <tr>
+                                <td>shift()</td>
+                                <td>Yes</td>
+                                <td>Removed element</td>
+                                <td>Removes first element</td>
+                            </tr>
+                            <tr>
+                                <td>unshift()</td>
+                                <td>Yes</td>
+                                <td>New length</td>
+                                <td>Adds elements to the beginning</td>
+                            </tr>
+                            <tr>
+                                <td>splice()</td>
+                                <td>Yes</td>
+                                <td>Array of removed elements</td>
+                                <td>Adds/removes elements at index</td>
+                            </tr>
+                            <tr>
+                                <td>sort()</td>
+                                <td>Yes</td>
+                                <td>Sorted array</td>
+                                <td>Sorts array elements</td>
+                            </tr>
+                            <tr>
+                                <td>reverse()</td>
+                                <td>Yes</td>
+                                <td>Reversed array</td>
+                                <td>Reverses array order</td>
+                            </tr>
+                            <tr>
+                                <td>map()</td>
+                                <td>No</td>
+                                <td>New array</td>
+                                <td>Creates new array with results of callback</td>
+                            </tr>
+                            <tr>
+                                <td>filter()</td>
+                                <td>No</td>
+                                <td>New array</td>
+                                <td>Creates new array with elements that pass test</td>
+                            </tr>
+                            <tr>
+                                <td>reduce()</td>
+                                <td>No</td>
+                                <td>Accumulator value</td>
+                                <td>Reduces array to single value</td>
+                            </tr>
+                            <tr>
+                                <td>forEach()</td>
+                                <td>No*</td>
+                                <td>undefined</td>
+                                <td>Executes callback for each element</td>
+                            </tr>
+                            <tr>
+                                <td>slice()</td>
+                                <td>No</td>
+                                <td>New array</td>
+                                <td>Returns shallow copy of portion of array</td>
+                            </tr>
+                            <tr>
+                                <td>concat()</td>
+                                <td>No</td>
+                                <td>New array</td>
+                                <td>Returns merged arrays</td>
+                            </tr>
+                            <tr>
+                                <td>find()</td>
+                                <td>No</td>
+                                <td>First matching element</td>
+                                <td>Returns first element that passes test</td>
+                            </tr>
+                            <tr>
+                                <td>some()</td>
+                                <td>No</td>
+                                <td>Boolean</td>
+                                <td>Tests if at least one element passes test</td>
+                            </tr>
+                            <tr>
+                                <td>every()</td>
+                                <td>No</td>
+                                <td>Boolean</td>
+                                <td>Tests if all elements pass test</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <div class="info-box">
+                        <h4>Key Points</h4>
+                        <ul>
+                            <li><strong>Mutating methods</strong> change the original array</li>
+                            <li><strong>Non-mutating methods</strong> return a new array or value without modifying the original</li>
+                            <li>forEach() doesn't mutate the array itself, but can mutate elements if they are objects</li>
+                            <li>Always check whether a method mutates if you need to preserve the original array</li>
+                            <li>Chain non-mutating methods for complex operations</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="tab-content" id="tab-1">
+                    <h3>Mutating Array Methods</h3>
+                    
+                    <div class="method-detail mutating">
+                        <h4>push() - Add elements to the end</h4>
+                        <pre><code>const arr = [1, 2, 3];
+const newLength = arr.push(4, 5);
+console.log(arr); // [1, 2, 3, 4, 5]
+console.log(newLength); // 5</code></pre>
+                    </div>
+                    
+                    <div class="method-detail mutating">
+                        <h4>pop() - Remove last element</h4>
+                        <pre><code>const arr = [1, 2, 3];
+const lastElement = arr.pop();
+console.log(arr); // [1, 2]
+console.log(lastElement); // 3</code></pre>
+                    </div>
+                    
+                    <div class="method-detail mutating">
+                        <h4>shift() - Remove first element</h4>
+                        <pre><code>const arr = [1, 2, 3];
+const firstElement = arr.shift();
+console.log(arr); // [2, 3]
+console.log(firstElement); // 1</code></pre>
+                    </div>
+                    
+                    <div class="method-detail mutating">
+                        <h4>unshift() - Add elements to the beginning</h4>
+                        <pre><code>const arr = [2, 3];
+const newLength = arr.unshift(0, 1);
+console.log(arr); // [0, 1, 2, 3]
+console.log(newLength); // 4</code></pre>
+                    </div>
+                    
+                    <div class="method-detail mutating">
+                        <h4>splice() - Add/remove elements at index</h4>
+                        <pre><code>const arr = [1, 2, 3, 4, 5];
+// Remove 2 elements starting at index 1, and add 'a', 'b'
+const removed = arr.splice(1, 2, 'a', 'b');
+console.log(arr); // [1, 'a', 'b', 4, 5]
+console.log(removed); // [2, 3]</code></pre>
+                    </div>
+                    
+                    <div class="method-detail mutating">
+                        <h4>sort() - Sort array elements</h4>
+                        <pre><code>const arr = [3, 1, 4, 1, 5];
+arr.sort(); // Default sort (lexicographical)
+console.log(arr); // [1, 1, 3, 4, 5]
+
+// With compare function for numerical sort
+const nums = [3, 1, 4, 1, 5];
+nums.sort((a, b) => a - b);
+console.log(nums); // [1, 1, 3, 4, 5]</code></pre>
+                    </div>
+                    
+                    <div class="method-detail mutating">
+                        <h4>reverse() - Reverse array order</h4>
+                        <pre><code>const arr = [1, 2, 3];
+arr.reverse();
+console.log(arr); // [3, 2, 1]</code></pre>
+                    </div>
+                    
+                    <div class="info-box">
+                        <h4>When to Use Mutating Methods</h4>
+                        <ul>
+                            <li>When you want to modify the original array directly</li>
+                            <li>When memory efficiency is important (no new array created)</li>
+                            <li>For queue (shift/push) or stack (push/pop) operations</li>
+                            <li>When working with large arrays and performance is critical</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="tab-content" id="tab-2">
+                    <h3>Non-Mutating Array Methods</h3>
+                    
+                    <div class="method-detail non-mutating">
+                        <h4>map() - Transform array elements</h4>
+                        <pre><code>const arr = [1, 2, 3];
+const doubled = arr.map(x => x * 2);
+console.log(arr); // [1, 2, 3] (unchanged)
+console.log(doubled); // [2, 4, 6]</code></pre>
+                    </div>
+                    
+                    <div class="method-detail non-mutating">
+                        <h4>filter() - Filter array elements</h4>
+                        <pre><code>const arr = [1, 2, 3, 4, 5];
+const evens = arr.filter(x => x % 2 === 0);
+console.log(arr); // [1, 2, 3, 4, 5] (unchanged)
+console.log(evens); // [2, 4]</code></pre>
+                    </div>
+                    
+                    <div class="method-detail non-mutating">
+                        <h4>reduce() - Reduce to a single value</h4>
+                        <pre><code>const arr = [1, 2, 3, 4];
+const sum = arr.reduce((acc, curr) => acc + curr, 0);
+console.log(arr); // [1, 2, 3, 4] (unchanged)
+console.log(sum); // 10</code></pre>
+                    </div>
+                    
+                    <div class="method-detail non-mutating">
+                        <h4>slice() - Extract portion of array</h4>
+                        <pre><code>const arr = [1, 2, 3, 4, 5];
+const portion = arr.slice(1, 4);
+console.log(arr); // [1, 2, 3, 4, 5] (unchanged)
+console.log(portion); // [2, 3, 4]</code></pre>
+                    </div>
+                    
+                    <div class="method-detail non-mutating">
+                        <h4>concat() - Merge arrays</h4>
+                        <pre><code>const arr1 = [1, 2];
+const arr2 = [3, 4];
+const merged = arr1.concat(arr2);
+console.log(arr1); // [1, 2] (unchanged)
+console.log(arr2); // [3, 4] (unchanged)
+console.log(merged); // [1, 2, 3, 4]</code></pre>
+                    </div>
+                    
+                    <div class="method-detail non-mutating">
+                        <h4>find() - Find first matching element</h4>
+                        <pre><code>const arr = [5, 12, 8, 130, 44];
+const found = arr.find(element => element > 10);
+console.log(arr); // [5, 12, 8, 130, 44] (unchanged)
+console.log(found); // 12</code></pre>
+                    </div>
+                    
+                    <div class="method-detail non-mutating">
+                        <h4>some() - Test if at least one element passes</h4>
+                        <pre><code>const arr = [1, 2, 3, 4, 5];
+const hasEven = arr.some(x => x % 2 === 0);
+console.log(arr); // [1, 2, 3, 4, 5] (unchanged)
+console.log(hasEven); // true</code></pre>
+                    </div>
+                    
+                    <div class="method-detail non-mutating">
+                        <h4>every() - Test if all elements pass</h4>
+                        <pre><code>const arr = [1, 2, 3, 4, 5];
+const allPositive = arr.every(x => x > 0);
+console.log(arr); // [1, 2, 3, 4, 5] (unchanged)
+console.log(allPositive); // true</code></pre>
+                    </div>
+                    
+                    <div class="info-box">
+                        <h4>Benefits of Non-Mutating Methods</h4>
+                        <ul>
+                            <li>Preserve original data (important for state management)</li>
+                            <li>Enable function chaining: arr.filter(...).map(...).reduce(...)</li>
+                            <li>More predictable code behavior</li>
+                            <li>Easier debugging since original data remains intact</li>
+                            <li>Better alignment with functional programming principles</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="tab-content" id="tab-3">
+                    <h3>Array Method Examples</h3>
+                    <pre><code>// Example 1: Data transformation pipeline
+const products = [
+    { id: 1, name: 'Laptop', price: 1000, category: 'electronics' },
+    { id: 2, name: 'Phone', price: 500, category: 'electronics' },
+    { id: 3, name: 'Shirt', price: 30, category: 'clothing' },
+    { id: 4, name: 'Shoes', price: 120, category: 'clothing' },
+    { id: 5, name: 'Book', price: 15, category: 'education' }
+];
+
+// Get electronics products, apply 10% discount, and extract names
+const electronicProductNames = products
+    .filter(product => product.category === 'electronics')
+    .map(product => ({
+        ...product,
+        price: product.price * 0.9 // 10% discount
+    }))
+    .map(product => product.name);
+
+console.log(electronicProductNames); // ['Laptop', 'Phone']
+console.log(products); // Original array unchanged
+
+// Example 2: Aggregating data with reduce
+const orders = [
+    { product: 'Laptop', quantity: 2, price: 1000 },
+    { product: 'Phone', quantity: 3, price: 500 },
+    { product: 'Headphones', quantity: 1, price: 100 }
+];
+
+const totalValue = orders.reduce((total, order) => {
+    return total + (order.quantity * order.price);
+}, 0);
+
+console.log(totalValue); // 2*1000 + 3*500 + 1*100 = 3600
+
+// Example 3: Finding and updating with map (non-mutating)
+const users = [
+    { id: 1, name: 'Alice', active: true },
+    { id: 2, name: 'Bob', active: false },
+    { id: 3, name: 'Charlie', active: true }
+];
+
+// Activate Bob without mutating original array
+const updatedUsers = users.map(user => 
+    user.id === 2 ? { ...user, active: true } : user
+);
+
+console.log(users); // Original unchanged
+console.log(updatedUsers); // Bob is now active
+
+// Example 4: Complex filtering with some and every
+const teams = [
+    { name: 'Team A', members: ['John', 'Jane', 'Mike'], completed: true },
+    { name: 'Team B', members: ['Sarah', 'Tom'], completed: false },
+    { name: 'Team C', members: ['Emily', 'David', 'Lisa'], completed: true }
+];
+
+// Check if all teams with more than 2 members are completed
+const allLargeTeamsCompleted = teams
+    .filter(team => team.members.length > 2)
+    .every(team => team.completed);
+
+console.log(allLargeTeamsCompleted); // true
+
+// Example 5: Flattening arrays with flat and flatMap
+const nestedArray = [1, [2, 3], [4, [5, 6]]];
+const flattened = nestedArray.flat(2); // Depth of 2
+console.log(flattened); // [1, 2, 3, 4, 5, 6]
+
+// Using flatMap to map and flatten in one step
+const sentences = ["Hello world", "Goodbye moon"];
+const words = sentences.flatMap(sentence => sentence.split(' '));
+console.log(words); // ["Hello", "world", "Goodbye", "moon"]</code></pre>
+                    
+                    <div class="info-box">
+                        <h4>Common Patterns</h4>
+                        <ul>
+                            <li>Chain filter().map() for data transformation pipelines</li>
+                            <li>Use reduce() for aggregation operations (sum, average, grouping)</li>
+                            <li>Combine find() with spread operator for updating specific elements</li>
+                            <li>Use some() and every() for validation checks</li>
+                            <li>Utilize flat() and flatMap() for working with nested arrays</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="best-practice">
+                        <h4>Best Practices</h4>
+                        <ol>
+                            <li>Prefer non-mutating methods when working with state management</li>
+                            <li>Use descriptive variable names for chained operations</li>
+                            <li>Break complex chains into intermediate variables for debugging</li>
+                            <li>Always provide initial value for reduce() to avoid errors</li>
+                            <li>Use the second parameter of forEach/map/filter for index when needed</li>
+                            <li>Consider using Object.freeze() to prevent accidental mutations</li>
+                        </ol>
+                    </div>
+                </div>
+                
+                <div class="tab-content" id="tab-4">
+                    <h3>Practice Questions</h3>
+                    
+                    <div class="question">
+                        <h4>Question 1: Which array method does NOT mutate the original array?</h4>
+                        <div class="options">
+                            <div class="option" onclick="checkAnswer(this, 0)">push()</div>
+                            <div class="option" onclick="checkAnswer(this, 1)">splice()</div>
+                            <div class="option" onclick="checkAnswer(this, 2)">sort()</div>
+                            <div class="option" onclick="checkAnswer(this, 3)">slice()</div>
+                        </div>
+                        <div class="result" id="result-0"></div>
+                    </div>
+                    
+                    <div class="question">
+                        <h4>Question 2: What will be the output of the following code?</h4>
+                        <pre><code>const arr = [1, 2, 3];
+const result = arr.map(x => x * 2).filter(x => x > 3);
+console.log(result);</code></pre>
+                        <div class="options">
+                            <div class="option" onclick="checkAnswer(this, 4)">[2, 4, 6]</div>
+                            <div class="option" onclick="checkAnswer(this, 5)">[4, 6]</div>
+                            <div class="option" onclick="checkAnswer(this, 6)">[1, 2, 3]</div>
+                            <div class="option" onclick="checkAnswer(this, 7)">[6]</div>
+                        </div>
+                        <div class="result" id="result-1"></div>
+                    </div>
+                    
+                    <div class="question">
+                        <h4>Question 3: Which method would you use to remove the last element from an array and return that element?</h4>
+                        <div class="options">
+                            <div class="option" onclick="checkAnswer(this, 8)">shift()</div>
+                            <div class="option" onclick="checkAnswer(this, 9)">pop()</div>
+                            <div class="option" onclick="checkAnswer(this, 10)">slice()</div>
+                            <div class="option" onclick="checkAnswer(this, 11)">splice()</div>
+                        </div>
+                        <div class="result" id="result-2"></div>
+                    </div>
+                    
+                    <div class="question">
+                        <h4>Question 4: What will be the value of 'result' after this code executes?</h4>
+                        <pre><code>const numbers = [10, 20, 30, 40];
+const result = numbers.reduce((acc, curr) => acc + curr, 0) / numbers.length;</code></pre>
+                        <div class="options">
+                            <div class="option" onclick="checkAnswer(this, 12)">100</div>
+                            <div class="option" onclick="checkAnswer(this, 13)">25</div>
+                            <div class="option" onclick="checkAnswer(this, 14)">50</div>
+                            <div class="option" onclick="checkAnswer(this, 15)">NaN</div>
+                        </div>
+                        <div class="result" id="result-3"></div>
+                    </div>
+                    
+                    <div class="question">
+                        <h4>Question 5: Which of these is a valid way to create a new array that is a copy of an existing array?</h4>
+                        <div class="options">
+                            <div class="option" onclick="checkAnswer(this, 16)">const newArray = oldArray;</div>
+                            <div class="option" onclick="checkAnswer(this, 17)">const newArray = oldArray.slice();</div>
+                            <div class="option" onclick="checkAnswer(this, 18)">const newArray = oldArray.splice(0);</div>
+                            <div class="option" onclick="checkAnswer(this, 19)">const newArray = oldArray.pop();</div>
+                        </div>
+                        <div class="result" id="result-4"></div>
+                    </div>
+                    
+                    <div class="task">
+                        <h4>Practice Exercise 1: Data Transformation</h4>
+                        <p>Given an array of products, write a function that:</p>
+                        <ol>
+                            <li>Filters products with price greater than $50</li>
+                            <li>Applies a 10% discount to the remaining products</li>
+                            <li>Returns an array of product names only</li>
+                        </ol>
+                        <pre><code>const products = [
+    { name: 'Laptop', price: 1000 },
+    { name: 'Phone', price: 500 },
+    { name: 'Headphones', price: 80 },
+    { name: 'Mouse', price: 30 },
+    { name: 'Keyboard', price: 120 }
+];
+
+// Your code here</code></pre>
+                    </div>
+                    
+                    <div class="task">
+                        <h4>Practice Exercise 2: Array Manipulation</h4>
+                        <p>Create a function that takes an array of numbers and returns an object with the following properties:</p>
+                        <ul>
+                            <li>sum: the total of all numbers</li>
+                            <li>average: the average of all numbers</li>
+                            <li>max: the highest number</li>
+                            <li>min: the lowest number</li>
+                        </ul>
+                        <pre><code>function analyzeArray(numbers) {
+    // Your code here
+}
+
+console.log(analyzeArray([1, 2, 3, 4, 5])); 
+// Should return { sum: 15, average: 3, max: 5, min: 1 }</code></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2025 <a rel="noopener" href="https://focal-x.com/" target="_blank">Focal X</a> All Right Reserved</p>
+    </footer>
+
+    <script>
+        // Tab switching functionality
+        function switchTab(tabIndex) {
+            // Remove active class from all tabs
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            // Add active class to clicked tab
+            tabs[tabIndex].classList.add('active');
+            
+            // Hide all tab content
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(content => content.classList.remove('active'));
+            
+            // Show selected tab content
+            document.getElementById('tab-' + tabIndex).classList.add('active');
+        }
+        
+        // Answer checking functionality
+        const correctAnswers = [
+            3, // Question 1: slice()
+            5, // Question 2: [4, 6]
+            9, // Question 3: pop()
+            13, // Question 4: 25
+            17 // Question 5: const newArray = oldArray.slice();
+        ];
+        
+        function checkAnswer(element, answerIndex) {
+            const question = element.closest('.question');
+            const options = question.querySelectorAll('.option');
+            const result = question.querySelector('.result');
+            
+            // Disable all options in this question
+            options.forEach(opt => opt.onclick = null);
+            
+            // Check if answer is correct
+            const isCorrect = correctAnswers.includes(answerIndex);
+            
+            // Highlight correct/incorrect
+            if (isCorrect) {
+                element.classList.add('correct');
+                result.innerHTML = '<p style="color: #155724">✅ Correct! Good job.</p>';
+                result.style.backgroundColor = '#d4edda';
+            } else {
+                element.classList.add('incorrect');
+                result.innerHTML = '<p style="color: #721c24">❌ Incorrect. Try again.</p>';
+                result.style.backgroundColor = '#f8d7da';
+                
+                // Also show the correct answer
+                const correctOptionIndex = correctAnswers.findIndex(a => 
+                    question.querySelectorAll('.option')[a] !== undefined
+                );
+                if (correctOptionIndex !== -1) {
+                    options[correctOptionIndex].classList.add('correct');
+                }
+            }
+            
+            result.style.display = 'block';
+        }
+    </script>
+</body>
+</html>

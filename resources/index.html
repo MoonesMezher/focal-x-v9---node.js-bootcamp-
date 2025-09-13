@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Focal X - Node.js Bootcamp Tables</title>
+    <title>Focal X - Node.js Bootcamp Resources</title>
     <link rel="shortcut icon" href="../logo.jpg" type="image/x-icon">
     <style>
         * {
@@ -23,6 +23,19 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
+        }
+
+        .img {
+            width: 100%;
+            border-radius: 5px;
+        }
+
+        .img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border: 1px solid black;
+            border-radius: 5px;
         }
 
         .footer {
@@ -186,45 +199,48 @@
     <div class="container">
         <header>
             <h1>Focal X V9 - Node.js Bootcamp</h1>
-            <p class="subtitle">Table Portal - Browse All Tables</p>
+            <p class="subtitle">Resources Portal - Browse All Resources</p>
         </header>
         
         <div class="lectures-container">
-            <h2>Available Tables</h2>
-            
-            <input type="text" class="search-box" placeholder="Search tables..." id="searchInput">
-            
+            <h2>Available Resources</h2>
+                        
             <table class="lectures-table">
                 <thead>
                     <tr>
-                        <th>Table #</th>
-                        <th>Title</th>
-                        <th hidden>Status</th>
+                        <th>Resources</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr onclick="window.location.href='table1.html'">
-                        <td>01</td>
-                        <td><a href="table1.html" class="lecture-link">Variables</a></td>
-                        <td hidden>1</td>
+                    <tr>
+                        <td class="img">
+                            <h3>Event Loop 1</h3>
+                            <img src="./event loop.jpeg" alt="Resource 1">
+                        </td>
                     </tr>
-
-                    <tr onclick="window.location.href='table2.html'">
-                        <td>02</td>
-                        <td><a href="table2.html" class="lecture-link">Functions</a></td>
-                        <td hidden>2</td>
+                    <tr>
+                        <td class="img">
+                            <h3>Event Loop 2</h3>
+                            <img src="./event loop 2.jpeg" alt="Resource 2">
+                        </td>
                     </tr>
-
-                    <tr onclick="window.location.href='table3.html'">
-                        <td>03</td>
-                        <td><a href="table3.html" class="lecture-link">Number & String Methods</a></td>
-                        <td hidden>3</td>
+                    <tr>
+                        <td class="img">
+                            <h3>API</h3>
+                            <img src="./api.png" alt="Resource 3">
+                        </td>
                     </tr>
-
-                    <tr onclick="window.location.href='table4.html'">
-                        <td>04</td>
-                        <td><a href="table4.html" class="lecture-link">Arrays</a></td>
-                        <td hidden>4</td>
+                    <tr>
+                        <td class="img">
+                            <h3>REST API 1</h3>
+                            <img src="./rest.png" alt="Resource 4">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="img">
+                            <h3>REST API 2</h3>
+                            <img src="./rest api.png" alt="Resource 5">
+                        </td>
                     </tr>
                 </tbody>
             </table>
@@ -234,24 +250,5 @@
     <footer class="footer">
         <p>&copy; 2025 <a rel="noopener" href="https://focal-x.com/" target="_blank">Focal X</a> All Rights Reserved</p>
     </footer>
-
-    <script>
-        // Simple search functionality
-        document.getElementById('searchInput').addEventListener('keyup', function() {
-            const searchText = this.value.toLowerCase();
-            const rows = document.querySelectorAll('.lectures-table tbody tr');
-            
-            rows.forEach(row => {
-                const title = row.cells[1].textContent.toLowerCase();
-                const topics = row.cells[2].textContent.toLowerCase();
-                
-                if (title.includes(searchText) || topics.includes(searchText)) {
-                    row.style.display = '';
-                } else {
-                    row.style.display = 'none';
-                }
-            });
-        });
-    </script>
 </body>
 </html>
