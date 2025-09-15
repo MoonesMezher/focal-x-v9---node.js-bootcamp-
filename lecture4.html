@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Focal X - Node.js Bootcamp: Lecture 4 </title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .footer {
+            padding-top: 30px;
+        }
+
+        .footer a {
+            color: black;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .coach {
+            background-color: white;
+            width: 80px;
+            border-radius: 0 0 50% 0;
+            color: black;
+            padding: 10px;
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+        
+        header {
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            padding: 20px;
+            height: 65vh;
+        }
+        
+        .lecture-content {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+        }
+        
+        .interactive-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+        }
+        
+        h2 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #3498db;
+            font-size: 1.5rem;
+        }
+        
+        h3 {
+            color: #2980b9;
+            margin: 20px 0 12px;
+            font-size: 1.2rem;
+        }
+        
+        pre {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 12px;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin: 12px 0;
+            font-size: 0.9rem;
+        }
+        
+        code {
+            font-family: 'Fira Code', monospace;
+        }
+        
+        .question {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .options {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+            margin: 12px 0;
+        }
+        
+        .option {
+            padding: 10px;
+            background: #e8f4fc;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+            font-size: 0.9rem;
+        }
+        
+        .option:hover {
+            background: #d1e9fa;
+        }
+        
+        .correct {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .incorrect {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .task {
+            background: #fff3cd;
+            padding: 12px;
+            border-left: 5px solid #ffc107;
+            margin: 15px 0;
+            border-radius: 5px;
+            font-size: 0.9rem;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background 0.3s;
+            margin-top: 8px;
+        }
+        
+        .btn:hover {
+            background: #2980b9;
+        }
+        
+        .result {
+            margin-top: 12px;
+            padding: 12px;
+            border-radius: 5px;
+            display: none;
+            font-size: 0.9rem;
+        }
+        
+        .search-task {
+            background: #e7f5e9;
+            padding: 12px;
+            border-radius: 5px;
+            margin: 15px 0;
+            border-left: 5px solid #28a745;
+            font-size: 0.9rem;
+        }
+        
+        .tabs {
+            display: flex;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .tab {
+            padding: 8px 15px;
+            cursor: pointer;
+            background: #f1f1f1;
+            border: 1px solid #ddd;
+            border-bottom: none;
+            border-radius: 5px 5px 0 0;
+            margin-right: 5px;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+        
+        .tab.active {
+            background: #6f42c1;
+            color: white;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 12px 0;
+            font-size: 0.9rem;
+        }
+        
+        .comparison-table th, .comparison-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        
+        .comparison-table th {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        .comparison-table tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        
+        @media (max-width: 900px) {
+            .content {
+                grid-template-columns: 1fr;
+                height: auto;
+            }
+            
+            .lecture-content, .interactive-section {
+                height: 50vh;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <p class="coach">Moones Mezher</p>
+        <header>
+            <h1 id="lecture-title">Focal X - Node.js Bootcamp</h1>
+            <p class="subtitle" id="lecture-subtitle">Advanced JavaScript: Event Loop, Regex, ES6, OOP, and APIs</p>
+        </header>
+        
+        <div class="content">
+            <div class="lecture-content">
+                <h2>Lecture Content</h2>
+                <div id="tabs-container"></div>
+                <div id="tab-content-container"></div>
+            </div>
+            
+            <div class="interactive-section">
+                <h2>Interactive Questions & Tasks</h2>
+                <div id="questions-container"></div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2025 <a rel="noopener" href="https://focal-x.com/" target="_blank">Focal X</a> All Right Reserved</p>
+    </footer>
+
+    <script>
+        // ==================== CONFIGURATION ====================
+        // Update these arrays to change the content of your lecture
+        
+        // Lecture metadata
+        const lectureConfig = {
+            title: "Focal X - Node.js Bootcamp",
+            subtitle: "Advanced JavaScript: Objects, Promises, Error Handling"
+        };
+        
+        // Lecture content organized by tabs
+        const lectureContent = [
+            {
+                tabTitle: "Last Lesson",
+                title: "Last Lesson Recap",
+                content: `/*
+1- Arrays 
+2- Mutate & Not-Mutate methods
+3- SetTimeout & SetInterval
+4- Date in JavaScript 
+*/`
+            },
+                        {
+                tabTitle: "Map & Set",
+                title: "Map and Set Data Structures",
+                content: `// A Map stores key-value pairs and preserves insertion order
+const map = new Map();
+
+// - Add
+map.set(0, "A");
+map.set(1, "B");
+
+// - Get
+const item1 = map.get(0);
+console.log(item1); // A
+
+// - Length
+console.log(map.size); // 2
+
+// - Has
+const isExist = map.has(1); // by key
+console.log(isExist); // true
+
+// - Delete
+map.delete(0);
+console.log(map); // Map(1) { 1 => "B" }
+
+// - Get keys as array
+console.log([...map.keys()]); // [1]
+
+// - Get values as array
+console.log([...map.values()]); // ["B"]
+
+// - Get keys and values as array
+console.log([...map.entries()]); // [[1, "B"]]
+
+// - Foreach
+map.forEach((val, key) => {
+    console.log(key, val); // 1 "B"
+});
+
+// - Clear
+map.clear();
+console.log(map); // Map(0) {}
+
+// A Set stores unique values (no duplicates)
+const set = new Set();
+
+// - Add
+set.add("AA");
+set.add("BB");
+set.add("AA"); // Won't be added (duplicate)
+
+// - Get (no direct get method, convert to array)
+const item1InSet = [...set][0];
+console.log(item1InSet); // AA
+
+// - Length
+console.log(set.size); // 2
+
+// - Has
+const isExistInSet = set.has("AA"); // by value
+console.log(isExistInSet); // true
+
+// - Delete
+set.delete("AA");
+console.log(set); // Set(1) { "BB" }
+
+// - Get values as array
+console.log([...set.values()]); // ["BB"]
+
+// - Foreach
+set.forEach((val) => {
+    console.log(val); // BB
+});
+
+// - Clear
+set.clear();
+console.log(set); // Set(0) {}`
+            },
+            {
+                tabTitle: "Objects",
+                title: "JavaScript Objects",
+                content: `// Objects group related properties/behaviors
+const person = {
+    name: "Alice",
+    age: 30,
+    isStudent: true,
+    subjects: ["Math", "Programming"],
+    address: {
+        city: "Paris",
+        country: "France"
+    },
+    greet: function() {
+        return \`Hello, my name is \${this.name}\`;
+    }
+};
+
+// Accessing data (two ways)
+console.log(person.name); // Alice
+console.log(person["name"]); // Alice
+
+const prop = "age";
+console.log(person[prop]); // 30
+
+console.log(person.address.city); // Paris
+console.log(person.greet()); // Hello, my name is Alice
+
+// Object Operations:
+// Add Property
+person.job = "Developer";
+
+// Delete Property
+delete person.isStudent;
+
+// Modify Property
+person.age = 31;
+
+// Check if Property Exists
+console.log("name" in person); // true
+
+// Object Methods:
+console.log(Object.keys(person)); // ["name", "age", "subjects", "address", "greet", "job"]
+console.log(Object.values(person)); // ["Alice", 31, Array(2), {…}, ƒ, "Developer"]
+console.log(Object.entries(person)); // Array of [key, value] pairs
+
+// Object.assign() (merge)
+const car = { brand: "Toyota" };
+const updatedCar = Object.assign({}, car, { model: "Camry", year: 2023 });
+console.log(updatedCar); // { brand: "Toyota", model: "Camry", year: 2023 }
+
+// Object.freeze()
+Object.freeze(car);
+car.brand = "Honda"; // Fails silently in non-strict mode
+console.log(car.brand); // "Toyota"
+
+// Iterating Over Objects:
+// for...in loop
+for (const key in person) {
+    console.log(\`\${key}: \${person[key]}\`);
+}
+
+// Object.entries() + forEach
+Object.entries(person).forEach(([key, value]) => {
+    console.log(\`\${key} -> \${value}\`);
+});
+
+// Transforming Objects:
+// Spread operator
+const updatedPerson = { ...person, age: 31 };
+
+// Destructuring
+const { name: personName, address: { city } } = person;
+console.log(personName, city); // "Alice Paris"
+
+// Deep copy
+const personClone = JSON.parse(JSON.stringify(person));
+
+// Dynamic property names
+const propName = "email";
+const user = {
+    [propName]: "alice@example.com",
+    [\`\${propName}-verified\`]: true
+};
+
+// Optional chaining (ES2020)
+console.log(person?.address?.zipCode ?? "Unknown"); // "Unknown"`
+            },
+            {
+                tabTitle: "Error Handling",
+                title: "try...catch for Error Handling",
+                content: `// Use try...catch to handle errors gracefully
+// Most commonly used with promises and async methods
+
+/*
+Form:
+try {
+    // code that might throw an error
+} catch (err) {
+    // handle the error
+} finally { 
+    // code that runs regardless of try/catch outcome
+}
+=> finally is optional
+*/
+
+try {
+    // Example 1: Assignment to constant
+    // const x = 1;
+    // x = 2; // This would throw an error
+    
+    // Example 2: Calling function before declaration (with const)
+    // console.log(hello());
+    // const hello = () => "hello"; // This would throw an error
+    
+    // Example 3: Accessing undefined variable
+    // console.log(title); // This would throw an error
+    
+    // Example 4: Calling non-function property
+    // const obj = { age: 10 };
+    // console.log(obj.age()); // This would throw an error
+    
+    console.log("success =>", 1);
+} catch (error) {
+    console.log("error =>", error.message);    
+} finally {
+    console.log("Completed");
+}
+
+// Custom error throwing
+function divide(a, b) {
+    if (b === 0) {
+        throw new Error("Division by zero is not allowed");
+    }
+    return a / b;
+}
+
+try {
+    const result = divide(10, 0);
+    console.log(result);
+} catch (error) {
+    console.log("Caught an error:", error.message);
+}`
+            },
+            {
+                tabTitle: "Operators",
+                title: "Important JavaScript Operators",
+                content: `// Logical Operators:
+
+// 1. && (Logical AND): Returns the first falsy value or the last truthy value
+const user = { isAdmin: true };
+user.isAdmin && console.log("Access granted"); // "Access granted"
+
+console.log(0 && "hello"); // 0 (first falsy value)
+console.log(1 && "hello"); // "hello" (both truthy, returns last)
+
+// 2. || (Logical OR): Returns the first truthy value or the last falsy value
+const username = "";
+console.log(username || "Guest"); // "Guest"
+
+console.log(0 || ""); // "" (both falsy, returns last)
+console.log(0 || "hello"); // "hello" (first truthy value)
+
+// 3. ?? (Nullish Coalescing): Returns right-hand value only if left is null or undefined
+const quantity = 0;
+console.log(quantity ?? 5); // 0 (0 is not null/undefined)
+console.log(null ?? 5); // 5
+
+// Compare with ||:
+console.log(quantity || 5); // 5 (0 is falsy)
+
+// 4. ?. (Optional Chaining): Safely access nested properties
+const user2 = { address: null };
+console.log(user2?.address?.city); // undefined (no error)
+
+// Works with functions:
+const fetchData = null;
+console.log(fetchData?.()); // undefined
+
+// 5. ? : (Ternary Operator): Conditional value assignment
+const isValid = true;
+const message = isValid ? "Yes" : "No";
+console.log(message); // "Yes"
+
+// Comparison Table:
+// | Operator | Name                | Returns                           | Example                    |  
+// |----------|---------------------|-----------------------------------|----------------------------|  
+// | &&       | Logical AND         | First falsy value or last truthy  | 0 && "hi" → 0              |  
+// | ||       | Logical OR          | First truthy value or last falsy  | "" || "hi" → "hi"          |  
+// | ??       | Nullish Coalescing  | Right-hand if left is null/undefined | 0 ?? 5 → 0             |  
+// | ?.       | Optional Chaining   | undefined if path is nullish      | user?.address?.city → safe |  
+// | ? :      | Ternary             | Value based on condition          | isValid ? "Yes" : "No"     |`
+            },
+            {
+                tabTitle: "Promises",
+                title: "JavaScript Promises",
+                content: `// Promises represent the eventual completion of an asynchronous operation
+
+// Creating a promise
+const promise = new Promise((resolve, reject) => {
+    // Simulate complex code
+    for(let i = 0; i < 1_000_000_000; i++) {}
+    
+    const data = Math.random();
+    
+    if(data < 0.5) {
+        resolve(data); // Success
+    } else {
+        reject("Error"); // Failure
+    }
+});
+
+// Using .then() and .catch()
+promise
+    .then((data) => {
+        console.log(data);
+    })
+    .catch((err) => {
+        console.log(err);
+    })
+    .finally(() => {
+        console.log("Completed");
+    });
+
+// Converting to async/await
+const app = async () => {
+    try {
+        const data = await promise;
+        console.log("Success:", data);
+    } catch (error) {
+        console.log("Error:", error);
+    }
+};
+app();
+
+// Real-world example: API call simulation
+function fetchUserData() {
+    return new Promise((resolve, reject) => {
+        setTimeout(() => {
+            const success = Math.random() > 0.3;
+            if (success) {
+                resolve({ name: "Alice", age: 30 });
+            } else {
+                reject("Failed to fetch user data");
+            }
+        }, 2000);
+    });
+}
+
+// Using the promise
+fetchUserData()
+    .then(user => console.log("User:", user))
+    .catch(error => console.error("Error:", error));
+
+// Using Promise.all() with arrays
+const promise1 = Promise.resolve(3);
+const promise2 = new Promise((resolve) => setTimeout(resolve, 100, 'foo'));
+const promise3 = fetchUserData();
+
+Promise.all([promise1, promise2, promise3])
+    .then(values => console.log(values))
+    .catch(error => console.error(error));`
+            }
+            ];
+        
+        // Questions and tasks
+        const questions = [
+        {
+                type: "question",
+                question: "Which operator returns the right-hand value only if the left-hand value is null or undefined?",
+                options: [
+                    "Logical OR (||)",
+                    "Optional Chaining (?.)",
+                    "Nullish Coalescing (??)",
+                    "Ternary Operator (?:)"
+                ],
+                correctIndex: 2
+            },
+            {
+                type: "question",
+                question: "What does the finally block do in a try/catch statement?",
+                options: [
+                    "Runs only if an error occurs",
+                    "Runs only if no error occurs",
+                    "Runs regardless of try/catch outcome",
+                    "Runs instead of the catch block"
+                ],
+                correctIndex: 2
+            },
+            {
+                type: "question",
+                question: "Which of these is NOT a way to access object properties?",
+                options: [
+                    "obj.property",
+                    "obj['property']",
+                    "obj->property",
+                    "obj[variable]"
+                ],
+                correctIndex: 2
+            },
+            {
+                type: "question",
+                question: "What will this code output? console.log(0 || 'hello')",
+                options: [
+                    "0",
+                    "'hello'",
+                    "true",
+                    "false"
+                ],
+                correctIndex: 1
+            },
+            {
+                type: "question",
+                question: "What does the await keyword do?",
+                options: [
+                    "Pauses execution until the promise is settled",
+                    "Cancels a promise",
+                    "Creates a new promise",
+                    "Handles promise rejection"
+                ],
+                correctIndex: 0
+            },
+            {
+                type: "question",
+                question: "Which method would you use to make an object immutable?",
+                options: [
+                    "Object.freeze()",
+                    "Object.seal()",
+                    "Object.preventExtensions()",
+                    "Object.lock()"
+                ],
+                correctIndex: 0
+            },
+            {
+                type: "question",
+                question: "What does the 'finally' block do in a try/catch statement?",
+                options: [
+                    "Runs only if an error occurs",
+                    "Runs only if no error occurs",
+                    "Runs regardless of try/catch outcome",
+                    "Runs instead of the catch block"
+                ],
+                correctIndex: 2
+            },
+            {
+                type: "question",
+                question: "Which method converts a JSON string to a JavaScript object?",
+                options: [
+                    "JSON.parse()",
+                    "JSON.stringify()",
+                    "JSON.toObject()",
+                    "JSON.convert()"
+                ],
+                correctIndex: 0
+            },
+            {
+                type: "task",
+                title: "Practice: Working with Objects",
+                content: "Create a person object with properties for name, age, and address. Then create a function that deep clones this object using JSON methods. Modify the clone and verify the original object remains unchanged."
+            },
+            {
+                type: "search-task",
+                title: "Research: Map & Set",
+                content: "Research the differences between Map & Set in JavaScript, and how can you use it instead of arrays."
+            },
+            {
+                type: "search-task",
+                title: "Research: Promise Methods",
+                content: "Research the differences between Promise.all(), Promise.race(), Promise.allSettled(), and Promise.any(). Create examples demonstrating each method's behavior."
+            }
+        ];
+        
+        // ==================== TEMPLATE RENDERING ====================
+        // Functions to render the content - you don't need to modify these
+        
+        // Set lecture title and subtitle
+        document.getElementById('lecture-title').textContent = lectureConfig.title;
+        document.getElementById('lecture-subtitle').textContent = lectureConfig.subtitle;
+        
+        // Render tabs and content
+        function renderTabsAndContent() {
+            const tabsContainer = document.getElementById('tabs-container');
+            const contentContainer = document.getElementById('tab-content-container');
+            
+            // Create tabs
+            const tabs = document.createElement('div');
+            tabs.className = 'tabs';
+            
+            // Create tab content areas
+            lectureContent.forEach((content, index) => {
+                // Create tab
+                const tab = document.createElement('div');
+                tab.className = 'tab' + (index === 0 ? ' active' : '');
+                tab.textContent = content.tabTitle;
+                tab.onclick = () => switchTab(index);
+                tabs.appendChild(tab);
+                
+                // Create content
+                const tabContent = document.createElement('div');
+                tabContent.className = 'tab-content' + (index === 0 ? ' active' : '');
+                tabContent.id = 'tab-' + index;
+                
+                // Add title
+                const title = document.createElement('h3');
+                title.textContent = content.title;
+                tabContent.appendChild(title);
+                
+                // Add code content
+                const pre = document.createElement('pre');
+                const code = document.createElement('code');
+                code.textContent = content.content;
+                pre.appendChild(code);
+                tabContent.appendChild(pre);
+
+                // Add table if exists
+                if (content.table) {
+                    const table = document.createElement('table');
+                    table.className = 'comparison-table';
+                    
+                    // Create header
+                    const thead = document.createElement('thead');
+                    const headerRow = document.createElement('tr');
+                    content.table.headers.forEach(headerText => {
+                        const th = document.createElement('th');
+                        th.textContent = headerText;
+                        headerRow.appendChild(th);
+                    });
+                    thead.appendChild(headerRow);
+                    table.appendChild(thead);
+                    
+                    // Create body
+                    const tbody = document.createElement('tbody');
+                    content.table.rows.forEach(rowData => {
+                        const row = document.createElement('tr');
+                        rowData.forEach(cellData => {
+                            const td = document.createElement('td');
+                            td.textContent = cellData;
+                            row.appendChild(td);
+                        });
+                        tbody.appendChild(row);
+                    });
+                    table.appendChild(tbody);
+                    
+                    tabContent.appendChild(table);
+                }
+                
+                
+                contentContainer.appendChild(tabContent);
+            });
+            
+            tabsContainer.appendChild(tabs);
+        }
+        
+        // Switch tabs function
+        function switchTab(index) {
+            // Remove active class from all tabs
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            // Add active class to clicked tab
+            tabs[index].classList.add('active');
+            
+            // Hide all tab content
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(content => content.classList.remove('active'));
+            
+            // Show selected tab content
+            document.getElementById('tab-' + index).classList.add('active');
+        }
+        
+        // Render questions and tasks
+        function renderQuestions() {
+            const container = document.getElementById('questions-container');
+            
+            questions.forEach((q, index) => {
+                if (q.type === 'question') {
+                    const questionDiv = document.createElement('div');
+                    questionDiv.className = 'question';
+                    
+                    const questionTitle = document.createElement('h3');
+                    questionTitle.textContent = `Question ${index + 1}: ${q.question}`;
+                    questionDiv.appendChild(questionTitle);
+                    
+                    if (q.code) {
+                        const pre = document.createElement('pre');
+                        const code = document.createElement('code');
+                        code.textContent = q.code;
+                        pre.appendChild(code);
+                        questionDiv.appendChild(pre);
+                    }
+                    
+                    const optionsDiv = document.createElement('div');
+                    optionsDiv.className = 'options';
+                    
+                    q.options.forEach((option, optIndex) => {
+                        const optionDiv = document.createElement('div');
+                        optionDiv.className = 'option';
+                        optionDiv.textContent = option;
+                        optionDiv.onclick = function() {
+                            checkAnswer(this, optIndex === q.correctIndex ? 'correct' : 'incorrect');
+                        };
+                        optionsDiv.appendChild(optionDiv);
+                    });
+                    
+                    questionDiv.appendChild(optionsDiv);
+                    
+                    const resultDiv = document.createElement('div');
+                    resultDiv.className = 'result';
+                    resultDiv.id = 'result-' + index;
+                    questionDiv.appendChild(resultDiv);
+                    
+                    container.appendChild(questionDiv);
+                } else if (q.type === 'task') {
+                    const taskDiv = document.createElement('div');
+                    taskDiv.className = 'task';
+                    
+                    const taskTitle = document.createElement('h3');
+                    taskTitle.textContent = q.title;
+                    taskDiv.appendChild(taskTitle);
+                    
+                    const taskContent = document.createElement('p');
+                    taskContent.textContent = q.content;
+                    taskDiv.appendChild(taskContent);
+                    
+                    container.appendChild(taskDiv);
+                } else if (q.type === 'search-task') {
+                    const searchTaskDiv = document.createElement('div');
+                    searchTaskDiv.className = 'search-task';
+                    
+                    const taskTitle = document.createElement('h3');
+                    taskTitle.textContent = q.title;
+                    searchTaskDiv.appendChild(taskTitle);
+                    
+                    const taskContent = document.createElement('p');
+                    taskContent.textContent = q.content;
+                    searchTaskDiv.appendChild(taskContent);
+                    
+                    container.appendChild(searchTaskDiv);
+                }
+            });
+        }
+        
+        // Check answer function
+        function checkAnswer(element, type) {
+            const options = element.parentElement.querySelectorAll('.option');
+            options.forEach(opt => {
+                opt.classList.remove('correct', 'incorrect');
+                opt.onclick = null;
+            });
+            
+            element.classList.add(type);
+            
+            const resultId = element.closest('.question').querySelector('.result').id;
+            const resultDiv = document.getElementById(resultId);
+            resultDiv.style.display = 'block';
+            
+            if (type === 'correct') {
+                resultDiv.innerHTML = '<p style="color: #155724">✅ Correct! Good job.</p>';
+                resultDiv.style.backgroundColor = '#d4edda';
+            } else {
+                resultDiv.innerHTML = '<p style="color: #721c24">❌ Incorrect. Try to understand why.</p>';
+                resultDiv.style.backgroundColor = '#f8d7da';
+            }
+        }
+        
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            renderTabsAndContent();
+            renderQuestions();
+        });
+    </script>
+</body>
+</html>
