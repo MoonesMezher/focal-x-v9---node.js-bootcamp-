@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Focal X - Node.js Bootcamp: Lecture 7 </title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .footer {
+            padding-top: 30px;
+        }
+
+        .footer a {
+            color: black;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .coach {
+            background-color: white;
+            width: 80px;
+            border-radius: 0 0 50% 0;
+            color: black;
+            padding: 10px;
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+        
+        header {
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            padding: 20px;
+            height: 65vh;
+        }
+        
+        .lecture-content {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+        }
+        
+        .interactive-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+        }
+        
+        h2 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #3498db;
+            font-size: 1.5rem;
+        }
+        
+        h3 {
+            color: #2980b9;
+            margin: 20px 0 12px;
+            font-size: 1.2rem;
+        }
+        
+        pre {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 12px;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin: 12px 0;
+            font-size: 0.9rem;
+        }
+        
+        code {
+            font-family: 'Fira Code', monospace;
+        }
+        
+        .question {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .options {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+            margin: 12px 0;
+        }
+        
+        .option {
+            padding: 10px;
+            background: #e8f4fc;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+            font-size: 0.9rem;
+        }
+        
+        .option:hover {
+            background: #d1e9fa;
+        }
+        
+        .correct {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .incorrect {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .task {
+            background: #fff3cd;
+            padding: 12px;
+            border-left: 5px solid #ffc107;
+            margin: 15px 0;
+            border-radius: 5px;
+            font-size: 0.9rem;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background 0.3s;
+            margin-top: 8px;
+        }
+        
+        .btn:hover {
+            background: #2980b9;
+        }
+        
+        .result {
+            margin-top: 12px;
+            padding: 12px;
+            border-radius: 5px;
+            display: none;
+            font-size: 0.9rem;
+        }
+        
+        .search-task {
+            background: #e7f5e9;
+            padding: 12px;
+            border-radius: 5px;
+            margin: 15px 0;
+            border-left: 5px solid #28a745;
+            font-size: 0.9rem;
+        }
+        
+        .tabs {
+            display: flex;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .tab {
+            padding: 8px 15px;
+            cursor: pointer;
+            background: #f1f1f1;
+            border: 1px solid #ddd;
+            border-bottom: none;
+            border-radius: 5px 5px 0 0;
+            margin-right: 5px;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+        
+        .tab.active {
+            background: #6f42c1;
+            color: white;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 12px 0;
+            font-size: 0.9rem;
+        }
+        
+        .comparison-table th, .comparison-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        
+        .comparison-table th {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        .comparison-table tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        
+        @media (max-width: 900px) {
+            .content {
+                grid-template-columns: 1fr;
+                height: auto;
+            }
+            
+            .lecture-content, .interactive-section {
+                height: 50vh;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <p class="coach">Moones Mezher</p>
+        <header>
+            <h1 id="lecture-title">Focal X - Node.js Bootcamp</h1>
+            <p class="subtitle" id="lecture-subtitle">Advanced JavaScript: Regex, ES6, OOP</p>
+        </header>
+        
+        <div class="content">
+            <div class="lecture-content">
+                <h2>Lecture Content</h2>
+                <div id="tabs-container"></div>
+                <div id="tab-content-container"></div>
+            </div>
+            
+            <div class="interactive-section">
+                <h2>Interactive Questions & Tasks</h2>
+                <div id="questions-container"></div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2025 <a rel="noopener" href="https://focal-x.com/" target="_blank">Focal X</a> All Right Reserved</p>
+    </footer>
+
+    <script>
+        // ==================== CONFIGURATION ====================
+        // Update these arrays to change the content of your lecture
+        
+        // Lecture metadata
+        const lectureConfig = {
+            title: "Focal X - Node.js Bootcamp",
+            subtitle: "Advanced JavaScript: Regex, ES6, OOP"
+        };
+        
+        // Lecture content organized by tabs
+        const lectureContent = [
+            {
+                tabTitle: "Last Lesson",
+                title: "Last Lesson Recap",
+                content: `/*
+1- Asynchronous (Callbacks, Promises, Async/Await)
+2- Event Loop (Call Stack, Queue, Web API, Micro Task Queue)
+3- Regex
+*/`
+            },
+            {
+                tabTitle: "Regex",
+                title: "Regular Expressions (Regex)",
+                content: `// Task: implement strong password pattern`,
+table: {
+    headers: ["Pattern", "Description", "Example"],
+    rows: [
+        ["\\d","Match any digit ([0-9]).", "/\\d/ → \"5\" in \"a5\""],
+        ["\\s","Match whitespace (space, tab, etc.)." ,"/\\s/ → \" \""],
+        ["\\w", "Match word character ([a-zA-Z0-9_])." , "/\\w+/ → \"hello\""],
+        [".", "Match any character except newline.", "/a.c/ → \"abc\""],
+        ["^", "Start of string/line.", "/^abc/ → \"abc\" at start"],
+        ["$", "End of string/line.", "/xyz$/ → \"xyz\" at end"],
+        ['[abc]','Match any of a, b, or c.', '/[aeiou]/ → "e"'],
+        ['[^abc]', 'Match anything not a, b, or c.','/[^0-9]/ → "a" in "a1"'],
+        ['a|b','Match a or b.', '/yes|no/ → "yes"'],
+        ['()','Capture group.', '/(\\d{2})-(\\d{2})/ → Groups in "12-34"'],
+        ['{n}','Exact n repetitions.', '/\\d{3}/ → "123"'],
+        ['{n,}','At least n repetitions.', '/\\d{2,}/ → "123"'],
+        ['{n,m}','Between n and m repetitions.', '/\\d{2,4}/ → "123"'],
+        ['"*"','Zero or more repetitions.', '/a"*"/ → "aaa"'],
+        ['"+"','One or more repetitions.', '/a+/ → "aaa"'],
+        ['"?"','Zero or one repetition.', '/a?/ → "a" or ""']
+    ]
+}
+            },
+            {
+                tabTitle: "ES6",
+                title: "ES6 Features & Syntactic Sugar",
+                table: {
+                    headers: ["Feature", "ES5 Way", "ES6 Syntactic Sugar"],
+                    rows: [
+                        ["Classes", "Constructor functions + prototypes", "\`class\` keyword"],
+                        ["Arrow Functions", "\`function() { ... }.bind(this)\`", "\`() => { ... }\`"],
+                        ["Template Strings", "String concatenation", "\`Hello \${name}\`"],
+                        ["Destructuring", "Manual property assignment", "\`const { prop } = obj\`"],
+                    ]
+                },
+                content: `// ES6 introduced syntax that makes JavaScript more expressive while maintaining its core prototype-based nature.`
+            },
+            {
+                tabTitle: "Destructuring",
+                title: "Destructuring in JavaScript",
+                content: `// - Array: 
+const arr = [1, 2, 3];
+const [a, b, c] = arr;
+const [first, ...rest] = arr;
+
+console.log(a, arr[0]); // 1
+console.log(b, arr[1]); // 2
+console.log(c, arr[2]); // 3
+console.log(rest); // [2, 3] (when first is 1)
+
+// - Object:
+const obj = { x: 1, y: 2 };
+const { x, y, z = 3 } = obj;
+const { x: a1, y: b1, z: o = 3 } = obj;
+const { x: xVal, ...restObj } = obj;
+
+console.log(x, a1); // 1
+console.log(y, b1); // 2
+console.log(z, o); // 3
+console.log(restObj); // { y: 2 } (when x is extracted)`
+            },
+            {
+                tabTitle: "OOP",
+                title: "Object-Oriented Programming in JavaScript",
+                content: `// What is OOP? (The Big Picture)
+// OOP (Object-Oriented Programming) is a programming paradigm, or a style of programming, 
+// that is based on the concept of "objects".
+
+// Think of it this way: Instead of writing a program as a long series of steps (like a recipe), 
+// you create a set of objects that interact with each other. Each object is a self-contained unit that contains its own data (properties) and behaviors (methods).
+
+// The Core Idea: Model your program after the real world. The real world is made up of objects—like cars,
+// dogs, bank accounts, and people—that have characteristics and can perform actions.
+
+// => Look around you. Everything is an object. Your phone is an object. 
+// It has properties (color: black, model: Pixel 8, isOn: false) and 
+// methods (powerOn(), takePhoto(), call()). OOP is just about creating digital versions of these objects.
+
+// -1. Objects & Prototypes:
+// JavaScript uses prototype-based inheritance (not classical inheritance like Java/C++).  
+// Every object has a prototype (a template object it inherits from).
+
+// -2. Constructor Function (old-school)
+function Person(name) {
+    this.name = name;
+    this.greet = function() {
+        console.log(\`Hi, I'm \${this.name}\`);
+    };
+}
+const john = new Person("John");
+john.greet();
+
+// -3. Class Syntax (ES6, syntactic sugar)
+class Person {
+    constructor(name) {
+        this.name = name;
+    }
+    greet() {
+        console.log(\`Hi, I'm \${this.name}\`);
+    }
+}
+
+const jane = new Person("Jane");
+console.log(jane);
+
+// -4. Inheritance (ES6 Class Syntax):
+class Student extends Person {
+    constructor(name, grade) {
+        super(name); // Call parent constructor
+        this.grade = grade;
+    }
+
+    study() {
+        console.log(\`\${this.name} is studying\`);
+    }
+}
+
+const student = new Student("Alice", "A");
+student.greet();
+student.study();
+
+// -5. Encapsulation & Access Control:
+class BankAccount {
+    #balance = 0; // Private field
+
+    deposit(amount) {
+        this.#balance += amount;
+    }
+
+    get balance() { // Getter
+        return this.#balance;
+    }
+
+    set balance(val) {
+        this.#balance = val;
+    }
+}
+
+const account = new BankAccount();
+account.deposit(100);
+account.balance = 200;
+console.log(account.balance); 
+// account.#balance → Error (private field)
+
+// -6. Method Overriding:
+class Animal {
+    makeSound() {
+        console.log("Generic animal sound");
+    }
+}
+
+class Dog extends Animal {
+    makeSound() { // Override parent method
+        console.log("Woof!");
+    }
+}
+
+const dog = new Dog();
+dog.makeSound(); // "Woof!"
+
+// -7. Static Methods/Properties:
+class MathUtils {
+    static PI = 3.14159; // Static property
+
+    static square(x) { // Static method
+        return x * x;
+    }
+}
+
+console.log(MathUtils.square(5)); // 25
+
+// -8. \`this\` Keyword Behavior:
+let obj = {
+    name: "Alice",
+    regularFunc: function() {
+        console.log(this.name); // "Alice"
+    },
+    arrowFunc: () => {
+        console.log(this.name); // undefined (inherits global/window)
+    }
+};
+
+obj.regularFunc();
+obj.arrowFunc();
+
+// -9. Factory Functions & Composition:
+const createUser = (name, role) => {
+    return {
+        name,
+        role,
+        logInfo() {
+            console.log(\`\${name} is a \${role}\`);
+        }
+    }
+};
+
+const admin = createUser("Bob", "admin");
+admin.logInfo();`,
+table: {
+    headers: ["Concept", "Real-World Meaning", "Code Meaning"],
+    rows: [
+        ["Class", "Blueprint, Recipe", "A template for creating objects"],
+        ["Object", "The actual thing", "An instance of a class"],
+        ["Property", "Adjective (What it is)", "Data / Variables"],
+        ["Method", "Verb (What it does)", "Functions / Behavior"],
+        ["new", "Build it!", "Creates a new object from the class"]
+    ]
+}
+            },
+            { 
+                tabTitle: "Multiple Inheritance",
+                title: "Multiple Inheritance in JavaScript",
+                content: `JavaScript does not support true multiple inheritance (inheriting from multiple parent classes):
+
+// -A. The Limitation:
+// class A { methodA() {} }
+// class B { methodB() {} }
+// class C extends A, B {} // ❌ Syntax Error
+
+
+// -B. Why It’s Not Allowed:
+
+// - Diamond Problem: Ambiguity in method resolution (common in languages like C++).
+// - Prototype Chain: JavaScript’s single prototype chain can’t point to multiple parents.
+
+// -C Modern JavaScript Improvements:
+// While multiple inheritance isn’t supported, newer features enable similar patterns:
+
+// #1. Mixins (Object Composition):
+// const Mixin1 = {
+//     method1() { console.log("From Mixin1"); }
+// };
+
+// const Mixin2 = {
+//     method2() { console.log("From Mixin2"); }
+// };
+
+// class MyClass {
+//     constructor() {
+//         Object.assign(this, Mixin1, Mixin2);
+//     }
+// }
+
+// #2. Object Composition: Use \`Object.assign()\` or spread syntax:
+// class Dog {
+//     constructor() {
+//         this = { ...animalTraits, ...dogTraits };
+//     }
+// }`
+            }
+            ];
+        
+        // Questions and tasks
+        const questions = [
+                {
+        type: "question",
+        question: "What will this class output when instantiated?",
+        code: `class A {
+    #value = 1;
+    getValue() { return this.#value; }
+}
+class B extends A {
+    #value = 2;
+}
+console.log(new B().getValue());`,
+        options: [
+            "1",
+            "2",
+            "undefined",
+            "TypeError"
+        ],
+        correctIndex: 0
+    },
+            {
+                type: "question",
+                question: "What will be the output of this destructuring code?",
+                code: `const arr = [10, 20, 30, 40];
+const [first, , third, ...rest] = arr;
+console.log(first, third, rest);`,
+                options: [
+                    "10 20 [30, 40]",
+                    "10 30 [40]",
+                    "10 30 []",
+                    "10 20 [40]"
+                ],
+                correctIndex: 1
+            },
+            {
+                type: "question",
+                question: "In object destructuring, what does the syntax 'const { x: a, y: b } = obj;' do?",
+                options: [
+                    "Creates new variables x and y from obj",
+                    "Creates new variables a and b assigned from obj.x and obj.y",
+                    "Renames obj to a and b",
+                    "Throws an error"
+                ],
+                correctIndex: 1
+            },
+            {
+                type: "question",
+                question: "Which of the following is NOT true about JavaScript classes?",
+                options: [
+                    "Classes are syntactic sugar over prototype-based inheritance",
+                    "Class methods are added to the prototype",
+                    "Private fields can be declared with a # prefix",
+                    "JavaScript supports multiple inheritance with classes"
+                ],
+                correctIndex: 3
+            },
+            {
+                type: "question",
+                question: "What will be the output of this code snippet?",
+                code: `class Animal {
+    makeSound() {
+        console.log("Generic sound");
+    }
+}
+class Dog extends Animal {
+    makeSound() {
+        console.log("Woof!");
+    }
+}
+const dog = new Dog();
+dog.makeSound();`,
+                options: [
+                    "Generic sound",
+                    "Woof!",
+                    "Error",
+                    "undefined"
+                ],
+                correctIndex: 1
+            },
+            {
+                type: "question",
+                question: "What is the behavior of 'this' inside an arrow function compared to a regular function?",
+                options: [
+                    "'this' inside arrow functions refers to the global object",
+                    "'this' inside arrow functions is lexically inherited from the enclosing scope",
+                    "'this' inside arrow functions is undefined",
+                    "'this' inside arrow functions refers to the function itself"
+                ],
+                correctIndex: 1
+            },
+            {
+                type: "question",
+                question: "Why does JavaScript not support true multiple inheritance?",
+                options: [
+                    "Because of the diamond problem and single prototype chain limitation",
+                    "Because JavaScript is a compiled language",
+                    "Because classes are not supported in JavaScript",
+                    "Because JavaScript only supports functional programming"
+                ],
+                correctIndex: 0
+            },
+            {
+                type: "question",
+                question: "How can you simulate multiple inheritance in JavaScript?",
+                options: [
+                    "Using Mixins and Object.assign() to compose objects",
+                    "Using multiple extends keywords",
+                    "Using private fields",
+                    "Using async/await"
+                ],
+                correctIndex: 0
+            },
+            {
+                type: "task",
+                title: "Implement: Class with Private Fields and Methods",
+                content: "Create a class representing a bank account with private balance field, deposit and withdraw methods, and a getter for balance."
+            },
+            {
+                type: "search-task",
+                title: "Research: ES6 Features and Their Impact on JavaScript Development",
+                content: "Explore key ES6 features such as classes, arrow functions, template literals, destructuring, and how they improve JavaScript code."
+            }
+        ];
+        // ==================== TEMPLATE RENDERING ====================
+        // Functions to render the content - you don't need to modify these
+        
+        // Set lecture title and subtitle
+        document.getElementById('lecture-title').textContent = lectureConfig.title;
+        document.getElementById('lecture-subtitle').textContent = lectureConfig.subtitle;
+        
+        // Render tabs and content
+        function renderTabsAndContent() {
+            const tabsContainer = document.getElementById('tabs-container');
+            const contentContainer = document.getElementById('tab-content-container');
+            
+            // Create tabs
+            const tabs = document.createElement('div');
+            tabs.className = 'tabs';
+            
+            // Create tab content areas
+            lectureContent.forEach((content, index) => {
+                // Create tab
+                const tab = document.createElement('div');
+                tab.className = 'tab' + (index === 0 ? ' active' : '');
+                tab.textContent = content.tabTitle;
+                tab.onclick = () => switchTab(index);
+                tabs.appendChild(tab);
+                
+                // Create content
+                const tabContent = document.createElement('div');
+                tabContent.className = 'tab-content' + (index === 0 ? ' active' : '');
+                tabContent.id = 'tab-' + index;
+                
+                // Add title
+                const title = document.createElement('h3');
+                title.textContent = content.title;
+                tabContent.appendChild(title);
+                
+                // Add code content
+                const pre = document.createElement('pre');
+                const code = document.createElement('code');
+                code.textContent = content.content;
+                pre.appendChild(code);
+                tabContent.appendChild(pre);
+
+                // Add table if exists
+                if (content.table) {
+                    const table = document.createElement('table');
+                    table.className = 'comparison-table';
+                    
+                    // Create header
+                    const thead = document.createElement('thead');
+                    const headerRow = document.createElement('tr');
+                    content.table.headers.forEach(headerText => {
+                        const th = document.createElement('th');
+                        th.textContent = headerText;
+                        headerRow.appendChild(th);
+                    });
+                    thead.appendChild(headerRow);
+                    table.appendChild(thead);
+                    
+                    // Create body
+                    const tbody = document.createElement('tbody');
+                    content.table.rows.forEach(rowData => {
+                        const row = document.createElement('tr');
+                        rowData.forEach(cellData => {
+                            const td = document.createElement('td');
+                            td.textContent = cellData;
+                            row.appendChild(td);
+                        });
+                        tbody.appendChild(row);
+                    });
+                    table.appendChild(tbody);
+                    
+                    tabContent.appendChild(table);
+                }
+                
+                
+                contentContainer.appendChild(tabContent);
+            });
+            
+            tabsContainer.appendChild(tabs);
+        }
+        
+        // Switch tabs function
+        function switchTab(index) {
+            // Remove active class from all tabs
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            // Add active class to clicked tab
+            tabs[index].classList.add('active');
+            
+            // Hide all tab content
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(content => content.classList.remove('active'));
+            
+            // Show selected tab content
+            document.getElementById('tab-' + index).classList.add('active');
+        }
+        
+        // Render questions and tasks
+        function renderQuestions() {
+            const container = document.getElementById('questions-container');
+            
+            questions.forEach((q, index) => {
+                if (q.type === 'question') {
+                    const questionDiv = document.createElement('div');
+                    questionDiv.className = 'question';
+                    
+                    const questionTitle = document.createElement('h3');
+                    questionTitle.textContent = `Question ${index + 1}: ${q.question}`;
+                    questionDiv.appendChild(questionTitle);
+                    
+                    if (q.code) {
+                        const pre = document.createElement('pre');
+                        const code = document.createElement('code');
+                        code.textContent = q.code;
+                        pre.appendChild(code);
+                        questionDiv.appendChild(pre);
+                    }
+                    
+                    const optionsDiv = document.createElement('div');
+                    optionsDiv.className = 'options';
+                    
+                    q.options.forEach((option, optIndex) => {
+                        const optionDiv = document.createElement('div');
+                        optionDiv.className = 'option';
+                        optionDiv.textContent = option;
+                        optionDiv.onclick = function() {
+                            checkAnswer(this, optIndex === q.correctIndex ? 'correct' : 'incorrect');
+                        };
+                        optionsDiv.appendChild(optionDiv);
+                    });
+                    
+                    questionDiv.appendChild(optionsDiv);
+                    
+                    const resultDiv = document.createElement('div');
+                    resultDiv.className = 'result';
+                    resultDiv.id = 'result-' + index;
+                    questionDiv.appendChild(resultDiv);
+                    
+                    container.appendChild(questionDiv);
+                } else if (q.type === 'task') {
+                    const taskDiv = document.createElement('div');
+                    taskDiv.className = 'task';
+                    
+                    const taskTitle = document.createElement('h3');
+                    taskTitle.textContent = q.title;
+                    taskDiv.appendChild(taskTitle);
+                    
+                    const taskContent = document.createElement('p');
+                    taskContent.textContent = q.content;
+                    taskDiv.appendChild(taskContent);
+                    
+                    container.appendChild(taskDiv);
+                } else if (q.type === 'search-task') {
+                    const searchTaskDiv = document.createElement('div');
+                    searchTaskDiv.className = 'search-task';
+                    
+                    const taskTitle = document.createElement('h3');
+                    taskTitle.textContent = q.title;
+                    searchTaskDiv.appendChild(taskTitle);
+                    
+                    const taskContent = document.createElement('p');
+                    taskContent.textContent = q.content;
+                    searchTaskDiv.appendChild(taskContent);
+                    
+                    container.appendChild(searchTaskDiv);
+                }
+            });
+        }
+        
+        // Check answer function
+        function checkAnswer(element, type) {
+            const options = element.parentElement.querySelectorAll('.option');
+            options.forEach(opt => {
+                opt.classList.remove('correct', 'incorrect');
+                opt.onclick = null;
+            });
+            
+            element.classList.add(type);
+            
+            const resultId = element.closest('.question').querySelector('.result').id;
+            const resultDiv = document.getElementById(resultId);
+            resultDiv.style.display = 'block';
+            
+            if (type === 'correct') {
+                resultDiv.innerHTML = '<p style="color: #155724">✅ Correct! Good job.</p>';
+                resultDiv.style.backgroundColor = '#d4edda';
+            } else {
+                resultDiv.innerHTML = '<p style="color: #721c24">❌ Incorrect. Try to understand why.</p>';
+                resultDiv.style.backgroundColor = '#f8d7da';
+            }
+        }
+        
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            renderTabsAndContent();
+            renderQuestions();
+        });
+    </script>
+</body>
+</html>
