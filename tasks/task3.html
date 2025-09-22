@@ -154,6 +154,8 @@
             font-family: monospace;
             white-space: pre;
             overflow: auto;
+            direction: ltr !important;
+            text-align: left !important;
         }
 
         .timer-section {
@@ -358,6 +360,7 @@
                         type: "list",
                         title: "Inheritance Implementation:",
                         items: [
+                            "Create an array called `products` it has produtcs as object from Product class",
                             "Create specialized classes that inherit from `Product`: `ElectronicsProduct`, `ClothingProduct`, `BookProduct`",
                             "Each specialized class should have additional properties specific to its category",
                             "Override methods where necessary using polymorphism",
@@ -458,10 +461,11 @@
                         type: "list",
                         title: "تنفيذ التوريث:",
                         items: [
+                            "قم بإنشاء مصفوفة تدعى products تمثل مصفوفة منتجات وهي عبارة عن object",
                             "أنشئ فئات متخصصة ترث من `Product`: `ElectronicsProduct`, `ClothingProduct`, `BookProduct`",
                             "يجب أن يكون لكل فئة متخصصة خصائص إضافية تناسب فئتها",
                             "أعد كتابة الطرق حيثما يكون ذلك ضروريًا باستخدام تعدد الأشكال",
-                            "استخدم كلمة `super()` في المنشئات بشكل صحيح"
+                            "استخدم كلمة `()super` في المنشئات بشكل صحيح"
                         ]
                     },
                     {
@@ -493,7 +497,7 @@
                         items: [
                             "`searchProducts(keyword)` - البحث بالاسم أو الوصف",
                             "`sortProductsByPrice(order)` - ترتيب تصاعدي/تنازلي",
-                            "`getActiveProducts()` - الحصول على المنتجات النشطة فقط",
+                            "`()getActiveProducts` - الحصول على المنتجات النشطة فقط",
                             "`getProductsCreatedAfter(date)` - التصفية حسب تاريخ الإنشاء"
                         ]
                     },
