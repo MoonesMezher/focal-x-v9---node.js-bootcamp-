@@ -483,184 +483,7 @@ const countStudentsByState = async (state) => {
             resolve(count);
         }, TIME);
     });
-}
-
-// test function to handle all use cases
-const test = (index) => {
-    const addValidGrades = () => {
-        const SUBMIT_GRADES = [
-            {
-                id: 1,
-                grade: 60
-            },
-            {
-                id: 1,
-                grade: 90
-            },
-            {
-                id: 1,
-                grade: 80
-            },
-            {
-                id: 1,
-                grade: 95
-            },
-            {
-                id: 1,
-                grade: 75
-            },
-            {
-                id: 2,
-                grade: 62
-            },
-            {
-                id: 2,
-                grade: 30
-            },
-            {
-                id: 2,
-                grade: 40
-            },
-            {
-                id: 2,
-                grade: 25
-            },
-            {
-                id: 2,
-                grade: 20
-            },
-            {
-                id: 3,
-                grade: 100
-            },
-            {
-                id: 3,
-                grade: 100
-            },
-            {
-                id: 3,
-                grade: 99
-            },
-            {
-                id: 3,
-                grade: 100
-            },
-            {
-                id: 3,
-                grade: 90
-            },
-            {
-                id: 4,
-                grade: 70
-            },
-            {
-                id: 4,
-                grade: 76
-            },
-            {
-                id: 4,
-                grade: 97
-            },
-            {
-                id: 4,
-                grade: 62
-            },
-            {
-                id: 4,
-                grade: 80
-            },
-            {
-                id: 5,
-                grade: 71
-            },
-            {
-                id: 5,
-                grade: 76
-            },
-            {
-                id: 5,
-                grade: 77
-            },
-            {
-                id: 5,
-                grade: 22
-            },
-            {
-                id: 5,
-                grade: 0
-            },
-        ];
-    
-        SUBMIT_GRADES.forEach(e => {
-            addGrade(e.id, e.grade);
-        })
-    
-        console.log(students);
-    }
-
-    const addNotValidGrade = () => {
-        addGrade(10, 90)
-    }
-
-    const handleCalculateGPA = () => {
-        const arr = calculateGPA();
-
-        console.log(arr);
-    }
-
-    const handleGetStudentInfo = () => {        
-        const student = getStudentInfo(2);
-
-        console.log(student);
-    }
-
-    const handleUpdateAllGrades = () => {
-        updateAllGrades();
-    }
-
-    const handleRemoveStudent = () => {
-        removeStudent(1);
-
-        console.log(students);
-    }
-
-    const handleStateOfStudent = async () => {
-        console.log(await getStudentState(2));
-    }
-
-    const handleGetCountByState = async () => {
-        console.log(await countStudentsByState("Bad"));
-    }
-
-    const methods = [
-        addValidGrades,
-        addNotValidGrade,
-        handleCalculateGPA,
-        handleGetStudentInfo,
-        handleUpdateAllGrades,
-        handleRemoveStudent,
-        handleStateOfStudent,
-        handleGetCountByState
-    ];
-
-    return methods[index]();
-}
-
-const app = () => {
-    try {
-        test(0);
-        // test(2);
-        // test(3)
-        // test(4)
-        // test(5)
-        // test(6)
-        test(7)
-    } catch (error) {
-        console.log(error.message);
-    }
-}
-
-app();`
+}`
             },
             {
                 tabTitle: "API & JSON",
@@ -709,7 +532,8 @@ fetch('https://api.example.com/data', {
 });
 
 /*
-- Is => (JavaScript Object Notation) => a lightweight, text-based 
+- What is JSON?
+=> (JavaScript Object Notation) => a lightweight, text-based 
 data format used for storing and exchanging data between systems.
 
 - Looks like JavaScript objects but is language-independent (used in Python, Java, PHP, ...).
@@ -741,6 +565,11 @@ console.log(jsonString);
 // Convert JSON string back to JavaScript object
 const parsedObject = JSON.parse(jsonString);
 console.log(parsedObject.name); // Alice`
+            },
+            {
+                tabTitle: "Finish",
+                title: "JavaScript is Done",
+                content: `console.log(Congratulations 🎉🥳👏);`
             }
             ];
         
