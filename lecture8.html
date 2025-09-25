@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Focal X - Node.js Bootcamp: Lecture 8 </title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .footer {
+            padding-top: 30px;
+        }
+
+        .footer a {
+            color: black;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .coach {
+            background-color: white;
+            width: 80px;
+            border-radius: 0 0 50% 0;
+            color: black;
+            padding: 10px;
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+        
+        header {
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            padding: 20px;
+            height: 65vh;
+        }
+        
+        .lecture-content {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+        }
+        
+        .interactive-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+        }
+        
+        h2 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #3498db;
+            font-size: 1.5rem;
+        }
+        
+        h3 {
+            color: #2980b9;
+            margin: 20px 0 12px;
+            font-size: 1.2rem;
+        }
+        
+        pre {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 12px;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin: 12px 0;
+            font-size: 0.9rem;
+        }
+        
+        code {
+            font-family: 'Fira Code', monospace;
+        }
+        
+        .question {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .options {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+            margin: 12px 0;
+        }
+        
+        .option {
+            padding: 10px;
+            background: #e8f4fc;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+            font-size: 0.9rem;
+        }
+        
+        .option:hover {
+            background: #d1e9fa;
+        }
+        
+        .correct {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .incorrect {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .task {
+            background: #fff3cd;
+            padding: 12px;
+            border-left: 5px solid #ffc107;
+            margin: 15px 0;
+            border-radius: 5px;
+            font-size: 0.9rem;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background 0.3s;
+            margin-top: 8px;
+        }
+        
+        .btn:hover {
+            background: #2980b9;
+        }
+        
+        .result {
+            margin-top: 12px;
+            padding: 12px;
+            border-radius: 5px;
+            display: none;
+            font-size: 0.9rem;
+        }
+        
+        .search-task {
+            background: #e7f5e9;
+            padding: 12px;
+            border-radius: 5px;
+            margin: 15px 0;
+            border-left: 5px solid #28a745;
+            font-size: 0.9rem;
+        }
+        
+        .tabs {
+            display: flex;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .tab {
+            padding: 8px 15px;
+            cursor: pointer;
+            background: #f1f1f1;
+            border: 1px solid #ddd;
+            border-bottom: none;
+            border-radius: 5px 5px 0 0;
+            margin-right: 5px;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+        
+        .tab.active {
+            background: #6f42c1;
+            color: white;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 12px 0;
+            font-size: 0.9rem;
+        }
+        
+        .comparison-table th, .comparison-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        
+        .comparison-table th {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        .comparison-table tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        
+        @media (max-width: 900px) {
+            .content {
+                grid-template-columns: 1fr;
+                height: auto;
+            }
+            
+            .lecture-content, .interactive-section {
+                height: 50vh;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <p class="coach">Moones Mezher</p>
+        <header>
+            <h1 id="lecture-title">Focal X - Node.js Bootcamp</h1>
+            <p class="subtitle" id="lecture-subtitle">Solve Task 2 - APIs & JSON</p>
+        </header>
+        
+        <div class="content">
+            <div class="lecture-content">
+                <h2>Lecture Content</h2>
+                <div id="tabs-container"></div>
+                <div id="tab-content-container"></div>
+            </div>
+            
+            <div class="interactive-section">
+                <h2>Interactive Questions & Tasks</h2>
+                <div id="questions-container"></div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2025 <a rel="noopener" href="https://focal-x.com/" target="_blank">Focal X</a> All Right Reserved</p>
+    </footer>
+
+    <script>
+        // ==================== CONFIGURATION ====================
+        // Update these arrays to change the content of your lecture
+        
+        // Lecture metadata
+        const lectureConfig = {
+            title: "Focal X - Node.js Bootcamp",
+            subtitle: "Solve Task 2 & Advanced JavaScript: APIs & JSON"
+        };
+        
+        // Lecture content organized by tabs
+        const lectureContent = [
+            {
+                tabTitle: "Last Lesson",
+                title: "Last Lesson Recap",
+                content: `/*
+1- Regex (example) 
+2- ES6
+3- Destructuring
+4- OOP 
+*/`
+            },
+            {
+                tabTitle: "Solve Task",
+                title: "Solve Task (Student Grade Management System)",
+                content: `// helper (return 'now' date)
+const now = () => new Date();
+
+// students array
+let students = [
+    { id: 1, name: "Moones Mezher", grades: [], avg: 0, createdAt: now() },
+    { id: 2, name: "Lionel Messi", grades: [], avg: 0, createdAt: now() },
+    { id: 3, name: "Cristiano Ronaldo", grades: [], avg: 0, createdAt: now() },
+    { id: 4, name: "Mohammed Salah", grades: [], avg: 0, createdAt: now() },
+    { id: 5, name: "Hary Kane", grades: [], avg: 0, createdAt: now() },
+]
+
+// helper (calculate AVG)
+const calculateAVG = (grades) => {
+    const sum = grades.reduce((a, b) => a + b, 0);
+
+    const len = grades.length;
+
+    return (len !== 0)? (sum / len): 0;
+}
+
+// add grade to student
+const addGrade = (studentId, grade) => {
+    if(typeof studentId !== "number") {
+        throw new Error('Invalid StudentId');
+    }
+
+    if(typeof grade !== "number" || 0 > grade || grade > 100) {
+        throw new Error('Invalid Grade');
+    }
+
+    const student = students.find(e => e.id === studentId);
+
+    if(!student) {
+        throw new Error('Student Not Found');
+    }
+
+    student.grades.push(grade);
+
+    student.avg = calculateAVG(student.grades);
+}
+
+// calaulate GPA to each student & return new array
+const calculateGPA = () => {
+    return students.map(e => ({ id: e.id, name: e.name, gpa: e.avg, createdAt: e.createdAt }));
+}
+
+// get student details by id
+const getStudentInfo = (studentId) => {
+    if(typeof studentId !== "number") {
+        throw new Error('Invalid StudentId');
+    }
+
+    const student = students.find(e => e.id === studentId);
+
+    if(!student) {
+        throw new Error('Student Not Found');
+    }
+
+    const { name, grades, avg, createdAt } = student;
+
+    grades.sort((a, b) => a - b);
+
+    return { name, grades, avg, createdAt };
+}
+
+// update students array by remove each grade <= 50
+const updateAllGrades = () => {
+    const TIME = 2000;
+
+    const callback = () => {
+        const MINGRADE = 50;
+
+        students.forEach(e => {
+            e.grades = e.grades.filter(g => g > MINGRADE);
+
+            e.avg = calculateAVG(e.grades)
+        });
+
+        console.log(students);
+    };
+
+    setTimeout(callback, TIME);
+}
+
+// remove student by id
+const removeStudent = (studentId) => {
+    if(typeof studentId !== "number") {
+        throw new Error('Invalid StudentId');
+    }
+
+    const student = students.find(e => e.id === studentId);
+
+    if(!student) {
+        throw new Error('Student Not Found');
+    }
+
+    students = students.filter(e => e.id !== studentId)
+}
+
+// get state of student by id
+const getStudentState = (studentId) => {
+    return new Promise((resolve, reject) => {
+        const TIME = 1000;
+
+        setTimeout(() => {
+            const student = students.find(s => s.id === studentId);
+            
+            if (!student) {
+                reject('Student Not Found');
+                return;
+            }
+
+            let state;
+            if (student.avg <= 60) {
+                state = 'Bad';
+            } else if (student.avg <= 80) {
+                state = 'Good';
+            } else if (student.avg <= 90) {
+                state = 'Very Good';
+            } else {
+                state = 'Excellent';
+            }
+            
+            resolve(state);
+        }, TIME);
+    });
+}
+
+// get count of students by state
+const countStudentsByState = async (state) => {
+    return new Promise((resolve, reject) => {
+        const TIME = 1000;
+
+        setTimeout(async () => {
+            const VALID_STATES = ['Bad', 'Good', 'Very Good', 'Excellent'];
+            
+            if (!VALID_STATES.includes(state)) {
+                reject('Invalid State');
+                return;
+            }
+
+            let count = 0;
+            
+            const statePromises = students.map(async (student) => {
+                try {
+                    const studentState = await getStudentState(student.id);
+                    return studentState === state;
+                } catch (error) {
+                    return false;
+                }
+            });
+
+            const results = await Promise.all(statePromises);
+            count = results.filter(result => result === true).length;
+            
+            resolve(count);
+        }, TIME);
+    });
+}
+
+// test function to handle all use cases
+const test = (index) => {
+    const addValidGrades = () => {
+        const SUBMIT_GRADES = [
+            {
+                id: 1,
+                grade: 60
+            },
+            {
+                id: 1,
+                grade: 90
+            },
+            {
+                id: 1,
+                grade: 80
+            },
+            {
+                id: 1,
+                grade: 95
+            },
+            {
+                id: 1,
+                grade: 75
+            },
+            {
+                id: 2,
+                grade: 62
+            },
+            {
+                id: 2,
+                grade: 30
+            },
+            {
+                id: 2,
+                grade: 40
+            },
+            {
+                id: 2,
+                grade: 25
+            },
+            {
+                id: 2,
+                grade: 20
+            },
+            {
+                id: 3,
+                grade: 100
+            },
+            {
+                id: 3,
+                grade: 100
+            },
+            {
+                id: 3,
+                grade: 99
+            },
+            {
+                id: 3,
+                grade: 100
+            },
+            {
+                id: 3,
+                grade: 90
+            },
+            {
+                id: 4,
+                grade: 70
+            },
+            {
+                id: 4,
+                grade: 76
+            },
+            {
+                id: 4,
+                grade: 97
+            },
+            {
+                id: 4,
+                grade: 62
+            },
+            {
+                id: 4,
+                grade: 80
+            },
+            {
+                id: 5,
+                grade: 71
+            },
+            {
+                id: 5,
+                grade: 76
+            },
+            {
+                id: 5,
+                grade: 77
+            },
+            {
+                id: 5,
+                grade: 22
+            },
+            {
+                id: 5,
+                grade: 0
+            },
+        ];
+    
+        SUBMIT_GRADES.forEach(e => {
+            addGrade(e.id, e.grade);
+        })
+    
+        console.log(students);
+    }
+
+    const addNotValidGrade = () => {
+        addGrade(10, 90)
+    }
+
+    const handleCalculateGPA = () => {
+        const arr = calculateGPA();
+
+        console.log(arr);
+    }
+
+    const handleGetStudentInfo = () => {        
+        const student = getStudentInfo(2);
+
+        console.log(student);
+    }
+
+    const handleUpdateAllGrades = () => {
+        updateAllGrades();
+    }
+
+    const handleRemoveStudent = () => {
+        removeStudent(1);
+
+        console.log(students);
+    }
+
+    const handleStateOfStudent = async () => {
+        console.log(await getStudentState(2));
+    }
+
+    const handleGetCountByState = async () => {
+        console.log(await countStudentsByState("Bad"));
+    }
+
+    const methods = [
+        addValidGrades,
+        addNotValidGrade,
+        handleCalculateGPA,
+        handleGetStudentInfo,
+        handleUpdateAllGrades,
+        handleRemoveStudent,
+        handleStateOfStudent,
+        handleGetCountByState
+    ];
+
+    return methods[index]();
+}
+
+const app = () => {
+    try {
+        test(0);
+        // test(2);
+        // test(3)
+        // test(4)
+        // test(5)
+        // test(6)
+        test(7)
+    } catch (error) {
+        console.log(error.message);
+    }
+}
+
+app();`
+            },
+            {
+                tabTitle: "API & JSON",
+                title: "APIs and JSON Data Format",
+                content: `/* 
+- API => (Application Programming Interface) is a set of rules and 
+protocols that allows different software systems to communicate.
+
+- Like a waiter taking your order and delivering food between the kitchen (server) 
+and you (client).
+
+- For => Fetch data, perform actions, or integrate third-party services like (weather data, 
+payment processing, football games).
+
+- Types:
+
+=> 1: Web
+- RESTful => Use HTTP methods like (GET, POST)
+- GraphQl 
+- Soap
+
+=> 2: Browser: Built into browsers for JavaScript interaction
+
+=> 3: Third-Party: External services requiring authentication
+
+- Data Formats:
+
+=> 1: JSON (most common).
+
+=> 2: XML (older systems).
+
+*/
+
+// GET Request
+// fetch returns a promise => takes time to execute => put in microtask queue
+fetch('https://jsonplaceholder.typicode.com/users')
+  .then(response => response.json())
+  .then(data => console.log("Data:", data))
+  .catch(error => console.error('Error:', error));
+
+// POST Request
+fetch('https://api.example.com/data', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ title: 'New Post', userId: 1 }),
+});
+
+/*
+- Is => (JavaScript Object Notation) => a lightweight, text-based 
+data format used for storing and exchanging data between systems.
+
+- Looks like JavaScript objects but is language-independent (used in Python, Java, PHP, ...).
+
+- Example: package.json
+
+- Like objects in JS But with Notes:
+Keys =>	Always in double quotes.
+Values => Limited to JSON data types.	
+Trailing Commas => Not allowed.
+Comments => Not supported.
+
+- JSON.parse() & JSON.stringify()
+*/
+
+// JSON Example
+const person = {
+    name: "Alice",
+    age: 30,
+    isStudent: false,
+    hobbies: ["reading", "hiking"]
+};
+
+// Convert JavaScript object to JSON string
+const jsonString = JSON.stringify(person);
+console.log(jsonString);
+// Output: {"name":"Alice","age":30,"isStudent":false,"hobbies":["reading","hiking"]}
+
+// Convert JSON string back to JavaScript object
+const parsedObject = JSON.parse(jsonString);
+console.log(parsedObject.name); // Alice`
+            }
+            ];
+        
+        // Questions and tasks
+        const questions = [
+            {
+                type: "question",
+                question: "What does the await keyword do?",
+                options: [
+                    "Pauses execution until the promise is settled",
+                    "Cancels a promise",
+                    "Creates a new promise",
+                    "Handles promise rejection"
+                ],
+                correctIndex: 0
+            },
+            {
+                type: "question",
+                question: "What is the output order of the following code?",
+                code: `console.log("1");
+setTimeout(() => console.log("2"), 0);
+Promise.resolve().then(() => console.log("3"));
+console.log("4");`,
+                options: [
+                    "1, 2, 3, 4",
+                    "1, 4, 3, 2",
+                    "1, 3, 4, 2",
+                    "1, 4, 2, 3"
+                ],
+                correctIndex: 1
+            },
+            {
+                type: "question",
+                question: "Which regex pattern would match an email address?",
+                options: [
+                    "/^[\\w.-]+@[\\w.-]+\\.\\w{2,}$/",
+                    "/^[\\w.-]+@[\\w.-]+\\w{2,}$/",
+                    "/[\\w.-]+@[\\w.-]+\\.\\w{2,}/",
+                    "/^[\\w.-]+@[\\w.-]+\\.\\w+$/"
+                ],
+                correctIndex: 0
+            },
+            {
+                type: "question",
+                question: "What will be the value of 'name' after this destructuring?",
+                code: `const person = { name: "Alice", age: 30 };
+const { name: personName } = person;
+console.log(personName);`,
+                options: [
+                    "undefined",
+                    "Alice",
+                    "personName",
+                    "Error"
+                ],
+                correctIndex: 1
+            },
+            {
+                type: "question",
+                question: "Which of these is a private class field in JavaScript?",
+                options: [
+                    "#balance",
+                    "_balance",
+                    "private balance",
+                    "balance#"
+                ],
+                correctIndex: 0
+            },
+            {
+                type: "search-task",
+                title: "Research: JavaScript Event Loop",
+                content: "Research how the JavaScript event loop works with setTimeout and setInterval. How do these functions interact with the call stack and task queue?"
+            },
+            {
+                type: "search-task",
+                title: "Research: Promise Methods",
+                content: "Research the differences between Promise.all(), Promise.race(), Promise.allSettled(), and Promise.any(). Create examples demonstrating each method's behavior."
+            },
+            {
+                type: "task",
+                title: "Practice: Regex Validation",
+                content: "Create a function that validates email addresses using a regular expression. Test it with various inputs to ensure it works correctly."
+            },
+            {
+                type: "task",
+                title: "Practice: Class Implementation",
+                content: "Create a class hierarchy for different types of vehicles (Car, Bike, Truck) that inherit from a base Vehicle class. Each should have unique properties and methods."
+            },
+            {
+                type: "search-task",
+                title: "Search: Multiple Inheritance",
+                content: "Make a Research about Modern JavaScript Improvements in Multiple Inheritance"
+            }
+        ];
+        
+        // ==================== TEMPLATE RENDERING ====================
+        // Functions to render the content - you don't need to modify these
+        
+        // Set lecture title and subtitle
+        document.getElementById('lecture-title').textContent = lectureConfig.title;
+        document.getElementById('lecture-subtitle').textContent = lectureConfig.subtitle;
+        
+        // Render tabs and content
+        function renderTabsAndContent() {
+            const tabsContainer = document.getElementById('tabs-container');
+            const contentContainer = document.getElementById('tab-content-container');
+            
+            // Create tabs
+            const tabs = document.createElement('div');
+            tabs.className = 'tabs';
+            
+            // Create tab content areas
+            lectureContent.forEach((content, index) => {
+                // Create tab
+                const tab = document.createElement('div');
+                tab.className = 'tab' + (index === 0 ? ' active' : '');
+                tab.textContent = content.tabTitle;
+                tab.onclick = () => switchTab(index);
+                tabs.appendChild(tab);
+                
+                // Create content
+                const tabContent = document.createElement('div');
+                tabContent.className = 'tab-content' + (index === 0 ? ' active' : '');
+                tabContent.id = 'tab-' + index;
+                
+                // Add title
+                const title = document.createElement('h3');
+                title.textContent = content.title;
+                tabContent.appendChild(title);
+                
+                // Add code content
+                const pre = document.createElement('pre');
+                const code = document.createElement('code');
+                code.textContent = content.content;
+                pre.appendChild(code);
+                tabContent.appendChild(pre);
+
+                // Add table if exists
+                if (content.table) {
+                    const table = document.createElement('table');
+                    table.className = 'comparison-table';
+                    
+                    // Create header
+                    const thead = document.createElement('thead');
+                    const headerRow = document.createElement('tr');
+                    content.table.headers.forEach(headerText => {
+                        const th = document.createElement('th');
+                        th.textContent = headerText;
+                        headerRow.appendChild(th);
+                    });
+                    thead.appendChild(headerRow);
+                    table.appendChild(thead);
+                    
+                    // Create body
+                    const tbody = document.createElement('tbody');
+                    content.table.rows.forEach(rowData => {
+                        const row = document.createElement('tr');
+                        rowData.forEach(cellData => {
+                            const td = document.createElement('td');
+                            td.textContent = cellData;
+                            row.appendChild(td);
+                        });
+                        tbody.appendChild(row);
+                    });
+                    table.appendChild(tbody);
+                    
+                    tabContent.appendChild(table);
+                }
+                
+                
+                contentContainer.appendChild(tabContent);
+            });
+            
+            tabsContainer.appendChild(tabs);
+        }
+        
+        // Switch tabs function
+        function switchTab(index) {
+            // Remove active class from all tabs
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            // Add active class to clicked tab
+            tabs[index].classList.add('active');
+            
+            // Hide all tab content
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(content => content.classList.remove('active'));
+            
+            // Show selected tab content
+            document.getElementById('tab-' + index).classList.add('active');
+        }
+        
+        // Render questions and tasks
+        function renderQuestions() {
+            const container = document.getElementById('questions-container');
+            
+            questions.forEach((q, index) => {
+                if (q.type === 'question') {
+                    const questionDiv = document.createElement('div');
+                    questionDiv.className = 'question';
+                    
+                    const questionTitle = document.createElement('h3');
+                    questionTitle.textContent = `Question ${index + 1}: ${q.question}`;
+                    questionDiv.appendChild(questionTitle);
+                    
+                    if (q.code) {
+                        const pre = document.createElement('pre');
+                        const code = document.createElement('code');
+                        code.textContent = q.code;
+                        pre.appendChild(code);
+                        questionDiv.appendChild(pre);
+                    }
+                    
+                    const optionsDiv = document.createElement('div');
+                    optionsDiv.className = 'options';
+                    
+                    q.options.forEach((option, optIndex) => {
+                        const optionDiv = document.createElement('div');
+                        optionDiv.className = 'option';
+                        optionDiv.textContent = option;
+                        optionDiv.onclick = function() {
+                            checkAnswer(this, optIndex === q.correctIndex ? 'correct' : 'incorrect');
+                        };
+                        optionsDiv.appendChild(optionDiv);
+                    });
+                    
+                    questionDiv.appendChild(optionsDiv);
+                    
+                    const resultDiv = document.createElement('div');
+                    resultDiv.className = 'result';
+                    resultDiv.id = 'result-' + index;
+                    questionDiv.appendChild(resultDiv);
+                    
+                    container.appendChild(questionDiv);
+                } else if (q.type === 'task') {
+                    const taskDiv = document.createElement('div');
+                    taskDiv.className = 'task';
+                    
+                    const taskTitle = document.createElement('h3');
+                    taskTitle.textContent = q.title;
+                    taskDiv.appendChild(taskTitle);
+                    
+                    const taskContent = document.createElement('p');
+                    taskContent.textContent = q.content;
+                    taskDiv.appendChild(taskContent);
+                    
+                    container.appendChild(taskDiv);
+                } else if (q.type === 'search-task') {
+                    const searchTaskDiv = document.createElement('div');
+                    searchTaskDiv.className = 'search-task';
+                    
+                    const taskTitle = document.createElement('h3');
+                    taskTitle.textContent = q.title;
+                    searchTaskDiv.appendChild(taskTitle);
+                    
+                    const taskContent = document.createElement('p');
+                    taskContent.textContent = q.content;
+                    searchTaskDiv.appendChild(taskContent);
+                    
+                    container.appendChild(searchTaskDiv);
+                }
+            });
+        }
+        
+        // Check answer function
+        function checkAnswer(element, type) {
+            const options = element.parentElement.querySelectorAll('.option');
+            options.forEach(opt => {
+                opt.classList.remove('correct', 'incorrect');
+                opt.onclick = null;
+            });
+            
+            element.classList.add(type);
+            
+            const resultId = element.closest('.question').querySelector('.result').id;
+            const resultDiv = document.getElementById(resultId);
+            resultDiv.style.display = 'block';
+            
+            if (type === 'correct') {
+                resultDiv.innerHTML = '<p style="color: #155724">✅ Correct! Good job.</p>';
+                resultDiv.style.backgroundColor = '#d4edda';
+            } else {
+                resultDiv.innerHTML = '<p style="color: #721c24">❌ Incorrect. Try to understand why.</p>';
+                resultDiv.style.backgroundColor = '#f8d7da';
+            }
+        }
+        
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            renderTabsAndContent();
+            renderQuestions();
+        });
+    </script>
+</body>
+</html>
