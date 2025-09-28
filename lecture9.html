@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Focal X - Node.js Bootcamp: Lecture 9 </title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .footer {
+            padding-top: 30px;
+        }
+
+        .footer a {
+            color: black;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .coach {
+            background-color: white;
+            width: 80px;
+            border-radius: 0 0 50% 0;
+            color: black;
+            padding: 10px;
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+        
+        header {
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            padding: 20px;
+            height: 65vh;
+        }
+        
+        .lecture-content {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+        }
+        
+        .interactive-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+        }
+        
+        h2 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #3498db;
+            font-size: 1.5rem;
+        }
+        
+        h3 {
+            color: #2980b9;
+            margin: 20px 0 12px;
+            font-size: 1.2rem;
+        }
+        
+        pre {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 12px;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin: 12px 0;
+            font-size: 0.9rem;
+        }
+        
+        code {
+            font-family: 'Fira Code', monospace;
+        }
+        
+        .question {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .options {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+            margin: 12px 0;
+        }
+        
+        .option {
+            padding: 10px;
+            background: #e8f4fc;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+            font-size: 0.9rem;
+        }
+        
+        .option:hover {
+            background: #d1e9fa;
+        }
+        
+        .correct {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .incorrect {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .task {
+            background: #fff3cd;
+            padding: 12px;
+            border-left: 5px solid #ffc107;
+            margin: 15px 0;
+            border-radius: 5px;
+            font-size: 0.9rem;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background 0.3s;
+            margin-top: 8px;
+        }
+        
+        .btn:hover {
+            background: #2980b9;
+        }
+        
+        .result {
+            margin-top: 12px;
+            padding: 12px;
+            border-radius: 5px;
+            display: none;
+            font-size: 0.9rem;
+        }
+        
+        .search-task {
+            background: #e7f5e9;
+            padding: 12px;
+            border-radius: 5px;
+            margin: 15px 0;
+            border-left: 5px solid #28a745;
+            font-size: 0.9rem;
+        }
+        
+        .tabs {
+            display: flex;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .tab {
+            padding: 8px 15px;
+            cursor: pointer;
+            background: #f1f1f1;
+            border: 1px solid #ddd;
+            border-bottom: none;
+            border-radius: 5px 5px 0 0;
+            margin-right: 5px;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+        
+        .tab.active {
+            background: #6f42c1;
+            color: white;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 12px 0;
+            font-size: 0.9rem;
+        }
+        
+        .comparison-table th, .comparison-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        
+        .comparison-table th {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        .comparison-table tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        
+        @media (max-width: 900px) {
+            .content {
+                grid-template-columns: 1fr;
+                height: auto;
+            }
+            
+            .lecture-content, .interactive-section {
+                height: 50vh;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <p class="coach">Moones Mezher</p>
+        <header>
+            <h1 id="lecture-title">Focal X - Node.js Bootcamp</h1>
+            <p class="subtitle" id="lecture-subtitle">TypeScript</p>
+        </header>
+        
+        <div class="content">
+            <div class="lecture-content">
+                <h2>Lecture Content</h2>
+                <div id="tabs-container"></div>
+                <div id="tab-content-container"></div>
+            </div>
+            
+            <div class="interactive-section">
+                <h2>Interactive Questions & Tasks</h2>
+                <div id="questions-container"></div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2025 <a rel="noopener" href="https://focal-x.com/" target="_blank">Focal X</a> All Right Reserved</p>
+    </footer>
+
+    <script>
+        // ==================== CONFIGURATION ====================
+        // Update these arrays to change the content of your lecture
+        
+        // Lecture metadata
+        const lectureConfig = {
+            title: "Focal X - Node.js Bootcamp",
+            subtitle: "TypeScript"
+        };
+        
+        // Lecture content organized by tabs
+        const lectureContent = [
+            {
+                tabTitle: "Last Lesson",
+                title: "Last Lesson Recap",
+                content: `/*
+1- Solve Task 2
+2- APIs & JSON
+*/`
+            },
+            {
+                tabTitle: "Info",
+                title: "What is TypeScript?",
+                content: `// TypeScript is a superset of JavaScript developed by Microsoft that allows developers to write statically typed code. 
+
+// This means you can define variable types, which can help in catching errors during development and improving code maintainability.
+
+// example: sort the rubish
+
+// Q: what did happen before typescript?`
+            },
+            {
+                tabTitle: "Installation ",
+                title: "TypeScript Installation",
+                content: `// 1- node js
+// 2- npm install typescript --save-dev`
+            },
+            {
+                tabTitle: "Types ",
+                title: "Types in TypeScript",
+                content: `let carName = "ooo";
+
+// Error:
+carName = 5;
+
+const num: number = 10;
+const username: string = "moones";
+const isTrue: boolean = true;
+const list: Array<string> = ["1", "2"];
+const list2: Array<number | string> = [1, 2, "s"];
+const list3: (string | number)[] = ["A", "B", "C", 12];
+const undifinedVar: undefined = undefined;
+const nullVar: null = null;
+
+type s = string;
+
+let a: s = "oooo";
+
+type obj = {
+    key: number;
+    val: string | null;
+}
+
+const obj: obj = { key: 1, val: "!" };
+
+const listOfObj: Array<obj> = [
+    { key: 0, val: "0" },
+    { key: 1, val: "1" },
+    { key: 2, val: null },
+];
+
+let msg: string|number = "Hi";
+
+msg = "Hi 2";
+msg = 10;`},
+{
+                tabTitle: "Config",
+                title: "TypeScript Installation",
+                content: `// tsc --init
+
+// tsc --watch
+
+// node --watch index.js`
+            },
+            {
+                tabTitle: "Arrays & Objects",
+                title: "Arrays & Objects in TypeScript",
+                content: `const arr: string[] = ["a", "b", "c", "d", "e"];
+
+const arr2 = ["a", "b"];
+
+const arr3: Array<string> = ["a"];
+
+// Error
+const item: number = arr[0];
+const item: number = arr2[0];
+const item: number = arr3[0];
+
+const obj: { age: number, name: string } = { age: 1, name: "hello" };
+
+type objectType = { age: number, name: string };
+
+const obj1: objectType = { age: 1, name: "hello" };`
+            },
+            {
+                tabTitle: "Functions",
+                title: "Functions in TypeScript",
+                content: `function sum(num1: number, num2: number): number {
+    return num1 + num2;
+}
+
+function printHello(value: string): void {
+    console.log(\`Hello \${value}\`);
+}
+
+// Error
+const str: number[] = [1,2].map(e => e);
+
+// Error
+function sum(num1: number, num2: number): string {
+    return num1 + num2;
+}`},
+            {
+                tabTitle: "Any",
+                title: "Any Type",
+                content: `// useful for migrating project from javascript to typescript
+
+let title: any = "Hello";
+
+title = 30;
+title = { hello: "world" }
+title = ["Hello", "World"];
+title = false;
+
+let arr: any[] = [];
+
+arr.push("Hello");
+arr.push(10);
+arr.push({ hello: "world" });
+arr.push([]);
+
+function sum(value: any): any {
+    return value + value;
+}
+
+sum(10);
+sum("A");`},
+                {
+                tabTitle: "Tubles",
+                title: "Tubles in TypeScript",
+                content: `// they are arrays with selected types
+
+const t1: [string, string, boolean, number] = ["a", "b", false, 10];
+
+// named tubles
+
+let t2: [name: string, age: number] = ["a", 10];
+
+console.log(t2[0]);
+console.log(t2[1]);`},
+{
+                tabTitle: "Interfaces",
+                title: "Interfaces in TypeScript",
+                content: `interface Author {
+    name: string;
+    age: number;
+}
+
+type x = Author
+
+const mario: Author = {
+    name: "Mario",
+    age: 10
+}
+
+interface Post {
+    title?: string;
+    body: string;
+    readonly tags: string[];
+    createdAt: Date;
+    author: Author;
+    print(): void
+}
+
+const post: Post = {
+    title: "s",
+    body: "ss",
+    tags: ["sss"],
+    createdAt: new Date(),
+    author: {
+        name: "ss",
+        age: 10
+    },
+    print: () => {
+        console.log("SS")
+    }
+}
+
+// 1- NOTE: prop?: type; => optional property => this means that the property may or may not be present in the object.
+// 2- NOTE: readonly prop: type; => readonly property => this means the property cannot be modified after the object is created.
+// 3- NOTE: prop(): type; => method as property
+// 4- NOTE: you can create a new interface that extends an existing one. This allows you to build on top of existing structures.
+
+interface FeaturedPost extends Post {
+    featured: boolean; // New property
+} 
+
+// 5- NOTE: you can define interfaces that can be indexed with a specific type. 
+This is useful for objects that have dynamic keys.
+
+interface StringArray {
+    [index: number]: string; // Index signature
+}
+
+let myArray: StringArray = ["Hello", "World"];
+
+// 6- NOTE: you can combine multiple interfaces using intersection types.
+interface Post {
+    title: string;
+    body: string;
+}
+
+interface Author {
+    name: string;
+}
+
+type PostWithAuthor = Post & Author;
+
+// 7- NOTE: classes can implement interfaces, ensuring that they adhere 
+// to the defined structure.
+
+const post1: Post = {
+    title: "post-1",
+    body: "ffffffffffffffffffffffff",
+    tags: ["a", "b", "c", "d", "e", "f"],
+    createdAt: new Date(),
+    author: mario
+}
+
+function getAuthor(post: Post): Author {
+    return post.author;
+}
+
+console.log(getAuthor(post1));
+
+const posts: Post[] = [];
+
+// Error
+posts.push("s");
+
+posts.push(post1);`},
+            ];
+        
+        // Questions and tasks
+        const questions = [
+    {
+        type: "question",
+        question: "What is TypeScript and what problem does it solve?",
+        options: [
+            "A new programming language that replaces JavaScript",
+            "A superset of JavaScript that adds static typing",
+            "A library for building user interfaces",
+            "A testing framework for JavaScript"
+        ],
+        correctIndex: 1
+    },
+    {
+        type: "question",
+        question: "How do you install TypeScript locally in a project?",
+        options: [
+            "npm install -g typescript",
+            "npm install typescript --save-dev",
+            "npm install typescript",
+            "yarn add typescript --global"
+        ],
+        correctIndex: 1
+    },
+    {
+        type: "question",
+        question: "What will TypeScript report for this code?",
+        code: `let name: string = "John";
+name = 25;`,
+        options: [
+            "No error - TypeScript automatically converts types",
+            "Error - cannot assign number to string type",
+            "Warning but code will compile",
+            "Depends on tsconfig settings"
+        ],
+        correctIndex: 1
+    },
+    {
+        type: "question",
+        question: "Which type annotation is correct for an array of numbers?",
+        options: [
+            "let numbers: number[]",
+            "let numbers: Array<number>",
+            "let numbers: numberArray",
+            "Both A and B"
+        ],
+        correctIndex: 3
+    },
+    {
+        type: "question",
+        question: "What is the purpose of the 'any' type in TypeScript?",
+        options: [
+            "To represent any possible value type",
+            "To improve performance",
+            "To create generic functions",
+            "To handle API responses only"
+        ],
+        correctIndex: 0
+    },
+    {
+        type: "question",
+        question: "What will be the TypeScript error in this function?",
+        code: `function add(a: number, b: number): string {
+    return a + b;
+}`,
+        options: [
+            "No parameters provided",
+            "Return type should be number, not string",
+            "Missing return statement",
+            "Parameters should be strings"
+        ],
+        correctIndex: 1
+    },
+    {
+        type: "question",
+        question: "What is the main difference between interface and type alias?",
+        options: [
+            "Interfaces can be extended, type aliases cannot",
+            "Type aliases are more performant",
+            "Interfaces only work with objects, type aliases work with primitives",
+            "No significant difference"
+        ],
+        correctIndex: 0
+    },
+    {
+        type: "question",
+        question: "What does the 'readonly' modifier do in an interface?",
+        options: [
+            "Makes the property optional",
+            "Prevents modification after initialization",
+            "Hides the property from other classes",
+            "Makes the property private"
+        ],
+        correctIndex: 1
+    },
+    {
+        type: "question",
+        question: "How do you define a tuple type in TypeScript?",
+        options: [
+            "[string, number, boolean]",
+            "Array<string, number, boolean>",
+            "Tuple<string, number, boolean>",
+            "(string | number | boolean)[]"
+        ],
+        correctIndex: 0
+    },
+    {
+        type: "question",
+        question: "Which command initializes a TypeScript configuration file?",
+        options: [
+            "tsc init",
+            "tsc --init",
+            "typescript init",
+            "npm init typescript"
+        ],
+        correctIndex: 1
+    },
+    {
+        type: "task",
+        title: "Implement: TypeScript Interface for User",
+        content: "Create an interface for a User object with properties: id (number), name (string), email (string), and optional phone (string). Include a method getFullName() that returns string."
+    },
+    {
+        type: "search-task",
+        title: "Research: TypeScript vs JavaScript",
+        content: "Compare TypeScript and JavaScript. What are the main advantages of using TypeScript? When might you choose plain JavaScript instead?"
+    },
+    {
+        type: "search-task",
+        title: "Research: TypeScript Configuration Options",
+        content: "Investigate the key configuration options in tsconfig.json. What do strict, noImplicitAny, and target options do? How do they affect compilation?"
+    },
+];
+        // ==================== TEMPLATE RENDERING ====================
+        // Functions to render the content - you don't need to modify these
+        
+        // Set lecture title and subtitle
+        document.getElementById('lecture-title').textContent = lectureConfig.title;
+        document.getElementById('lecture-subtitle').textContent = lectureConfig.subtitle;
+        
+        // Render tabs and content
+        function renderTabsAndContent() {
+            const tabsContainer = document.getElementById('tabs-container');
+            const contentContainer = document.getElementById('tab-content-container');
+            
+            // Create tabs
+            const tabs = document.createElement('div');
+            tabs.className = 'tabs';
+            
+            // Create tab content areas
+            lectureContent.forEach((content, index) => {
+                // Create tab
+                const tab = document.createElement('div');
+                tab.className = 'tab' + (index === 0 ? ' active' : '');
+                tab.textContent = content.tabTitle;
+                tab.onclick = () => switchTab(index);
+                tabs.appendChild(tab);
+                
+                // Create content
+                const tabContent = document.createElement('div');
+                tabContent.className = 'tab-content' + (index === 0 ? ' active' : '');
+                tabContent.id = 'tab-' + index;
+                
+                // Add title
+                const title = document.createElement('h3');
+                title.textContent = content.title;
+                tabContent.appendChild(title);
+                
+                // Add code content
+                const pre = document.createElement('pre');
+                const code = document.createElement('code');
+                code.textContent = content.content;
+                pre.appendChild(code);
+                tabContent.appendChild(pre);
+
+                // Add table if exists
+                if (content.table) {
+                    const table = document.createElement('table');
+                    table.className = 'comparison-table';
+                    
+                    // Create header
+                    const thead = document.createElement('thead');
+                    const headerRow = document.createElement('tr');
+                    content.table.headers.forEach(headerText => {
+                        const th = document.createElement('th');
+                        th.textContent = headerText;
+                        headerRow.appendChild(th);
+                    });
+                    thead.appendChild(headerRow);
+                    table.appendChild(thead);
+                    
+                    // Create body
+                    const tbody = document.createElement('tbody');
+                    content.table.rows.forEach(rowData => {
+                        const row = document.createElement('tr');
+                        rowData.forEach(cellData => {
+                            const td = document.createElement('td');
+                            td.textContent = cellData;
+                            row.appendChild(td);
+                        });
+                        tbody.appendChild(row);
+                    });
+                    table.appendChild(tbody);
+                    
+                    tabContent.appendChild(table);
+                }
+                
+                
+                contentContainer.appendChild(tabContent);
+            });
+            
+            tabsContainer.appendChild(tabs);
+        }
+        
+        // Switch tabs function
+        function switchTab(index) {
+            // Remove active class from all tabs
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            // Add active class to clicked tab
+            tabs[index].classList.add('active');
+            
+            // Hide all tab content
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(content => content.classList.remove('active'));
+            
+            // Show selected tab content
+            document.getElementById('tab-' + index).classList.add('active');
+        }
+        
+        // Render questions and tasks
+        function renderQuestions() {
+            const container = document.getElementById('questions-container');
+            
+            questions.forEach((q, index) => {
+                if (q.type === 'question') {
+                    const questionDiv = document.createElement('div');
+                    questionDiv.className = 'question';
+                    
+                    const questionTitle = document.createElement('h3');
+                    questionTitle.textContent = `Question ${index + 1}: ${q.question}`;
+                    questionDiv.appendChild(questionTitle);
+                    
+                    if (q.code) {
+                        const pre = document.createElement('pre');
+                        const code = document.createElement('code');
+                        code.textContent = q.code;
+                        pre.appendChild(code);
+                        questionDiv.appendChild(pre);
+                    }
+                    
+                    const optionsDiv = document.createElement('div');
+                    optionsDiv.className = 'options';
+                    
+                    q.options.forEach((option, optIndex) => {
+                        const optionDiv = document.createElement('div');
+                        optionDiv.className = 'option';
+                        optionDiv.textContent = option;
+                        optionDiv.onclick = function() {
+                            checkAnswer(this, optIndex === q.correctIndex ? 'correct' : 'incorrect');
+                        };
+                        optionsDiv.appendChild(optionDiv);
+                    });
+                    
+                    questionDiv.appendChild(optionsDiv);
+                    
+                    const resultDiv = document.createElement('div');
+                    resultDiv.className = 'result';
+                    resultDiv.id = 'result-' + index;
+                    questionDiv.appendChild(resultDiv);
+                    
+                    container.appendChild(questionDiv);
+                } else if (q.type === 'task') {
+                    const taskDiv = document.createElement('div');
+                    taskDiv.className = 'task';
+                    
+                    const taskTitle = document.createElement('h3');
+                    taskTitle.textContent = q.title;
+                    taskDiv.appendChild(taskTitle);
+                    
+                    const taskContent = document.createElement('p');
+                    taskContent.textContent = q.content;
+                    taskDiv.appendChild(taskContent);
+                    
+                    container.appendChild(taskDiv);
+                } else if (q.type === 'search-task') {
+                    const searchTaskDiv = document.createElement('div');
+                    searchTaskDiv.className = 'search-task';
+                    
+                    const taskTitle = document.createElement('h3');
+                    taskTitle.textContent = q.title;
+                    searchTaskDiv.appendChild(taskTitle);
+                    
+                    const taskContent = document.createElement('p');
+                    taskContent.textContent = q.content;
+                    searchTaskDiv.appendChild(taskContent);
+                    
+                    container.appendChild(searchTaskDiv);
+                }
+            });
+        }
+        
+        // Check answer function
+        function checkAnswer(element, type) {
+            const options = element.parentElement.querySelectorAll('.option');
+            options.forEach(opt => {
+                opt.classList.remove('correct', 'incorrect');
+                opt.onclick = null;
+            });
+            
+            element.classList.add(type);
+            
+            const resultId = element.closest('.question').querySelector('.result').id;
+            const resultDiv = document.getElementById(resultId);
+            resultDiv.style.display = 'block';
+            
+            if (type === 'correct') {
+                resultDiv.innerHTML = '<p style="color: #155724">✅ Correct! Good job.</p>';
+                resultDiv.style.backgroundColor = '#d4edda';
+            } else {
+                resultDiv.innerHTML = '<p style="color: #721c24">❌ Incorrect. Try to understand why.</p>';
+                resultDiv.style.backgroundColor = '#f8d7da';
+            }
+        }
+        
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            renderTabsAndContent();
+            renderQuestions();
+        });
+    </script>
+</body>
+</html>
