@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Focal X - Node.js Bootcamp: Lecture 11 </title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .footer {
+            padding-top: 30px;
+        }
+
+        .footer a {
+            color: black;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .coach {
+            background-color: white;
+            width: 80px;
+            border-radius: 0 0 50% 0;
+            color: black;
+            padding: 10px;
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+        
+        header {
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            padding: 20px;
+            height: 65vh;
+        }
+        
+        .lecture-content {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+        }
+        
+        .interactive-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+        }
+        
+        h2 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #3498db;
+            font-size: 1.5rem;
+        }
+        
+        h3 {
+            color: #2980b9;
+            margin: 20px 0 12px;
+            font-size: 1.2rem;
+        }
+        
+        pre {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 12px;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin: 12px 0;
+            font-size: 0.9rem;
+        }
+        
+        code {
+            font-family: 'Fira Code', monospace;
+        }
+        
+        .question {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .options {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+            margin: 12px 0;
+        }
+        
+        .option {
+            padding: 10px;
+            background: #e8f4fc;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+            font-size: 0.9rem;
+        }
+        
+        .option:hover {
+            background: #d1e9fa;
+        }
+        
+        .correct {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .incorrect {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .task {
+            background: #fff3cd;
+            padding: 12px;
+            border-left: 5px solid #ffc107;
+            margin: 15px 0;
+            border-radius: 5px;
+            font-size: 0.9rem;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background 0.3s;
+            margin-top: 8px;
+        }
+        
+        .btn:hover {
+            background: #2980b9;
+        }
+        
+        .result {
+            margin-top: 12px;
+            padding: 12px;
+            border-radius: 5px;
+            display: none;
+            font-size: 0.9rem;
+        }
+        
+        .search-task {
+            background: #e7f5e9;
+            padding: 12px;
+            border-radius: 5px;
+            margin: 15px 0;
+            border-left: 5px solid #28a745;
+            font-size: 0.9rem;
+        }
+        
+        .tabs {
+            display: flex;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .tab {
+            padding: 8px 15px;
+            cursor: pointer;
+            background: #f1f1f1;
+            border: 1px solid #ddd;
+            border-bottom: none;
+            border-radius: 5px 5px 0 0;
+            margin-right: 5px;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+        
+        .tab.active {
+            background: #6f42c1;
+            color: white;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 12px 0;
+            font-size: 0.9rem;
+        }
+        
+        .comparison-table th, .comparison-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        
+        .comparison-table th {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        .comparison-table tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        
+        @media (max-width: 900px) {
+            .content {
+                grid-template-columns: 1fr;
+                height: auto;
+            }
+            
+            .lecture-content, .interactive-section {
+                height: 50vh;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <p class="coach">Moones Mezher</p>
+        <header>
+            <h1 id="lecture-title">Focal X - Node.js Bootcamp</h1>
+            <p class="subtitle" id="lecture-subtitle">Solve Task 3</p>
+        </header>
+        
+        <div class="content">
+            <div class="lecture-content">
+                <h2>Lecture Content</h2>
+                <div id="tabs-container"></div>
+                <div id="tab-content-container"></div>
+            </div>
+            
+            <div class="interactive-section">
+                <h2>Interactive Questions & Tasks</h2>
+                <div id="questions-container"></div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2025 <a rel="noopener" href="https://focal-x.com/" target="_blank">Focal X</a> All Right Reserved</p>
+    </footer>
+
+    <script>
+        // ==================== CONFIGURATION ====================
+        // Update these arrays to change the content of your lecture
+        
+        // Lecture metadata
+        const lectureConfig = {
+            title: "Focal X - Node.js Bootcamp",
+            subtitle: "Solve Task 3"
+        };
+        
+        // Lecture content organized by tabs
+        const lectureContent = [
+            {
+                tabTitle: "Last Lesson",
+                title: "Last Lesson Recap",
+                content: `/*
+1- Interfaces 
+2- Type Aliases
+3- Union Types
+4- Type Guards
+5- Tagged Interfaces
+6- Generics 
+*/`
+            },
+            {
+                tabTitle: "Solve Task",
+                title: "Solve Task (Product Management System)",
+                content: `// Base class
+class Product {
+    constructor(id, name, price, category, sku) {
+        // Properties with encapsulation
+        this._id = this._validateId(id);
+        this._name = this._validateProductName(name);
+        this._price = this._validatePrice(price);
+        this._category = this._validateCategory(category);
+        this._sku = this._sku(sku);
+        this._createdAt = new Date(); // the current value of date
+        this._isActive = true;
+    }
+    
+    // Getters
+    get _id() { return this._id; }
+
+    get _name() { return this._name; }
+
+    get _category() { return this._category; }
+
+    get _sku() { return this._sku; }
+
+    get _price() { return this._price; }
+
+    get _createdAt() { return this._createdAt; }
+
+    get _isActive() { return this._isActive; }
+
+    // Setters
+    set _id(id) { 
+        this._id = this._validateId(id); 
+    }
+
+    set _name(name) { 
+        this._name = this._validateProductName(name); 
+    }
+
+    set _category(category) { 
+        this._category = this._validateCategory(category); 
+    }
+
+    set _sku(sku) { 
+        this._sku = this._validateSKU(sku); 
+    }
+
+    set _price(price) { 
+        this._price = this._validatePrice(price); 
+    }
+
+    set _createdAt(createdAt) { 
+        if(!createdAt) {
+            throw new Error("Invalid Date");
+        }
+
+        if(createdAt instanceof Date) {
+            this._createdAt = createdAt; 
+        }
+    }
+    
+    set _isActive(isActive) { 
+        if(!isActive) {
+            throw new Error("Empty isActive");
+        }
+
+        if(typeof isActive !== "boolean") {
+            throw new Error("Invalid isActive");
+        }
+
+        this._isActive = isActive; 
+    }
+
+    // Methods: 
+    updatePrice(newPrice) {
+        this._price = this._validatePrice(newPrice);
+    }
+
+    deactivate() {
+        this._isActive = false;
+    }
+
+    getDetails() {
+        return {
+            id: this._id,
+            name: this._name,
+            sku: this._sku,
+            price: this._price,
+            category: this._category,
+            createdAt: this._createdAt,
+            isActive: this._isActive
+        }
+    }
+
+    // validation
+    _validateId(id) {
+        // Pattern: PROD-999
+        const regex = /^PROD-d{3}$/;
+
+        if(regex.test(id)) {
+            return id;
+        } 
+
+        throw new Error("Invalid Prodcut Id")
+    }
+
+    _validateSKU(sku) {
+        // Pattern: SKU-ABC-123 
+        const regex = /^SKU-[A-Z]{3}-d{3}$/;
+
+        if(regex.test(sku)) {
+            return sku;
+        } 
+
+        throw new Error("Invalid Prodcut SKU")
+    }
+
+    _validatePrice(price) {
+        const regex = /^d+(.d{1,2})?$/;
+
+        if(regex.test(price.toString()) && price > 0) {
+            return price;
+        } 
+
+        throw new Error("Invalid Prodcut Price")
+    } 
+
+    _validateEmail(email) {
+        const regex = /[\w.-]+@[\w.-]+\.\w{2,}$/;
+
+        if(regex.test(email)) {
+            return email;
+        } 
+
+        throw new Error("Invalid Email")
+    }
+
+    _validateProductName(name) {
+        const regex = /^[a-zA-Z0-9s]{2,50}$/;
+
+        if(regex.test(name)) {
+            return name;
+        } 
+
+        throw new Error("Invalid Prodcut Name")
+    }
+
+    _validateCategory(category) {
+        if(!category) {
+            throw new Error("Empty Category");
+        }
+
+        if(typeof category !== "string") {
+            throw new Error("Invalid Category");
+        }
+
+        return category;
+    }
+}
+
+// Inherted classes
+class ElectronicsProduct extends Product {
+    constructor(id, name, price, sku, watt) {
+        super(id, name, price, "Electronics", sku);
+
+        this._watt = watt;
+
+        this.getDetails
+    }
+
+    getDetails() {
+        return {
+            ...super.getDetails(),
+            watt: this._watt
+        }
+    } 
+}
+
+class ClothingProduct extends Product {
+    constructor(id, name, price, sku, size) {
+        super(id, name, price, "Clothing", sku);
+
+        this._size = size;
+    }
+
+    getDetails() {
+        return {
+            ...super.getDetails(),
+            size: this._size
+        }
+    } 
+}
+
+class BookProduct extends Product {
+    constructor(id, name, price, sku, author) {
+        super(id, name, price, "Book", sku);
+
+        this._author = author;
+    }
+
+    getDetails() {
+        return {
+            ...super.getDetails(),
+            author: this._author
+        }
+    } 
+}
+
+// ProductManager class
+class ProductManager {
+    constructor() {
+        // data array
+        this.products = []
+    }
+
+    addProduct(productData) {
+        if(!productData.category) {
+            throw new Error("Empty Category");
+        }
+
+        const category = productData.category;
+
+        const id = productData?.id;
+
+        const duplicate = this.products.find(e => e._id === id);
+
+        if(duplicate) {
+            throw new Error("Invalid Id");
+        }
+
+        // const idPattern = 'PROD-'
+
+        let data;
+
+        if(category === "Electronics") {
+            data = new ElectronicsProduct(
+                productData?.id,
+                productData?.name,
+                productData?.price,
+                productData?.sku,
+                productData?.watt
+            );
+        } else if(category === "Clothing") {
+            data = new ClothingProduct(
+                productData?.id,
+                productData?.name,
+                productData?.price,
+                productData?.sku,
+                productData?.size
+            );
+        } else if(category === "Book") {
+            data = new BookProduct(
+                productData?.id,
+                productData?.name,
+                productData?.price,
+                productData?.sku,
+                productData?.author
+            );
+        } else {
+            data = new Product(
+                productData?.id,
+                productData?.name,
+                productData?.price,
+                productData?.category,
+                productData?.sku,
+            );
+        }
+
+        this.products.push(data);
+    }
+
+    findProductById(productId) {
+        const id = this._validateId(productId);
+
+        const product = this.products.find(e => e._id === id && e._isActive);
+
+        if(!product) {
+            throw new Error("Product Not Found")
+        }
+
+        return product;
+    }
+
+    updateProductPrice(productId, newPrice) {
+        const product = this.findProductById(productId);
+
+        product?.updatePrice(newPrice);
+    }
+
+    filterProductsByCategory(category) {
+        const category = this._validateCategory(category);
+
+        return this.products.filter(e => e.category === category && e._isActive);
+    }
+
+    getProductsByPriceRange(minPrice, maxPrice) {
+        const min = this._validatePrice(minPrice);
+        const max = this._validatePrice(maxPrice);
+        
+        if(min >= max) {
+            throw new Error("Invalid MinPrice & MaxPrice");
+        }
+
+        const filterdData = this.products.filter(e => (
+            (e._price >= min) && 
+            (e._price <= max) &&
+            (e._isActive)
+        ))
+
+        return filterdData.length === 0? "No Items": filterdData;
+    }
+
+    removeProduct(productId) {
+        const product = this.findProductById(productId);
+
+        product?.deactivate(); // soft delete
+    }
+
+    searchProducts(keyword) {
+        const regex = new RegExp(keyword, "i");
+
+        return this.products.filter(e => (regex.test(e._name) && e._isActive));
+    }
+
+    sortProductsByPrice(order = "asc") {
+        if(order !== "asc" && order !== "desc") {
+            throw new Error("Invalid Order")
+        }
+
+        return this.products.sort((a, b) => {
+            if(order == "asc") {
+                return b._price - a._price;
+            } 
+
+            return a._price - b._price;
+        })
+    }
+
+    getActiveProducts() {
+        return this.products.filter(e => e._isActive);
+    }
+
+    getProductsCreatedAfter(date) {
+        if(!createdAt) {
+            throw new Error("Empty Date");
+        }
+
+        if(date instanceof Date) {
+            return this.products.filter(e => ((e._isActive) && (e._createdAt.getTime() > date.getTime())))
+        }                     
+
+        throw new Error("Invalid Date");
+    }
+
+    _validateId(id) {
+        // Pattern: PROD-999
+        const regex = /^PROD-d{3}$/;
+
+        if(regex.test(id)) {
+            return id;
+        } 
+
+        throw new Error("Invalid Prodcut Id")
+    }
+
+    _validateCategory(category) {
+        if(!category) {
+            throw new Error("Empty Category");
+        }
+
+        if(typeof category !== "string") {
+            throw new Error("Invalid Category");
+        }
+
+        return category;
+    }
+
+    _validatePrice(price) {
+        const regex = /^d+(.d{1,2})?$/;
+
+        if(regex.test(price.toString()) && price > 0) {
+            return price;
+        } 
+
+        throw new Error("Invalid Prodcut Price")
+    } 
+}
+
+const app = () => {
+    try {
+        const manager = new ProductManager();
+    } catch (error) {
+        console.log("Error:", error.message);
+    }
+}`          
+            },
+];
+        
+        // Questions and tasks
+        const questions = [
+    {
+        type: "question",
+        question: "Why are the validation methods in the Product class prefixed with underscore (_validateId, _validateName, etc.)?",
+        options: [
+            "It's a convention to indicate they're private/internal methods",
+            "It makes the methods automatically private in JavaScript",
+            "It's required for inheritance to work properly",
+            "It improves performance of the validation"
+        ],
+        correctIndex: 0,
+        explanation: "The underscore prefix is a naming convention to indicate these are intended as private/internal methods, even though JavaScript doesn't enforce true privacy in classes."
+    },
+    {
+        type: "question",
+        question: "In the _validatePrice method, why do we check both the regex and price > 0 separately?",
+        options: [
+            "The regex alone can't ensure the price is positive",
+            "It's redundant and unnecessary",
+            "To handle different currency formats",
+            "The regex only works with string inputs"
+        ],
+        correctIndex: 0,
+        explanation: "The regex ensures the format is correct (digits with optional decimals), but we need an additional check to ensure the numerical value is positive, as regex alone can't validate numerical ranges."
+    },
+    {
+        type: "question",
+        question: "What is the purpose of the switch statement in the ProductManager's addProduct method?",
+        options: [
+            "To handle different product categories and create appropriate instances",
+            "To validate different product types separately",
+            "To optimize performance for different product categories",
+            "To enforce different pricing rules per category"
+        ],
+        correctIndex: 0,
+        explanation: "The switch statement determines which specific product class (ElectronicsProduct, ClothingProduct, etc.) to instantiate based on the category, ensuring each product type gets the correct specialized class."
+    },
+    {
+        type: "question",
+        question: "Why does the findProductById method re-validate the productId format even though it was validated during creation?",
+        options: [
+            "To prevent SQL injection attacks",
+            "To ensure input consistency and catch malformed IDs early",
+            "It's unnecessary duplication",
+            "To convert the ID to uppercase"
+        ],
+        correctIndex: 1,
+        explanation: "Re-validating input parameters ensures consistency, prevents malformed queries, and provides immediate feedback if an invalid ID format is passed to the search method."
+    },
+    {
+        type: "question",
+        question: "In the removeProduct method, why do we call deactivate() instead of directly removing from the array?",
+        options: [
+            "It's faster than array manipulation",
+            "To maintain historical data and allow reactivation",
+            "The array delete method doesn't exist in JavaScript",
+            "To avoid reindexing the products array"
+        ],
+        correctIndex: 1,
+        explanation: "Using a soft delete (deactivation) preserves historical data, allows for audit trails, and enables potential reactivation of products, which is often better than permanent deletion in business applications."
+    },
+     {
+        type: "question",
+        question: "Why are getters used for properties like id, name, price instead of direct property access?",
+        options: [
+            "Getters are faster than direct access",
+            "To allow computed properties and maintain encapsulation",
+            "JavaScript requires getters for class properties",
+            "To make the properties writable"
+        ],
+        correctIndex: 1,
+        explanation: "Getters provide encapsulation, allow for computed properties if needed, and maintain control over how properties are accessed while keeping the internal representation private."
+    },
+    {
+        type: "question",
+        question: "What potential issue exists in the current price range filtering implementation?",
+        options: [
+            "It doesn't handle negative prices correctly",
+            "It converts prices to strings before comparison",
+            "It doesn't account for currency formatting",
+            "It uses strict equality instead of range comparison"
+        ],
+        correctIndex: 0,
+        explanation: "While there's a check for negative min/max prices, the method doesn't handle the case where product prices could be negative (though validation prevents this during creation)."
+    },
+    {
+        type: "question",
+        question: "Why is the createdAt property set in the Product constructor rather than passed as a parameter?",
+        options: [
+            "It's more efficient for memory",
+            "To ensure it always reflects the actual creation time",
+            "To allow users to set custom creation dates",
+            "It's required for JSON serialization"
+        ],
+        correctIndex: 1,
+        explanation: "Setting createdAt automatically in the constructor ensures it always accurately reflects when the product object was created, preventing manipulation and maintaining data integrity."
+    },
+    {
+        type: "task",
+        title: "Extend: Add New Product Category",
+        content: "Add a new 'FoodProduct' class that extends Product with additional properties like 'expiryDate' and 'nutritionalInfo'. Update the ProductManager to handle this new category."
+    },
+    {
+        type: "task",
+        title: "Refactor: Improve Validation",
+        content: "Refactor the validation methods to use a centralized validation service. Create a Validation class that can be reused across different product types and provide better error messages."
+    },
+    {
+        type: "search-task",
+        title: "Research: Factory Pattern",
+        content: "Research the Factory Pattern and refactor the ProductManager's addProduct method to use a proper Factory Pattern for creating different product types instead of the switch statement."
+    },
+    {
+        type: "task",
+        title: "Practice: Add Search Enhancement",
+        content: "Enhance the searchProducts method to search not just by name, but also by brand, author, and other product-specific properties. Make it case-insensitive and support partial matches."
+    },
+    {
+        type: "task",
+        title: "Implement: Bulk Operations",
+        content: "Add methods to ProductManager for bulk operations: bulkAddProducts, bulkUpdatePrices, and bulkDeactivate. Include proper error handling for partial failures."
+    },
+    {
+        type: "search-task",
+        title: "Research: Memory Management",
+        content: "Research how JavaScript handles memory with class instances and large arrays. How would you optimize the ProductManager for memory efficiency with thousands of products?"
+    },
+    {
+        type: "task",
+        title: "Practice: Add Pagination",
+        content: "Implement pagination for methods that return multiple products (filterProductsByCategory, getProductsByPriceRange, etc.). Add parameters for page number and page size."
+    },
+];
+        // ==================== TEMPLATE RENDERING ====================
+        // Functions to render the content - you don't need to modify these
+        
+        // Set lecture title and subtitle
+        document.getElementById('lecture-title').textContent = lectureConfig.title;
+        document.getElementById('lecture-subtitle').textContent = lectureConfig.subtitle;
+        
+        // Render tabs and content
+        function renderTabsAndContent() {
+            const tabsContainer = document.getElementById('tabs-container');
+            const contentContainer = document.getElementById('tab-content-container');
+            
+            // Create tabs
+            const tabs = document.createElement('div');
+            tabs.className = 'tabs';
+            
+            // Create tab content areas
+            lectureContent.forEach((content, index) => {
+                // Create tab
+                const tab = document.createElement('div');
+                tab.className = 'tab' + (index === 0 ? ' active' : '');
+                tab.textContent = content.tabTitle;
+                tab.onclick = () => switchTab(index);
+                tabs.appendChild(tab);
+                
+                // Create content
+                const tabContent = document.createElement('div');
+                tabContent.className = 'tab-content' + (index === 0 ? ' active' : '');
+                tabContent.id = 'tab-' + index;
+                
+                // Add title
+                const title = document.createElement('h3');
+                title.textContent = content.title;
+                tabContent.appendChild(title);
+                
+                // Add code content
+                const pre = document.createElement('pre');
+                const code = document.createElement('code');
+                code.textContent = content.content;
+                pre.appendChild(code);
+                tabContent.appendChild(pre);
+
+                // Add table if exists
+                if (content.table) {
+                    const table = document.createElement('table');
+                    table.className = 'comparison-table';
+                    
+                    // Create header
+                    const thead = document.createElement('thead');
+                    const headerRow = document.createElement('tr');
+                    content.table.headers.forEach(headerText => {
+                        const th = document.createElement('th');
+                        th.textContent = headerText;
+                        headerRow.appendChild(th);
+                    });
+                    thead.appendChild(headerRow);
+                    table.appendChild(thead);
+                    
+                    // Create body
+                    const tbody = document.createElement('tbody');
+                    content.table.rows.forEach(rowData => {
+                        const row = document.createElement('tr');
+                        rowData.forEach(cellData => {
+                            const td = document.createElement('td');
+                            td.textContent = cellData;
+                            row.appendChild(td);
+                        });
+                        tbody.appendChild(row);
+                    });
+                    table.appendChild(tbody);
+                    
+                    tabContent.appendChild(table);
+                }
+                
+                
+                contentContainer.appendChild(tabContent);
+            });
+            
+            tabsContainer.appendChild(tabs);
+        }
+        
+        // Switch tabs function
+        function switchTab(index) {
+            // Remove active class from all tabs
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            // Add active class to clicked tab
+            tabs[index].classList.add('active');
+            
+            // Hide all tab content
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(content => content.classList.remove('active'));
+            
+            // Show selected tab content
+            document.getElementById('tab-' + index).classList.add('active');
+        }
+        
+        // Render questions and tasks
+        function renderQuestions() {
+            const container = document.getElementById('questions-container');
+            
+            questions.forEach((q, index) => {
+                if (q.type === 'question') {
+                    const questionDiv = document.createElement('div');
+                    questionDiv.className = 'question';
+                    
+                    const questionTitle = document.createElement('h3');
+                    questionTitle.textContent = `Question ${index + 1}: ${q.question}`;
+                    questionDiv.appendChild(questionTitle);
+                    
+                    if (q.code) {
+                        const pre = document.createElement('pre');
+                        const code = document.createElement('code');
+                        code.textContent = q.code;
+                        pre.appendChild(code);
+                        questionDiv.appendChild(pre);
+                    }
+                    
+                    const optionsDiv = document.createElement('div');
+                    optionsDiv.className = 'options';
+                    
+                    q.options.forEach((option, optIndex) => {
+                        const optionDiv = document.createElement('div');
+                        optionDiv.className = 'option';
+                        optionDiv.textContent = option;
+                        optionDiv.onclick = function() {
+                            checkAnswer(this, optIndex === q.correctIndex ? 'correct' : 'incorrect');
+                        };
+                        optionsDiv.appendChild(optionDiv);
+                    });
+                    
+                    questionDiv.appendChild(optionsDiv);
+                    
+                    const resultDiv = document.createElement('div');
+                    resultDiv.className = 'result';
+                    resultDiv.id = 'result-' + index;
+                    questionDiv.appendChild(resultDiv);
+                    
+                    container.appendChild(questionDiv);
+                } else if (q.type === 'task') {
+                    const taskDiv = document.createElement('div');
+                    taskDiv.className = 'task';
+                    
+                    const taskTitle = document.createElement('h3');
+                    taskTitle.textContent = q.title;
+                    taskDiv.appendChild(taskTitle);
+                    
+                    const taskContent = document.createElement('p');
+                    taskContent.textContent = q.content;
+                    taskDiv.appendChild(taskContent);
+                    
+                    container.appendChild(taskDiv);
+                } else if (q.type === 'search-task') {
+                    const searchTaskDiv = document.createElement('div');
+                    searchTaskDiv.className = 'search-task';
+                    
+                    const taskTitle = document.createElement('h3');
+                    taskTitle.textContent = q.title;
+                    searchTaskDiv.appendChild(taskTitle);
+                    
+                    const taskContent = document.createElement('p');
+                    taskContent.textContent = q.content;
+                    searchTaskDiv.appendChild(taskContent);
+                    
+                    container.appendChild(searchTaskDiv);
+                }
+            });
+        }
+        
+        // Check answer function
+        function checkAnswer(element, type) {
+            const options = element.parentElement.querySelectorAll('.option');
+            options.forEach(opt => {
+                opt.classList.remove('correct', 'incorrect');
+                opt.onclick = null;
+            });
+            
+            element.classList.add(type);
+            
+            const resultId = element.closest('.question').querySelector('.result').id;
+            const resultDiv = document.getElementById(resultId);
+            resultDiv.style.display = 'block';
+            
+            if (type === 'correct') {
+                resultDiv.innerHTML = '<p style="color: #155724">✅ Correct! Good job.</p>';
+                resultDiv.style.backgroundColor = '#d4edda';
+            } else {
+                resultDiv.innerHTML = '<p style="color: #721c24">❌ Incorrect. Try to understand why.</p>';
+                resultDiv.style.backgroundColor = '#f8d7da';
+            }
+        }
+        
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            renderTabsAndContent();
+            renderQuestions();
+        });
+    </script>
+</body>
+</html>
