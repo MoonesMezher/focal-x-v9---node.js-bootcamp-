@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Focal X - Node.js Bootcamp: Lecture 13 </title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .footer {
+            padding-top: 30px;
+        }
+
+        .footer a {
+            color: black;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .coach {
+            background-color: white;
+            width: 80px;
+            border-radius: 0 0 50% 0;
+            color: black;
+            padding: 10px;
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+        
+        header {
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            padding: 20px;
+            height: 65vh;
+        }
+        
+        .lecture-content {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+        }
+        
+        .interactive-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+        }
+        
+        h2 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #3498db;
+            font-size: 1.5rem;
+        }
+        
+        h3 {
+            color: #2980b9;
+            margin: 20px 0 12px;
+            font-size: 1.2rem;
+        }
+        
+        pre {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 12px;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin: 12px 0;
+            font-size: 0.9rem;
+        }
+        
+        code {
+            font-family: 'Fira Code', monospace;
+        }
+        
+        .question {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .options {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+            margin: 12px 0;
+        }
+        
+        .option {
+            padding: 10px;
+            background: #e8f4fc;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+            font-size: 0.9rem;
+        }
+        
+        .option:hover {
+            background: #d1e9fa;
+        }
+        
+        .correct {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .incorrect {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .task {
+            background: #fff3cd;
+            padding: 12px;
+            border-left: 5px solid #ffc107;
+            margin: 15px 0;
+            border-radius: 5px;
+            font-size: 0.9rem;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background 0.3s;
+            margin-top: 8px;
+        }
+        
+        .btn:hover {
+            background: #2980b9;
+        }
+        
+        .result {
+            margin-top: 12px;
+            padding: 12px;
+            border-radius: 5px;
+            display: none;
+            font-size: 0.9rem;
+        }
+        
+        .search-task {
+            background: #e7f5e9;
+            padding: 12px;
+            border-radius: 5px;
+            margin: 15px 0;
+            border-left: 5px solid #28a745;
+            font-size: 0.9rem;
+        }
+        
+        .tabs {
+            display: flex;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .tab {
+            padding: 8px 15px;
+            cursor: pointer;
+            background: #f1f1f1;
+            border: 1px solid #ddd;
+            border-bottom: none;
+            border-radius: 5px 5px 0 0;
+            margin-right: 5px;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+        
+        .tab.active {
+            background: #6f42c1;
+            color: white;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 12px 0;
+            font-size: 0.9rem;
+        }
+        
+        .comparison-table th, .comparison-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        
+        .comparison-table th {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        .comparison-table tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        
+        @media (max-width: 900px) {
+            .content {
+                grid-template-columns: 1fr;
+                height: auto;
+            }
+            
+            .lecture-content, .interactive-section {
+                height: 50vh;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <p class="coach">Moones Mezher</p>
+        <header>
+            <h1 id="lecture-title">Focal X - Node.js Bootcamp</h1>
+            <p class="subtitle" id="lecture-subtitle">Node</p>
+        </header>
+        
+        <div class="content">
+            <div class="lecture-content">
+                <h2>Lecture Content</h2>
+                <div id="tabs-container"></div>
+                <div id="tab-content-container"></div>
+            </div>
+            
+            <div class="interactive-section">
+                <h2>Interactive Questions & Tasks</h2>
+                <div id="questions-container"></div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2025 <a rel="noopener" href="https://focal-x.com/" target="_blank">Focal X</a> All Right Reserved</p>
+    </footer>
+
+    <script>
+        // ==================== CONFIGURATION ====================
+        // Update these arrays to change the content of your lecture
+        
+        // Lecture metadata
+        const lectureConfig = {
+            title: "Focal X - Node.js Bootcamp",
+            subtitle: "Node"
+        };
+        
+        // Lecture content organized by tabs
+        const lectureContent = [
+            {
+                tabTitle: "Last Lesson",
+                title: "Last Lesson Recap",
+                content: `/*
+1- CLI
+2- Git
+3- Github
+4- Core Commands
+5- Branching
+6- README.md file
+7- .gitignore file
+*/`
+            },
+            {
+                tabTitle: "Git Workflow",
+                title: "Git Workflow & Areas",
+                content: `Understanding Git's Architecture
+
+Four Main Areas:
+
+1. Working Directory
+- Your actual project files
+- Where you make changes
+- Untracked by Git initially
+
+2. Staging Area (Index)
+- Prepares changes for commit
+- Selective inclusion of changes
+- Intermediate between working directory and repository
+
+3. Local Repository
+- Complete project history
+- All commits and branches
+- Stores metadata in .git folder
+
+4. Remote Repository
+- Shared repository (GitHub, etc.)
+- Collaboration point for teams
+- Backup and distribution center
+
+Typical Workflow:
+1. Modify files in Working Directory
+2. Stage changes with git add
+3. Commit changes with git commit
+4. Push changes with git push`
+    },
+    {
+        tabTitle: "Node.js Introduction",
+        title: "Node.js Fundamentals",
+        content: `/*
+- Node is not a framework, it is a runtime. => interpreter.
+- Compiler Vs. Interpreter:
+=> code => compile => machine code => output
+=> code => interprete => output
+
+=> Node js runtime and is not a compiler.
+
+- JS on browser BY V8 Engine => 2008: JS on server = node js
+
+- Node js is single threaded (line by line) => one thread is work
+*/`
+    },
+    {
+        tabTitle: "Node.js Globals",
+        title: "Global Variables in Node.js",
+        content: `/* 
+- No window in node js (because no browser) like browser (it has a window & DOM)
+- node js has filesystem but in browser it does not has filesystem 
+- global variables => anywhere in your application you can access them
+
+Key Global Variables:
+
+1. __dirname => path to current working directory
+2. __filename => file name
+3. require => method to use modules in common.js
+4. module => info about current module
+5. process => info about env where the program is being executed
+
+Examples:
+console.log(__dirname);
+console.log(__filename.split('\\\\')[__filename.split('\\\\').length - 1]);
+console.log(process.env.OS);
+process.stdout.write('Hi');
+*/`
+    },
+    {
+        tabTitle: "Node.js Modules",
+        title: "Modules System in Node.js",
+        content: `// Question: have i write all my app code in one file? => answer: yes & no
+
+// Common.js => each file is module (by default) and you can change it from package.json => "type": "module"
+
+/*
+Module Export/Import Pattern:
+
+file: x.js
+    const x = 1;
+    module.exports = x;
+
+file: log.js
+    const x = require('./x');
+    console.log(x);
+*/
+
+Core Built-in Modules:
+- OS Module
+- Path Module  
+- FS Module
+- HTTP Module
+- And many more...`
+    },
+    {
+        tabTitle: "OS & Path Modules",
+        title: "Operating System and Path Utilities",
+        content: `// OS Module
+const os = require('os');
+
+const currentOS = {
+    platform: os.platform(),
+    name: os.type(),
+    hostname: os.hostname(),
+    version: os.version(),
+    userInfo: os.userInfo(),
+    release: os.release(),
+    arch: os.arch(),
+    loadavg: os.loadavg(),
+    tmpdir: os.tmpdir(),
+    networkInterfaces: os.networkInterfaces(),
+};
+
+// Path Module
+const path = require('path');
+
+const uri = "C:\\\\Users\\\\97150\\\\OneDrive/Desktop/Focal/Ass Coach/Node 8/course/code"
+console.log(path.normalize(uri));
+console.log(path.sep)
+console.log(path.join(uri));
+console.log(path.basename(uri));
+console.log(path.resolve(uri));`
+    },
+    {
+        tabTitle: "FS Module",
+        title: "File System Operations",
+        content: `const fs = require('fs');
+const filePath = 'main.js';
+const data = 'const x = 1;\\n// console.log(x);';
+
+// Synchronous Methods
+fs.writeFileSync(filePath, data, 'utf8');
+const content = fs.readFileSync(filePath, 'utf-8');
+fs.unlinkSync("main.txt");
+
+// Asynchronous Methods (Callback)
+fs.writeFile('', 'hello world', (err, res) => {
+    if(err) {
+        console.log(err);
+        return;
+    }
+    console.log(res)
+});
+
+fs.readFile('main.js', 'utf8', (err, res) => {
+    if(err) {
+        console.log(err);
+        return;
+    }
+    console.log(res)
+});`
+    },
+    {
+    tabTitle: "APIs & HTTP Methods",
+    title: "Understanding APIs and Web Communication",
+    content: `# API: Application Programming Interface
+
+## What is an API?
+- Like a waiter in a restaurant: You (the application) give your order to the waiter (the API) who delivers it to the kitchen (the server) and brings back the result
+- A mediator for communication between different applications
+- A set of rules that govern how software programs communicate with each other
+
+## Backend Role (Server)
+The backend works like the kitchen in a restaurant:
+1. Receives requests - Like receiving customer orders
+2. Applies rules - Validates data and prevents errors
+3. Handles database - Stores and retrieves information
+4. Verifies identity - Checks user permissions for actions
+5. Sends results - Provides the requested data
+
+## Frontend Role (User Interface)
+The frontend works like the menu and ordering system:
+1. Displays data - Like showing the menu
+2. Sends user requests - Like ordering a specific meal
+3. Updates interface - Shows changes immediately
+4. Handles user interaction - Receives clicks and inputs
+
+# Request Components
+
+## Request Structure:
+Request Method + URL + Headers + Body (optional)
+
+### 1. HTTP Methods (Actions)
+GET - Retrieve data (like: asking for a menu)
+POST - Add new data (like: ordering a new meal)
+PUT - Update existing data (like: modifying an order)
+DELETE - Delete data (like: canceling an order)
+
+### 2. URL (Address)
+- Like a home address or table number in a restaurant
+- Specifies the location you want to access
+- Examples:
+  - \`/api/products\` - All products
+  - \`/api/products/1\` - Product number 1
+  - \`/api/products?category=electronics\` - Only electronics products
+
+### 3. Headers
+- Metadata about the request
+- Like additional instructions: "Meal for diabetic person", "Delivery required"
+- Examples:
+  - \`Content-Type\`: Data type (Arabic, English, JSON)
+  - \`Authorization\`: ID card or permission
+  - \`User-Agent\`: Type of device used
+
+### 4. Body
+- The actual data being sent
+- Like order details: "Large pizza, drink, salad"
+- Used with POST and PUT requests
+
+# Response Components
+
+## Response Structure:
+Status Code + Headers + Data
+
+### Response Examples:
+- Success: 200 - With product list
+- Created: 201 - With new product data
+- Error: 404 - Product not found
+- Permission Error: 401 - Login required
+
+# HTTP Methods Explained with Life Examples
+
+## GET - Read Data
+Like: Asking for a restaurant menu
+Request: "I want the menu"
+Response: Complete menu list
+
+## POST - Create New Data
+Like: Ordering a new meal
+Request: "I want a large pizza"
+Response: "Your order number 5 has been received"
+
+## PUT - Update Data
+Like: Modifying an order
+Request: "I want to change the pizza to medium"
+Response: "Order 5 has been modified"
+
+## DELETE - Delete Data
+Like: Canceling an order
+Request: "I want to cancel order 5"
+Response: "Order 5 has been canceled"
+
+# Status Codes
+
+## 100-199: Informational
+- Like: "Preparing", "Please wait"
+
+## 200-299: Success ✅
+- 200 OK - Operation completed successfully
+- 201 Created - New item created successfully
+- 204 No Content - Success but no content to return
+
+## 300-399: Redirects 🔄
+- 301 Moved - Content moved to another location
+- 304 Not Modified - Content hasn't changed (like using cached version)
+
+## 400-499: Client Errors ❌
+- 400 Bad Request - Request not understood (like: incomplete order)
+- 401 Unauthorized - Login required
+- 403 Forbidden - Access denied (like: employee trying to access manager data)
+- 404 Not Found - Content doesn't exist
+- 409 Conflict - Conflict (like: trying to register an existing email)
+
+## 500-599: Server Errors 🚨
+- 500 Internal Error - Server error (like: database malfunction)
+- 503 Service Unavailable - Service not available (like: maintenance)
+
+# Complete Life Example
+
+## Ordering from an Online Store:
+
+### 1. User Opens the Store (Frontend)
+- Displays product list (GET request)
+- Clicks "Add to Cart" (POST request)
+- Modifies quantity (PUT request)
+- Deletes product (DELETE request)
+
+### 2. The Store (Backend)
+- Receives requests and validates them
+- Checks product availability in inventory
+- Calculates final price
+- Sends order confirmation
+
+### 3. Communication Between Them:
+Frontend: "I want product number 123" (GET)
+Backend: "Here is product 123" (200)
+
+Frontend: "I want to buy product 123" (POST)
+Backend: "Operation completed successfully" (201)
+
+Frontend: "I want to cancel the order" (DELETE)
+Backend: "Order canceled" (200)
+
+# Summary
+APIs are the communication bridge between user interface and server, working like an ordering system in a restaurant where:
+- Frontend is the customer who places orders
+- API is the waiter who delivers orders
+- Backend is the kitchen that prepares orders
+
+Every request has a method (GET, POST, PUT, DELETE) and every response has a status (200, 404, 500) that tells us the operation result.`,
+table: {
+    headers: ["Aspect", "Headers", "Body"],
+    rows: [
+        ["Purpose", "Metadata about the request", "Actual data"],
+        ["Content", "Data type, permissions","Products, users, orders"],
+        ["Usage", "Present in every request", "Only when needed"],
+        ["Life Example", "Delivery instructions, meal type","The actual meal"]
+    ]
+}
+},
+    {
+        tabTitle: "HTTP Module",
+        title: "Creating Web Servers with HTTP",
+        content: `const http = require('http');
+
+// Basic Server
+const server = http.createServer((req, res) => {
+    if(req.method === 'GET') {
+        if(req.url === '/') {
+            return res.end("Hello, world!");
+        } else if (req.url === '/hello') {
+            return res.end("Hello, Twice");
+        }
+        return res.end('<p>Oops!</p><a href="/">Go To Home</a>');
+    } 
+});
+
+// REST API Implementation
+let data = [
+    { id: 1, name: "moones", age: 21 },
+    { id: 2, name: "rami", age: 31 },
+    { id: 3, name: "fares", age: 25 }
+];
+
+// CRUD Operations:
+// GET    /api/users       # Get all users
+// POST   /api/users       # Create new user  
+// GET    /api/users/{id}  # Get single user
+// PUT    /api/users/{id}  # Update user
+// DELETE /api/users/{id}  # Delete user
+
+const PORT = 4000;
+const HOSTNAME = '127.0.0.1';
+server.listen(PORT, HOSTNAME, () => {
+    console.log('App is listening on port \${PORT} successfully');
+});`
+    }
+        ];
+
+// Enhanced Questions and Tasks with Node.js content
+const questions = [
+    // Node.js Fundamentals
+    {
+        type: "question",
+        question: "What is Node.js?",
+        options: [
+            "A web browser",
+            "A JavaScript framework",
+            "A JavaScript runtime environment",
+            "A database system"
+        ],
+        correctIndex: 2
+    },
+    {
+        type: "question",
+        question: "What is the main difference between a compiler and an interpreter?",
+        options: [
+            "Compilers are faster than interpreters",
+            "Compilers generate machine code, interpreters execute code directly",
+            "Interpreters are only for JavaScript",
+            "There is no difference"
+        ],
+        correctIndex: 1
+    },
+    {
+        type: "question",
+        question: "Which of these is NOT a global variable in Node.js?",
+        options: [
+            "__dirname",
+            "__filename", 
+            "window",
+            "process"
+        ],
+        correctIndex: 2
+    },
+    {
+        type: "question",
+        question: "What does the __dirname global variable contain?",
+        options: [
+            "The name of the current file",
+            "The path to the current working directory",
+            "The process environment variables",
+            "The Node.js version"
+        ],
+        correctIndex: 1
+    },
+    {
+        type: "question",
+        question: "Which method is used to import modules in CommonJS?",
+        options: [
+            "import",
+            "include",
+            "require",
+            "load"
+        ],
+        correctIndex: 2
+    },
+    {
+        type: "question",
+        question: "What is the purpose of the 'module' global in Node.js?",
+        options: [
+            "To manage database connections",
+            "To provide information about the current module",
+            "To create HTTP servers",
+            "To handle file operations"
+        ],
+        correctIndex: 1
+    },
+    {
+        type: "question",
+        question: "Which module would you use to get information about the operating system?",
+        options: [
+            "fs module",
+            "path module",
+            "os module",
+            "http module"
+        ],
+        correctIndex: 2
+    },
+    {
+        type: "question",
+        question: "What does the path.normalize() method do?",
+        options: [
+            "Creates a new directory",
+            "Normalizes a path string by resolving '..' and '.' segments",
+            "Checks if a path exists",
+            "Converts relative path to absolute path"
+        ],
+        correctIndex: 1
+    },
+    {
+        type: "question",
+        question: "Which method is synchronous in the fs module?",
+        options: [
+            "fs.readFile()",
+            "fs.writeFile()",
+            "fs.readFileSync()",
+            "All of the above"
+        ],
+        correctIndex: 2
+    },
+    {
+        type: "question",
+        question: "What is the purpose of the http.createServer() method?",
+        options: [
+            "To create a web browser",
+            "To create an HTTP server that listens for requests",
+            "To download files from the internet",
+            "To connect to a database"
+        ],
+        correctIndex: 1
+    },
+    {
+        type: "question",
+        question: "In a REST API, which HTTP method is typically used for creating new resources?",
+        options: [
+            "GET",
+            "POST", 
+            "PUT",
+            "DELETE"
+        ],
+        correctIndex: 1
+    },
+
+    // Practical Tasks - Node.js
+    {
+        type: "task",
+        title: "Node.js Environment Setup",
+        content: "Install Node.js on your machine and verify the installation using 'node -v' and 'npm -v'. Explore the Node.js REPL by running 'node' in your terminal and practice basic JavaScript operations."
+    },
+    {
+        type: "task",
+        title: "Global Variables Exploration",
+        content: "Create a script that demonstrates all Node.js global variables. Log __dirname, __filename, process.env, and explore the module object. Create a function that uses process.stdout.write instead of console.log."
+    },
+    {
+        type: "task",
+        title: "Module System Implementation",
+        content: "Create a multi-file application using CommonJS modules. Create at least 3 modules that export different types of data (variables, functions, objects) and import them in a main file. Experiment with both default and named exports."
+    },
+    {
+        type: "task",
+        title: "OS and Path Module Practice",
+        content: "Write a script that collects system information using the os module and displays it in a formatted way. Then, create path manipulation functions that normalize, join, and resolve different path strings. Handle both Windows and Unix-style paths."
+    },
+    {
+        type: "task",
+        title: "File System Operations",
+        content: "Create a file management script that can create, read, update, and delete files using both synchronous and asynchronous methods. Implement error handling for file operations and create a backup system that copies files to a backup directory."
+    },
+    {
+        type: "task", 
+        title: "Basic HTTP Server",
+        content: "Create an HTTP server that handles different routes and HTTP methods. Implement a simple REST API for a resource (like 'users') with GET, POST, PUT, and DELETE operations. Test your API using curl or Postman."
+    },
+    {
+        type: "search-task",
+        title: "Research: Node.js Event Loop",
+        content: "Research the Node.js event loop and how it handles asynchronous operations. Understand the differences between callbacks, promises, and async/await. Create a presentation explaining the event loop with diagrams and examples."
+    },
+    {
+        type: "search-task",
+        title: "Explore: npm Ecosystem",
+        content: "Research the npm ecosystem and popular packages. Learn about package.json structure, semantic versioning, and best practices for dependency management. Create a sample project with multiple dependencies and scripts."
+    },
+    {
+        type: "search-task",
+        title: "Study: Express.js Framework",
+        content: "Research the Express.js framework and compare it with the built-in HTTP module. Create a simple web application using Express that includes routing, middleware, and template rendering. Document the advantages of using Express over plain HTTP."
+    }
+];// ==================== TEMPLATE RENDERING ====================
+        // Functions to render the content - you don't need to modify these
+        
+        // Set lecture title and subtitle
+        document.getElementById('lecture-title').textContent = lectureConfig.title;
+        document.getElementById('lecture-subtitle').textContent = lectureConfig.subtitle;
+        
+        // Render tabs and content
+        function renderTabsAndContent() {
+            const tabsContainer = document.getElementById('tabs-container');
+            const contentContainer = document.getElementById('tab-content-container');
+            
+            // Create tabs
+            const tabs = document.createElement('div');
+            tabs.className = 'tabs';
+            
+            // Create tab content areas
+            lectureContent.forEach((content, index) => {
+                // Create tab
+                const tab = document.createElement('div');
+                tab.className = 'tab' + (index === 0 ? ' active' : '');
+                tab.textContent = content.tabTitle;
+                tab.onclick = () => switchTab(index);
+                tabs.appendChild(tab);
+                
+                // Create content
+                const tabContent = document.createElement('div');
+                tabContent.className = 'tab-content' + (index === 0 ? ' active' : '');
+                tabContent.id = 'tab-' + index;
+                
+                // Add title
+                const title = document.createElement('h3');
+                title.textContent = content.title;
+                tabContent.appendChild(title);
+                
+                // Add code content
+                const pre = document.createElement('pre');
+                const code = document.createElement('code');
+                code.textContent = content.content;
+                pre.appendChild(code);
+                tabContent.appendChild(pre);
+
+                // Add table if exists
+                if (content.table) {
+                    const table = document.createElement('table');
+                    table.className = 'comparison-table';
+                    
+                    // Create header
+                    const thead = document.createElement('thead');
+                    const headerRow = document.createElement('tr');
+                    content.table.headers.forEach(headerText => {
+                        const th = document.createElement('th');
+                        th.textContent = headerText;
+                        headerRow.appendChild(th);
+                    });
+                    thead.appendChild(headerRow);
+                    table.appendChild(thead);
+                    
+                    // Create body
+                    const tbody = document.createElement('tbody');
+                    content.table.rows.forEach(rowData => {
+                        const row = document.createElement('tr');
+                        rowData.forEach(cellData => {
+                            const td = document.createElement('td');
+                            td.textContent = cellData;
+                            row.appendChild(td);
+                        });
+                        tbody.appendChild(row);
+                    });
+                    table.appendChild(tbody);
+                    
+                    tabContent.appendChild(table);
+                }
+                
+                
+                contentContainer.appendChild(tabContent);
+            });
+            
+            tabsContainer.appendChild(tabs);
+        }
+        
+        // Switch tabs function
+        function switchTab(index) {
+            // Remove active class from all tabs
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            // Add active class to clicked tab
+            tabs[index].classList.add('active');
+            
+            // Hide all tab content
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(content => content.classList.remove('active'));
+            
+            // Show selected tab content
+            document.getElementById('tab-' + index).classList.add('active');
+        }
+        
+        // Render questions and tasks
+        function renderQuestions() {
+            const container = document.getElementById('questions-container');
+            
+            questions.forEach((q, index) => {
+                if (q.type === 'question') {
+                    const questionDiv = document.createElement('div');
+                    questionDiv.className = 'question';
+                    
+                    const questionTitle = document.createElement('h3');
+                    questionTitle.textContent = `Question ${index + 1}: ${q.question}`;
+                    questionDiv.appendChild(questionTitle);
+                    
+                    if (q.code) {
+                        const pre = document.createElement('pre');
+                        const code = document.createElement('code');
+                        code.textContent = q.code;
+                        pre.appendChild(code);
+                        questionDiv.appendChild(pre);
+                    }
+                    
+                    const optionsDiv = document.createElement('div');
+                    optionsDiv.className = 'options';
+                    
+                    q.options.forEach((option, optIndex) => {
+                        const optionDiv = document.createElement('div');
+                        optionDiv.className = 'option';
+                        optionDiv.textContent = option;
+                        optionDiv.onclick = function() {
+                            checkAnswer(this, optIndex === q.correctIndex ? 'correct' : 'incorrect');
+                        };
+                        optionsDiv.appendChild(optionDiv);
+                    });
+                    
+                    questionDiv.appendChild(optionsDiv);
+                    
+                    const resultDiv = document.createElement('div');
+                    resultDiv.className = 'result';
+                    resultDiv.id = 'result-' + index;
+                    questionDiv.appendChild(resultDiv);
+                    
+                    container.appendChild(questionDiv);
+                } else if (q.type === 'task') {
+                    const taskDiv = document.createElement('div');
+                    taskDiv.className = 'task';
+                    
+                    const taskTitle = document.createElement('h3');
+                    taskTitle.textContent = q.title;
+                    taskDiv.appendChild(taskTitle);
+                    
+                    const taskContent = document.createElement('p');
+                    taskContent.textContent = q.content;
+                    taskDiv.appendChild(taskContent);
+                    
+                    container.appendChild(taskDiv);
+                } else if (q.type === 'search-task') {
+                    const searchTaskDiv = document.createElement('div');
+                    searchTaskDiv.className = 'search-task';
+                    
+                    const taskTitle = document.createElement('h3');
+                    taskTitle.textContent = q.title;
+                    searchTaskDiv.appendChild(taskTitle);
+                    
+                    const taskContent = document.createElement('p');
+                    taskContent.textContent = q.content;
+                    searchTaskDiv.appendChild(taskContent);
+                    
+                    container.appendChild(searchTaskDiv);
+                }
+            });
+        }
+        
+        // Check answer function
+        function checkAnswer(element, type) {
+            const options = element.parentElement.querySelectorAll('.option');
+            options.forEach(opt => {
+                opt.classList.remove('correct', 'incorrect');
+                opt.onclick = null;
+            });
+            
+            element.classList.add(type);
+            
+            const resultId = element.closest('.question').querySelector('.result').id;
+            const resultDiv = document.getElementById(resultId);
+            resultDiv.style.display = 'block';
+            
+            if (type === 'correct') {
+                resultDiv.innerHTML = '<p style="color: #155724">✅ Correct! Good job.</p>';
+                resultDiv.style.backgroundColor = '#d4edda';
+            } else {
+                resultDiv.innerHTML = '<p style="color: #721c24">❌ Incorrect. Try to understand why.</p>';
+                resultDiv.style.backgroundColor = '#f8d7da';
+            }
+        }
+        
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            renderTabsAndContent();
+            renderQuestions();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,1113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Focal X - Node.js Bootcamp: Lecture 12 </title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .footer {
+            padding-top: 30px;
+        }
+
+        .footer a {
+            color: black;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .coach {
+            background-color: white;
+            width: 80px;
+            border-radius: 0 0 50% 0;
+            color: black;
+            padding: 10px;
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+        
+        header {
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            padding: 20px;
+            height: 65vh;
+        }
+        
+        .lecture-content {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+        }
+        
+        .interactive-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+        }
+        
+        h2 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #3498db;
+            font-size: 1.5rem;
+        }
+        
+        h3 {
+            color: #2980b9;
+            margin: 20px 0 12px;
+            font-size: 1.2rem;
+        }
+        
+        pre {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 12px;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin: 12px 0;
+            font-size: 0.9rem;
+        }
+        
+        code {
+            font-family: 'Fira Code', monospace;
+        }
+        
+        .question {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .options {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+            margin: 12px 0;
+        }
+        
+        .option {
+            padding: 10px;
+            background: #e8f4fc;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+            font-size: 0.9rem;
+        }
+        
+        .option:hover {
+            background: #d1e9fa;
+        }
+        
+        .correct {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .incorrect {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .task {
+            background: #fff3cd;
+            padding: 12px;
+            border-left: 5px solid #ffc107;
+            margin: 15px 0;
+            border-radius: 5px;
+            font-size: 0.9rem;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background 0.3s;
+            margin-top: 8px;
+        }
+        
+        .btn:hover {
+            background: #2980b9;
+        }
+        
+        .result {
+            margin-top: 12px;
+            padding: 12px;
+            border-radius: 5px;
+            display: none;
+            font-size: 0.9rem;
+        }
+        
+        .search-task {
+            background: #e7f5e9;
+            padding: 12px;
+            border-radius: 5px;
+            margin: 15px 0;
+            border-left: 5px solid #28a745;
+            font-size: 0.9rem;
+        }
+        
+        .tabs {
+            display: flex;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .tab {
+            padding: 8px 15px;
+            cursor: pointer;
+            background: #f1f1f1;
+            border: 1px solid #ddd;
+            border-bottom: none;
+            border-radius: 5px 5px 0 0;
+            margin-right: 5px;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+        
+        .tab.active {
+            background: #6f42c1;
+            color: white;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 12px 0;
+            font-size: 0.9rem;
+        }
+        
+        .comparison-table th, .comparison-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        
+        .comparison-table th {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        .comparison-table tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        
+        @media (max-width: 900px) {
+            .content {
+                grid-template-columns: 1fr;
+                height: auto;
+            }
+            
+            .lecture-content, .interactive-section {
+                height: 50vh;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <p class="coach">Moones Mezher</p>
+        <header>
+            <h1 id="lecture-title">Focal X - Node.js Bootcamp</h1>
+            <p class="subtitle" id="lecture-subtitle">Git & Github</p>
+        </header>
+        
+        <div class="content">
+            <div class="lecture-content">
+                <h2>Lecture Content</h2>
+                <div id="tabs-container"></div>
+                <div id="tab-content-container"></div>
+            </div>
+            
+            <div class="interactive-section">
+                <h2>Interactive Questions & Tasks</h2>
+                <div id="questions-container"></div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2025 <a rel="noopener" href="https://focal-x.com/" target="_blank">Focal X</a> All Right Reserved</p>
+    </footer>
+
+    <script>
+        // ==================== CONFIGURATION ====================
+        // Update these arrays to change the content of your lecture
+        
+        // Lecture metadata
+        const lectureConfig = {
+            title: "Focal X - Node.js Bootcamp",
+            subtitle: "Git & Github"
+        };
+        
+        // Lecture content organized by tabs
+        const lectureContent = [
+    {
+        tabTitle: "Last Lesson",
+        title: "Last Lesson Recap",
+        content: `/*
+1- Solve Task 3 (Very Important)
+*/`
+    },
+    {
+        tabTitle: "Terminal Basics",
+        title: "Terminals & Shells Fundamentals",
+        content: `Understanding Your Development Environment
+
+- Terminal: The window we type commands into
+- Shell: Runs inside the terminal to execute commands
+- CLI vs GUI: Command Line Interface vs Graphical User Interface`,
+        table: {
+            headers: ["System", "Terminal", "Shell"],
+            rows: [
+                ["Windows 11", "Windows Terminal", "PowerShell"],
+                ["Mac/Linux", "Terminal", "ZSH/BASH"],
+                ["Git Bash", "MinTTY", "BASH"],
+                ["WSL", "Windows Terminal", "BASH"]
+            ]
+        }
+    },
+    {
+        tabTitle: "CLI Commands",
+        title: "Command Line Essentials",
+        content: `Mastering the Command Line Interface
+
+- Flags: Start with - or --, change command behavior
+- Arguments: Additional information for commands
+- Paths: Absolute (full path) vs Relative (from current directory)`,
+        table: {
+            headers: ["Command", "Meaning", "Examples & Notes"],
+            rows: [
+                ["pwd", "Print working directory", "Shows current full path"],
+                ["ls", "List directory contents", "ls -a (show hidden), ls -l (detailed)"],
+                ["cd [path]", "Change directory", "cd .. (up), cd ~ (home), cd / (root)"],
+                ["mkdir", "Create directory", "mkdir project-folder"],
+                ["touch", "Create file", "touch index.html"],
+                ["cp", "Copy files/dirs", "cp file1 file2, cp -r dir1 dir2"],
+                ["mv", "Move/rename", "mv old.txt new.txt"],
+                ["rm", "Remove files", "rm file.txt, rm -r folder/"],
+                ["cat", "View file content", "cat README.md"],
+                ["notepad", "View file content in notepad", "notepad README.md"],
+                ["echo", "Print text", "echo 'Hello' > file.txt"],
+                ["grep", "Search text", "grep 'error' log.txt"],
+                ["find", "Find files", "find . -name '*.js'"],
+                ["clear", "Clear terminal", "Clears screen, history remains"]
+            ]
+        }
+    },
+    {
+        tabTitle: "Git Fundamentals",
+        title: "What is Git?",
+        content: `Understanding Version Control
+
+- Git: Distributed Version Control System (DVCS)
+- Free & Open Source (Created by Linus Torvalds)
+- Available as GUI or CLI (Command Line Recommended)
+
+Why Git is Essential:
+- Track all changes and history
+- Collaborate efficiently with teams
+- Revert to previous versions when needed
+- Maintain multiple features simultaneously
+- Backup and restore code easily
+
+Without Git:
+- No proper change tracking
+- Team collaboration becomes chaotic
+- Manual file sharing (email, USB, cloud)
+- No reliable backup system
+- Difficulty in identifying when bugs were introduced`
+    },
+    {
+        tabTitle: "Git vs GitHub",
+        title: "GitHub & Alternatives",
+        content: `Git Hosting Platforms
+
+GitHub:
+- Cloud-based Git repository hosting
+- Web-based graphical interface
+- Collaboration tools (issues, PRs, projects)
+- Free for public repositories
+
+Other Platforms:
+- GitLab: Self-hosted alternative with CI/CD
+- Bitbucket: Good for small teams, free private repos
+- Azure DevOps: Microsoft's enterprise solution
+- SourceForge: Older platform for open source
+
+Key Differences:
+- Git: The version control tool itself
+- GitHub: A service that hosts Git repositories
+- You can use Git without GitHub
+- GitHub enhances Git with collaboration features`
+    },
+    {
+        tabTitle: "Core Concepts",
+        title: "Git Core Concepts",
+        content: `Fundamental Git Building Blocks
+
+Repository (Repo):
+- Container for your project and its history
+- Can be local (your machine) or remote (server)
+
+Branch:
+- Independent line of development
+- Enables parallel work without conflicts
+- Default branch: main/master
+
+Commit:
+- Snapshot of changes with descriptive message
+- Unique SHA-1 hash identifier
+- Checkpoint in project history
+
+Common Operations:
+- Clone: Copy repository from remote
+- Push: Upload local changes to remote
+- Pull: Download remote changes to local
+- Fork: Copy someone else's repository
+- Pull Request: Request to merge changes
+
+Best Practices:
+- One repository per project
+- One branch per feature/task
+- Meaningful commit messages
+- Regular pushing to remote`
+    },
+    {
+        tabTitle: "Setup & Config",
+        title: "Git Setup & Configuration",
+        content: `Getting Started with Git
+
+Installation Steps:
+1. Create GitHub account (github.com)
+2. Install Git:
+   - Windows: git-scm.com/downloads
+   - macOS: brew.sh OR git-scm.com/downloads
+   - Linux: sudo apt-get install git
+
+Verification:
+\`\`\`bash
+git --version
+git config --global --list
+\`\`\`
+
+Essential Configuration:
+\`\`\`bash
+git config --global user.name "Your Name"
+git config --global user.email "your.email@example.com"
+git config --global init.defaultBranch main
+git config --global core.editor "code --wait"  # VS Code
+\`\`\`
+
+Common Configurations:
+- core.autocrlf: Handle line endings (true for Windows)
+- merge.tool: Configure merge tool
+- alias: Create command shortcuts`
+    },
+    {
+        tabTitle: "Basic Commands",
+        title: "Essential Git Commands",
+        content: `Daily Git Command Toolkit
+
+Repository Operations:
+\`\`\`bash
+git init                    # Initialize new repo
+git clone [url]            # Clone existing repo
+git status                 # Check repository status
+\`\`\`
+
+Basic Workflow:
+\`\`\`bash
+git add [files]            # Stage changes
+git add .                  # Stage all changes
+git reset [files]          # Unstage changes
+git commit -m "message"    # Commit staged changes
+\`\`\`
+
+History & Inspection:
+\`\`\`bash
+git log                    # Show commit history
+git log --oneline          # Compact history
+git show [commit]          # Show commit details
+git diff                   # Show unstaged changes
+\`\`\`
+
+Remote Operations:
+\`\`\`bash
+git push origin main       # Push to remote
+git pull origin main       # Pull from remote
+git fetch                  # Download remote updates
+git remote -v              # Show remote repositories
+\`\`\` `
+    },
+    {
+        tabTitle: "Branching",
+        title: "Git Branching & Merging",
+        content: `Working with Branches
+
+Branch Operations:
+\`\`\`bash
+git branch                 # List branches
+git branch [name]         # Create new branch
+git checkout [branch]     # Switch branch
+git checkout -b [branch]  # Create and switch
+git merge [branch]        # Merge branches
+git branch -d [branch]    # Delete branch
+\`\`\`
+
+Branch Strategies:
+- Feature Branches: One branch per feature
+- Release Branches: Prepare for releases
+- Hotfix Branches: Emergency fixes
+- Development Branch: Integration branch
+
+Merging Types:
+- Fast-forward: Linear history
+- 3-way Merge: Creates merge commit
+- Rebase: Linear history, rewrites commits
+
+Best Practices:
+- Create descriptive branch names
+- Keep branches focused and small
+- Regular merging with main
+- Delete merged branches`
+    },
+    {
+        tabTitle: "README & Markdown",
+        title: "README Files & Markdown",
+        content: `Project Documentation Essentials
+
+What is README.md?
+- Primary documentation file for projects
+- First thing users see in your repository
+- Written in Markdown (.md extension)
+- Auto-rendered by GitHub/GitLab
+
+Why README is Crucial:
+- Project overview and purpose
+- Installation instructions
+- Usage examples
+- Contribution guidelines
+- License information
+
+Markdown Basics:
+\`\`\`markdown
+# Heading 1
+## Heading 2
+### Heading 3
+
+**Bold Text**
+*Italic Text*
+~~Strikethrough~~
+
+- List item 1
+- List item 2
+
+1. Numbered item 1
+2. Numbered item 2
+
+[Link Text](https://example.com)
+![Image Alt](image.jpg)
+
+\`Inline Code\`
+
+\`\`\`
+Code Block
+\`\`\`
+
+> Blockquote
+\`\`\`
+
+Advanced Markdown:
+- Tables with | syntax
+- Task lists with - [ ] 
+- Emoji with :emoji_name:
+- Mathematical formulas
+- Mermaid diagrams
+
+README Structure:
+1. Project Title & Badges
+2. Project Description
+3. Installation
+4. Usage
+5. Features
+6. Contributing
+7. License
+8. Contact
+
+Best Practices:
+- Write clear, concise documentation
+- Include code examples
+- Use screenshots/GIFs
+- Keep it updated
+- Multiple languages if needed`
+    },
+    {
+        tabTitle: "Gitignore",
+        title: "Gitignore Files",
+        content: `Ignoring Files in Git
+
+Purpose:
+- Exclude files from version control
+- Prevent committing sensitive data
+- Avoid unnecessary binary files
+- Keep repository clean and focused
+
+Common Ignored Files:
+\`\`\`
+# Dependencies
+node_modules/
+vendor/
+*.jar
+
+# Environment variables
+.env
+.config
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+
+# Build outputs
+/dist
+/build
+*.exe
+\`\`\`
+
+Usage:
+- Create .gitignore in root directory
+- One pattern per line
+- Supports wildcards (*) and directories (/)
+- Can have global .gitignore for all projects
+
+Best Practices:
+- Ignore OS-specific files
+- Exclude dependencies
+- Never commit secrets
+- Use templates from gitignore.io`
+    },
+    {
+        tabTitle: "Advanced Git",
+        title: "Advanced Git Techniques",
+        content: `Beyond the Basics
+
+Stashing Changes:
+\`\`\`bash
+git stash                  # Temporarily save changes
+git stash list            # List stashes
+git stash pop             # Restore latest stash
+git stash apply           # Apply without removing
+\`\`\`
+
+Undoing Changes:
+\`\`\`bash
+git reset --soft [commit]  # Keep changes staged
+git reset --mixed [commit] # Keep changes unstaged
+git reset --hard [commit]  # Discard all changes
+git revert [commit]        # Create undo commit
+\`\`\`
+
+Rebasing:
+\`\`\`bash
+git rebase main           # Reapply commits on main
+git rebase -i [commit]    # Interactive rebase
+\`\`\`
+
+Tagging:
+\`\`\`bash
+git tag v1.0.0           # Create lightweight tag
+git tag -a v1.0.0 -m "Release"  # Annotated tag
+git push --tags          # Push tags to remote
+\`\`\`
+
+Advanced Tools:
+- git bisect: Binary search for bugs
+- git cherry-pick: Apply specific commits
+- git reflog: Recovery tool
+- git worktree: Multiple working directories`
+    }
+];
+
+// Enhanced Questions and Tasks
+const questions = [
+    // Git Fundamentals
+    {
+        type: "question",
+        question: "What is the main purpose of Git?",
+        options: [
+            "A social media platform for developers",
+            "A distributed version control system",
+            "An alternative to email",
+            "A programming language"
+        ],
+        correctIndex: 1
+    },
+    {
+        type: "question",
+        question: "What is the key difference between Git and GitHub?",
+        options: [
+            "They are the same thing",
+            "Git is the tool, GitHub is a hosting service",
+            "GitHub is the tool, Git is the hosting service",
+            "They are completely unrelated"
+        ],
+        correctIndex: 1
+    },
+    {
+        type: "question",
+        question: "What does 'git commit' do?",
+        options: [
+            "Uploads changes to remote repository",
+            "Downloads changes from remote repository",
+            "Creates a checkpoint in local repository",
+            "Creates a new branch"
+        ],
+        correctIndex: 2
+    },
+    {
+        type: "question",
+        question: "What is the primary purpose of branching in Git?",
+        options: [
+            "To make the repository larger",
+            "To avoid conflicts and manage features separately",
+            "To delete old code",
+            "To improve internet speed"
+        ],
+        correctIndex: 1
+    },
+    
+    // CLI & Terminal
+    {
+        type: "question",
+        question: "Which command is used to list directory contents in Linux/Mac?",
+        options: [
+            "dir",
+            "list",
+            "ls",
+            "show"
+        ],
+        correctIndex: 2
+    },
+    {
+        type: "question",
+        question: "What does 'cd ..' command do?",
+        options: [
+            "Creates a new directory",
+            "Goes to home directory",
+            "Moves up one directory level",
+            "Shows current directory"
+        ],
+        correctIndex: 2
+    },
+    
+    // Git Commands
+    {
+        type: "question",
+        question: "Which command is used to download a repository from GitHub?",
+        options: [
+            "git init",
+            "git push",
+            "git clone",
+            "git commit"
+        ],
+        correctIndex: 2
+    },
+    {
+        type: "question",
+        question: "What does 'git status' show?",
+        options: [
+            "The commit history",
+            "The current branch and changes",
+            "Remote repository URL",
+            "Git version information"
+        ],
+        correctIndex: 1
+    },
+    {
+        type: "question",
+        question: "Which command stages all changes for commit?",
+        options: [
+            "git stage .",
+            "git add .",
+            "git commit all",
+            "git update ."
+        ],
+        correctIndex: 1
+    },
+    
+    // Branching & Merging
+    {
+        type: "question",
+        question: "How do you create and switch to a new branch?",
+        options: [
+            "git branch new-branch",
+            "git checkout new-branch",
+            "git checkout -b new-branch",
+            "git create new-branch"
+        ],
+        correctIndex: 2
+    },
+    {
+        type: "question",
+        question: "What is a 'fast-forward' merge?",
+        options: [
+            "A merge that creates a merge commit",
+            "A merge that moves branch pointer forward",
+            "A merge that deletes the branch",
+            "A merge that requires conflict resolution"
+        ],
+        correctIndex: 1
+    },
+    
+    // README & Markdown
+    {
+        type: "question",
+        question: "What is the primary purpose of a README.md file?",
+        options: [
+            "To store secret keys",
+            "To document the project",
+            "To compile the code",
+            "To run tests"
+        ],
+        correctIndex: 1
+    },
+    {
+        type: "question",
+        question: "Which Markdown syntax creates a level 2 heading?",
+        options: [
+            "# Heading",
+            "## Heading",
+            "### Heading",
+            "**Heading**"
+        ],
+        correctIndex: 1
+    },
+    {
+        type: "question",
+        question: "What does .gitignore file do?",
+        options: [
+            "Tracks all files in repository",
+            "Specifies files to ignore in Git",
+            "Contains Git configuration",
+            "Stores commit messages"
+        ],
+        correctIndex: 1
+    },
+
+    // Practical Tasks
+    {
+        type: "task",
+        title: "Setup Git Environment",
+        content: "Install Git on your machine and configure it with your name and email. Verify the installation by running 'git --version' and check configuration with 'git config --list'. Set up SSH keys for secure authentication with GitHub."
+    },
+    {
+        type: "task",
+        title: "Create Your First Repository",
+        content: "Create a new local repository using 'git init', add a comprehensive README.md file with proper Markdown formatting, make your first commit with a descriptive message, and push it to a new GitHub repository. Include sections for Installation, Usage, and Contributing in your README."
+    },
+    {
+        type: "task",
+        title: "Practice Branching Strategy",
+        content: "Create a new branch for a feature, make some changes, commit them, then merge the branch back to main. Practice resolving merge conflicts. Create at least three feature branches and practice different merge strategies (fast-forward, 3-way merge)."
+    },
+    {
+        type: "task",
+        title: "Create .gitignore File",
+        content: "Create a comprehensive .gitignore file for a web project. Include patterns for ignoring node_modules, environment variables, IDE files, build outputs, and OS-specific files. Test that your ignored files are not tracked by Git."
+    },
+    {
+        type: "task",
+        title: "Markdown Documentation",
+        content: "Create a detailed README.md file using advanced Markdown features: include a table, code blocks with syntax highlighting, task lists, links, images, and emojis. Make it professional and comprehensive for a hypothetical project."
+    },
+    {
+        type: "search-task",
+        title: "Research: Git Workflow Models",
+        content: "Research different Git workflow models like Git Flow, GitHub Flow, and GitLab Flow. Compare their advantages and use cases for different team sizes and project types. Create a presentation showing when to use each workflow."
+    },
+    {
+        type: "search-task",
+        title: "Explore: Advanced Git Commands",
+        content: "Research and practice advanced Git commands like 'git rebase', 'git stash', 'git cherry-pick', and 'git bisect'. Understand when and why to use each command. Create cheat sheets with practical examples."
+    },
+    {
+        type: "search-task",
+        title: "Study: Markdown Advanced Features",
+        content: "Research advanced Markdown features including Mermaid diagrams, mathematical formulas, footnotes, and custom HTML. Create a sample document demonstrating these features and their proper usage in technical documentation."
+    }
+];
+// ==================== TEMPLATE RENDERING ====================
+        // Functions to render the content - you don't need to modify these
+        
+        // Set lecture title and subtitle
+        document.getElementById('lecture-title').textContent = lectureConfig.title;
+        document.getElementById('lecture-subtitle').textContent = lectureConfig.subtitle;
+        
+        // Render tabs and content
+        function renderTabsAndContent() {
+            const tabsContainer = document.getElementById('tabs-container');
+            const contentContainer = document.getElementById('tab-content-container');
+            
+            // Create tabs
+            const tabs = document.createElement('div');
+            tabs.className = 'tabs';
+            
+            // Create tab content areas
+            lectureContent.forEach((content, index) => {
+                // Create tab
+                const tab = document.createElement('div');
+                tab.className = 'tab' + (index === 0 ? ' active' : '');
+                tab.textContent = content.tabTitle;
+                tab.onclick = () => switchTab(index);
+                tabs.appendChild(tab);
+                
+                // Create content
+                const tabContent = document.createElement('div');
+                tabContent.className = 'tab-content' + (index === 0 ? ' active' : '');
+                tabContent.id = 'tab-' + index;
+                
+                // Add title
+                const title = document.createElement('h3');
+                title.textContent = content.title;
+                tabContent.appendChild(title);
+                
+                // Add code content
+                const pre = document.createElement('pre');
+                const code = document.createElement('code');
+                code.textContent = content.content;
+                pre.appendChild(code);
+                tabContent.appendChild(pre);
+
+                // Add table if exists
+                if (content.table) {
+                    const table = document.createElement('table');
+                    table.className = 'comparison-table';
+                    
+                    // Create header
+                    const thead = document.createElement('thead');
+                    const headerRow = document.createElement('tr');
+                    content.table.headers.forEach(headerText => {
+                        const th = document.createElement('th');
+                        th.textContent = headerText;
+                        headerRow.appendChild(th);
+                    });
+                    thead.appendChild(headerRow);
+                    table.appendChild(thead);
+                    
+                    // Create body
+                    const tbody = document.createElement('tbody');
+                    content.table.rows.forEach(rowData => {
+                        const row = document.createElement('tr');
+                        rowData.forEach(cellData => {
+                            const td = document.createElement('td');
+                            td.textContent = cellData;
+                            row.appendChild(td);
+                        });
+                        tbody.appendChild(row);
+                    });
+                    table.appendChild(tbody);
+                    
+                    tabContent.appendChild(table);
+                }
+                
+                
+                contentContainer.appendChild(tabContent);
+            });
+            
+            tabsContainer.appendChild(tabs);
+        }
+        
+        // Switch tabs function
+        function switchTab(index) {
+            // Remove active class from all tabs
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            // Add active class to clicked tab
+            tabs[index].classList.add('active');
+            
+            // Hide all tab content
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(content => content.classList.remove('active'));
+            
+            // Show selected tab content
+            document.getElementById('tab-' + index).classList.add('active');
+        }
+        
+        // Render questions and tasks
+        function renderQuestions() {
+            const container = document.getElementById('questions-container');
+            
+            questions.forEach((q, index) => {
+                if (q.type === 'question') {
+                    const questionDiv = document.createElement('div');
+                    questionDiv.className = 'question';
+                    
+                    const questionTitle = document.createElement('h3');
+                    questionTitle.textContent = `Question ${index + 1}: ${q.question}`;
+                    questionDiv.appendChild(questionTitle);
+                    
+                    if (q.code) {
+                        const pre = document.createElement('pre');
+                        const code = document.createElement('code');
+                        code.textContent = q.code;
+                        pre.appendChild(code);
+                        questionDiv.appendChild(pre);
+                    }
+                    
+                    const optionsDiv = document.createElement('div');
+                    optionsDiv.className = 'options';
+                    
+                    q.options.forEach((option, optIndex) => {
+                        const optionDiv = document.createElement('div');
+                        optionDiv.className = 'option';
+                        optionDiv.textContent = option;
+                        optionDiv.onclick = function() {
+                            checkAnswer(this, optIndex === q.correctIndex ? 'correct' : 'incorrect');
+                        };
+                        optionsDiv.appendChild(optionDiv);
+                    });
+                    
+                    questionDiv.appendChild(optionsDiv);
+                    
+                    const resultDiv = document.createElement('div');
+                    resultDiv.className = 'result';
+                    resultDiv.id = 'result-' + index;
+                    questionDiv.appendChild(resultDiv);
+                    
+                    container.appendChild(questionDiv);
+                } else if (q.type === 'task') {
+                    const taskDiv = document.createElement('div');
+                    taskDiv.className = 'task';
+                    
+                    const taskTitle = document.createElement('h3');
+                    taskTitle.textContent = q.title;
+                    taskDiv.appendChild(taskTitle);
+                    
+                    const taskContent = document.createElement('p');
+                    taskContent.textContent = q.content;
+                    taskDiv.appendChild(taskContent);
+                    
+                    container.appendChild(taskDiv);
+                } else if (q.type === 'search-task') {
+                    const searchTaskDiv = document.createElement('div');
+                    searchTaskDiv.className = 'search-task';
+                    
+                    const taskTitle = document.createElement('h3');
+                    taskTitle.textContent = q.title;
+                    searchTaskDiv.appendChild(taskTitle);
+                    
+                    const taskContent = document.createElement('p');
+                    taskContent.textContent = q.content;
+                    searchTaskDiv.appendChild(taskContent);
+                    
+                    container.appendChild(searchTaskDiv);
+                }
+            });
+        }
+        
+        // Check answer function
+        function checkAnswer(element, type) {
+            const options = element.parentElement.querySelectorAll('.option');
+            options.forEach(opt => {
+                opt.classList.remove('correct', 'incorrect');
+                opt.onclick = null;
+            });
+            
+            element.classList.add(type);
+            
+            const resultId = element.closest('.question').querySelector('.result').id;
+            const resultDiv = document.getElementById(resultId);
+            resultDiv.style.display = 'block';
+            
+            if (type === 'correct') {
+                resultDiv.innerHTML = '<p style="color: #155724">✅ Correct! Good job.</p>';
+                resultDiv.style.backgroundColor = '#d4edda';
+            } else {
+                resultDiv.innerHTML = '<p style="color: #721c24">❌ Incorrect. Try to understand why.</p>';
+                resultDiv.style.backgroundColor = '#f8d7da';
+            }
+        }
+        
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            renderTabsAndContent();
+            renderQuestions();
+        });
+    </script>
+</body>
+</html>
