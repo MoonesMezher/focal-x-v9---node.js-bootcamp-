@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Focal X - Node.js Bootcamp: Lecture 14 </title>
+    <title>Focal X - Node.js Bootcamp: Lecture 15 </title>
     <style>
         * {
             margin: 0;
@@ -76,7 +76,7 @@
         
         .content {
             display: grid;
-            grid-template-columns: 1fr;
+            grid-template-columns: 1fr 1fr;
             gap: 20px;
             padding: 20px;
             height: 65vh;
@@ -278,7 +278,7 @@
         <p class="coach">Moones Mezher</p>
         <header>
             <h1 id="lecture-title">Focal X - Node.js Bootcamp</h1>
-            <p class="subtitle" id="lecture-subtitle">Solve Task 4</p>
+            <p class="subtitle" id="lecture-subtitle">Node</p>
         </header>
         
         <div class="content">
@@ -288,7 +288,7 @@
                 <div id="tab-content-container"></div>
             </div>
             
-            <div class="interactive-section" hidden>
+            <div class="interactive-section">
                 <h2>Interactive Questions & Tasks</h2>
                 <div id="questions-container"></div>
             </div>
@@ -306,7 +306,7 @@
         // Lecture metadata
         const lectureConfig = {
             title: "Focal X - Node.js Bootcamp",
-            subtitle: "Solve Task 4"
+            subtitle: "Node "
         };
         
         // Lecture content organized by tabs
@@ -315,145 +315,85 @@
                 tabTitle: "Last Lesson",
                 title: "Last Lesson Recap",
                 content: `/*
-1- Git Workflow 
-2- Node.js introduction
-3- Node.js Globals
-4- Node.js Modules
-5- Import & Export
-6- OS Module
-7- Path Module
-8- FS Module
-9- API's & HTTP Methods
+1- CLI
+2- Git
+3- Github
+4- Core Commands
+5- Branching
+6- README.md file
+7- .gitignore file
 */`
             },
-            {
-                tabTitle: "Solve Task",
-                title: "Solve Task (JavaScript to TypeScript Conversion)",
-                content: `// User Management System in JavaScript
-type TUserId = number;
-type TUserName = string;
-type TUserEmail = string;
-type TUserRole = 'admin' | 'user' | 'moderator';
+   {
+        tabTitle: "HTTP Module",
+        title: "Creating Web Servers with HTTP",
+        content: `const http = require('http');
 
-interface UserOut {
-    id: TUserId
-    
-    name: TUserName
-    
-    email: TUserEmail
-    
-    role: TUserRole
-    
-    isActive: boolean
-    
-    createdAt: Date
-}
-
-function createUser(id: TUserId, name: TUserName, email: TUserEmail, role: TUserRole = 'user'): UserOut {
-    return {
-        id,
-        name,
-        email,
-        role,
-        isActive: true,
-        createdAt: new Date()
-    };
-}
-
-type TProductId = number;
-type TProductName = string;
-type TProductPrice = number;
-type TProductCategory = string;
-type TProductInStock = boolean;
-
-interface ProductOut {
-    id: TProductId
-
-    name: TProductName
-
-    price: TProductPrice
-
-    category: TProductCategory
-
-    inStock: TProductInStock
-
-    createdAt: Date
-}
-
-function createProduct(id: TProductId, name: TProductName, price: TProductPrice, category: TProductCategory, inStock: TProductInStock = true): ProductOut {
-    return {
-        id,
-        name,
-        price,
-        category,
-        inStock,
-        createdAt: new Date()
-    };
-}
-
-function calculateTotalPrice(products: ProductOut[]): number {
-    return products.reduce((total: number, product: ProductOut) => {
-        if (product.inStock) {
-            return total + product.price;
+// Basic Server
+const server = http.createServer((req, res) => {
+    if(req.method === 'GET') {
+        if(req.url === '/') {
+            return res.end("Hello, world!");
+        } else if (req.url === '/hello') {
+            return res.end("Hello, Twice");
         }
-        return total;
-    }, 0);
-}
+        return res.end('<p>Oops!</p><a href="/">Go To Home</a>');
+    } 
+});
 
-type TUserOrProdcutItem = ProductOut | UserOut;
+// REST API Implementation
+let data = [
+    { id: 1, name: "moones", age: 21 },
+    { id: 2, name: "rami", age: 31 },
+    { id: 3, name: "fares", age: 25 }
+];
 
-function formatDisplay(item: TUserOrProdcutItem): string {
-    if ("role" in item) {
-        return \`User: \${item.name} (\${item.role})\`;
-    } else if ("category" in item) {
-        return \`Product: \${item.name} - $\${item.price}\`;
+// CRUD Operations:
+// GET    /api/users       # Get all users
+// POST   /api/users       # Create new user  
+// GET    /api/users/{id}  # Get single user
+// PUT    /api/users/{id}  # Update user
+// DELETE /api/users/{id}  # Delete user
+
+const PORT = 4000;
+const HOSTNAME = '127.0.0.1';
+server.listen(PORT, HOSTNAME, () => {
+    console.log('App is listening on port \${PORT} successfully');
+});`
     }
-    return 'Unknown item';
-}
-
-interface Results {
-    users: UserOut[]
-
-    products: ProductOut[]
-
-    totalValue: number
-}
-
-interface TaggedProduct extends ProductOut {
-    type: "product"
-}
-
-interface TaggedUser extends UserOut {
-    type: "user"
-}
-
-type TItem = TaggedUser | TaggedProduct;
-
-function processItems(items: TItem[]): Results {
-    const results: Results = {
-        users: [],
-        products: [],
-        totalValue: 0
-    };
-    
-    items.forEach((item: TItem) => {
-        if (item.type === "user") {
-            results.users.push(item);
-        } else if (item.type === "product") {
-            results.products.push(item);
-            if (item.inStock) {
-                results.totalValue += item.price;
-            }
-        }
-    });
-    
-    return results;
-}`
-            }
         ];
-        // Questions and tasks
-        const questions = [];     
-        // ==================== TEMPLATE RENDERING ====================
+
+// Enhanced Questions and Tasks with Node.js content
+const questions = [
+    // Node.js Fundamentals
+    {
+        type: "question",
+        question: "What is the purpose of the http.createServer() method?",
+        options: [
+            "To create a web browser",
+            "To create an HTTP server that listens for requests",
+            "To download files from the internet",
+            "To connect to a database"
+        ],
+        correctIndex: 1
+    },
+    // Practical Tasks - Node.js
+    {
+        type: "task", 
+        title: "Basic HTTP Server",
+        content: "Create an HTTP server that handles different routes and HTTP methods. Implement a simple REST API for a resource (like 'users') with GET, POST, PUT, and DELETE operations. Test your API using curl or Postman."
+    },
+    {
+        type: "search-task",
+        title: "Research: Node.js Event Loop",
+        content: "Research the Node.js event loop and how it handles asynchronous operations. Understand the differences between callbacks, promises, and async/await. Create a presentation explaining the event loop with diagrams and examples."
+    },
+    {
+        type: "search-task",
+        title: "Study: Express.js Framework",
+        content: "Research the Express.js framework and compare it with the built-in HTTP module. Create a simple web application using Express that includes routing, middleware, and template rendering. Document the advantages of using Express over plain HTTP."
+    }
+];// ==================== TEMPLATE RENDERING ====================
         // Functions to render the content - you don't need to modify these
         
         // Set lecture title and subtitle
