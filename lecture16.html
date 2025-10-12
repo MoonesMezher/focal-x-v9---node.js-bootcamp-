@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Focal X - Node.js Bootcamp: Lecture 15 </title>
+    <title>Focal X - Node.js Bootcamp: Lecture 16 </title>
     <style>
         * {
             margin: 0;
@@ -306,7 +306,7 @@
         // Lecture metadata
         const lectureConfig = {
             title: "Focal X - Node.js Bootcamp",
-            subtitle: "HTTP Module, ExpressJS (Setup, Routing, HTTP Methods, Request & Response)"
+            subtitle: "ExpressJS (Middleware)"
         };
         
         // Lecture content organized by tabs
@@ -315,203 +315,59 @@
                 tabTitle: "Last Lesson",
                 title: "Last Lesson Recap",
                 content: `/*
-1- Solve Task 4
+1- HTTP Module
+2- ExpressJS Setup
+3- ExpressJS Routing
 */`
             },
-   {
-        tabTitle: "HTTP Module",
-        title: "Creating Web Servers with HTTP",
-        content: `const http = require('http');
-
-// Basic Server
-const server = http.createServer((req, res) => {
-    if(req.method === 'GET') {
-        if(req.url === '/') {
-            return res.end("Hello, world!");
-        } else if (req.url === '/hello') {
-            return res.end("Hello, Twice");
-        }
-        return res.end('<p>Oops!</p><a href="/">Go To Home</a>');
-    } 
-});
-
-// REST API Implementation
-let data = [
-    { id: 1, name: "moones", age: 21 },
-    { id: 2, name: "rami", age: 31 },
-    { id: 3, name: "fares", age: 25 }
-];
-
-// CRUD Operations:
-// GET    /api/users       # Get all users
-// POST   /api/users       # Create new user  
-// GET    /api/users/{id}  # Get single user
-// PUT    /api/users/{id}  # Update user
-// DELETE /api/users/{id}  # Delete user
-
-const PORT = 4000;
-const HOSTNAME = '127.0.0.1';
-server.listen(PORT, HOSTNAME, () => {
-    console.log('App is listening on port \${PORT} successfully');
-});`
-    },
-    {
-        tabTitle: "Introduction to Express.js",
-        title: "Why Express.js?",
+            {
+        tabTitle: "NPM & Package Management",
+        title: "Node Package Manager Essentials",
         content: `/*
-Express.js is a minimal and flexible Node.js web application framework that provides a robust set of features for web and mobile applications.
+NPM (Node Package Manager) - Your development toolbox
 
-Why Express.js over HTTP module?
-• Faster development
-• Built-in middleware support
-• Robust routing
-• Better error handling
-• Large ecosystem of packages
-• Community support
+Key Commands:
+• npm init / npm init -y - Create package.json
+• npm install <package> - Local installation
+• npm install -g <package> - Global installation
+• npm uninstall <package> - Remove package
+• npm update <package> - Update package
 
-Think of it like this:
-• HTTP module = Building a car from scratch
-• Express.js = Using a car manufacturing framework
+Understanding package.json:
+• dependencies - Production packages
+• devDependencies - Development-only packages
+• scripts - Custom automation commands
 
-Popular Express-based frameworks:
-• Nest.js - Enterprise-grade
-• Next.js - React-based SSR
-• Fastify - Performance focused
+Security Best Practices:
+• Check package popularity and maintenance
+• Regular security audits: npm audit
+• Use specific versions, not wildcards
 */
 
-// Basic comparison: HTTP vs Express
-const http = require('http');
-const express = require('express');
+// package.json example
+{
+  "name": "my-express-app",
+  "version": "1.0.0",
+  "description": "A sample Express application",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js",
+    "test": "jest"
+  },
+  "dependencies": {
+    "express": "^4.18.0",
+    "cors": "^2.8.5"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.0",
+    "jest": "^28.0.0"
+  }
+}
 
-// HTTP module approach
-const httpServer = http.createServer((req, res) => {
-    if (req.url === '/api/users' && req.method === 'GET') {
-        res.writeHead(200, {'Content-Type': 'application/json'});
-        res.end(JSON.stringify({users: []}));
-    }
-});
-
-// Express approach
-const app = express();
-app.get('/api/users', (req, res) => {
-    res.json({users: []});
-});`
-    },
-    {
-        tabTitle: "Express Server Setup",
-        title: "Creating Your First Express Server",
-        content: `/*
-Basic Express Server Structure:
-1. Import Express
-2. Create app instance
-3. Configure middleware
-4. Define routes
-5. Start server
-*/
-
-const express = require('express');
-const app = express();
-
-// Middleware configuration
-app.use(express.json()); // Parse JSON bodies
-app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
-
-// Basic route
-app.get('/', (req, res) => {
-    res.send('Hello World!');
-});
-
-// Health check endpoint
-app.get('/health', (req, res) => {
-    res.status(200).json({ 
-        status: 'OK', 
-        timestamp: new Date().toISOString(),
-        uptime: process.uptime()
-    });
-});
-
-// Server configuration
-const PORT = process.env.PORT || 4000;
-const HOST = process.env.HOST || 'localhost';
-
-app.listen(PORT, HOST, () => {
-    console.log(\`Server running at http://\${HOST}:\${PORT}\`);
-});
-
-/*
-Environment Variables (.env file):
-PORT=4000
-HOST=localhost
-NODE_ENV=development
-
-Access with: process.env.PORT
-*/`
-    },
-    {
-        tabTitle: "Routing & HTTP Methods",
-        title: "Complete Routing Guide",
-        content: `/*
-Express Routing Methods:
-• GET    - Retrieve data
-• POST   - Create data
-• PUT    - Update entire resource
-• PATCH  - Partial update
-• DELETE - Remove data
-• ALL    - Handle all methods
-
-Route Parameters:
-• :id - Dynamic segments
-• Query strings - ?key=value
-• Request body - JSON/form data
-*/
-
-// Route parameters
-app.get('/users/:userId/posts/:postId', (req, res) => {
-    const { userId, postId } = req.params;
-    res.json({ userId, postId });
-});
-
-// Query parameters
-app.get('/search', (req, res) => {
-    const { q, page, limit } = req.query;
-    res.json({ query: q, page: page || 1, limit: limit || 10 });
-});
-
-// All HTTP methods demonstration
-app.route('/api/products')
-    .get((req, res) => {
-        // Get all products
-        res.json({ message: 'GET all products' });
-    })
-    .post((req, res) => {
-        // Create new product
-        const product = req.body;
-        res.status(201).json({ message: 'Product created', product });
-    })
-    .put((req, res) => {
-        // Update all products (rare)
-        res.json({ message: 'All products updated' });
-    });
-
-app.route('/api/products/:id')
-    .get((req, res) => {
-        const { id } = req.params;
-        res.json({ message: \`GET product \${id}\` });
-    })
-    .put((req, res) => {
-        const { id } = req.params;
-        const updates = req.body;
-        res.json({ message: \`PUT product \${id}\`, updates });
-    })
-    .patch((req, res) => {
-        const { id } = req.params;
-        const partialUpdates = req.body;
-        res.json({ message: \`PATCH product \${id}\`, partialUpdates });
-    })
-    .delete((req, res) => {
-        const { id } = req.params;
-        res.json({ message: \`DELETE product \${id}\` });
-    });`
+// Installing development tools
+// npm install -g nodemon  # Auto-restart server on changes
+// npm install --save-dev jest # Testing framework`
     },
     {
         tabTitle: "Request & Response Objects",
@@ -591,6 +447,360 @@ app.get('/jsonp', (req, res) => {
     res.jsonp({ message: 'JSONP response' }); // JSON with padding
 });`
     },
+    {
+        tabTitle: "Middleware Concepts",
+        title: "Express Middleware Mastery",
+        content: `/*
+Middleware: Functions that have access to request, response, and next function
+
+Types of Middleware:
+1. Application-level middleware
+2. Router-level middleware  
+3. Error-handling middleware
+4. Built-in middleware
+5. Third-party middleware
+
+Execution Order Matters!
+*/
+
+// Custom middleware example
+const loggerMiddleware = (req, res, next) => {
+    console.log(\`[\${new Date().toISOString()}] \${req.method} \${req.url}\`);
+    next(); // Continue to next middleware/route
+};
+
+const authMiddleware = (req, res, next) => {
+    const token = req.headers.authorization;
+    
+    if (!token) {
+        return res.status(401).json({ error: 'No token provided' });
+    }
+    
+    // Validate token (simplified)
+    if (token !== 'valid-token') {
+        return res.status(403).json({ error: 'Invalid token' });
+    }
+    
+    req.user = { id: 1, name: 'John Doe' }; // Attach user to request
+    next();
+};
+
+// Apply middleware
+app.use(express.json()); // Built-in
+app.use(loggerMiddleware); // Custom
+app.use('/api/protected', authMiddleware); // Route-specific
+
+// Error handling middleware
+app.use((error, req, res, next) => {
+    console.error('Error:', error);
+    res.status(500).json({ 
+        error: 'Something went wrong!',
+        ...(process.env.NODE_ENV === 'development' && { stack: error.stack })
+    });
+});
+
+// 404 handler (must be last)
+app.use('*', (req, res) => {
+    res.status(404).json({ error: 'Route not found' });
+});
+
+// Popular third-party middleware:
+// • cors - Enable CORS
+// • helmet - Security headers
+// • morgan - HTTP request logger
+// • compression - Response compression
+// • cookie-parser - Parse cookies`
+    },
+    {
+        tabTitle: "CRUD Operations & Validation",
+        title: "Building Robust CRUD APIs",
+        content: `/*
+Complete CRUD Implementation with:
+• Input validation
+• Error handling
+• Status codes
+• Data sanitization
+*/
+
+let users = [
+    { id: 1, name: "moones", age: 21, email: "moones@example.com" },
+    { id: 2, name: "rami", age: 31, email: "rami@example.com" },
+    { id: 3, name: "dana", age: 41, email: "dana@example.com" }
+];
+
+// Input validation middleware
+const validateUser = (req, res, next) => {
+    const { name, age, email } = req.body;
+    const errors = [];
+
+    if (!name || typeof name !== 'string' || name.length < 2) {
+        errors.push('Name must be a string with at least 2 characters');
+    }
+
+    if (!age || typeof age !== 'number' || age < 18 || age > 120) {
+        errors.push('Age must be a number between 18 and 120');
+    }
+
+    if (!email || !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)) {
+        errors.push('Valid email is required');
+    }
+
+    if (errors.length > 0) {
+        return res.status(400).json({ 
+            error: 'Validation failed', 
+            details: errors 
+        });
+    }
+
+    next();
+};
+
+// GET all users with filtering
+app.get('/api/users', (req, res) => {
+    const { minAge, maxAge, search } = req.query;
+    let filteredUsers = [...users];
+
+    if (minAge) {
+        filteredUsers = filteredUsers.filter(user => user.age >= parseInt(minAge));
+    }
+
+    if (maxAge) {
+        filteredUsers = filteredUsers.filter(user => user.age <= parseInt(maxAge));
+    }
+
+    if (search) {
+        filteredUsers = filteredUsers.filter(user => 
+            user.name.toLowerCase().includes(search.toLowerCase())
+        );
+    }
+
+    res.json({
+        success: true,
+        count: filteredUsers.length,
+        data: filteredUsers
+    });
+});
+
+// GET single user
+app.get('/api/users/:id', (req, res) => {
+    const id = parseInt(req.params.id);
+    const user = users.find(u => u.id === id);
+
+    if (!user) {
+        return res.status(404).json({ 
+            success: false,
+            error: 'User not found' 
+        });
+    }
+
+    res.json({ success: true, data: user });
+});
+
+// POST create user
+app.post('/api/users', validateUser, (req, res) => {
+    const { name, age, email } = req.body;
+    
+    // Check for duplicate email
+    const existingUser = users.find(u => u.email === email);
+    if (existingUser) {
+        return res.status(409).json({
+            success: false,
+            error: 'User with this email already exists'
+        });
+    }
+
+    const newId = Math.max(...users.map(u => u.id)) + 1;
+    const newUser = { id: newId, name, age, email };
+    
+    users.push(newUser);
+    
+    res.status(201).json({
+        success: true,
+        message: 'User created successfully',
+        data: newUser
+    });
+});
+
+// PUT update user
+app.put('/api/users/:id', validateUser, (req, res) => {
+    const id = parseInt(req.params.id);
+    const userIndex = users.findIndex(u => u.id === id);
+
+    if (userIndex === -1) {
+        return res.status(404).json({
+            success: false,
+            error: 'User not found'
+        });
+    }
+
+    const { name, age, email } = req.body;
+    
+    // Check email uniqueness (excluding current user)
+    const emailExists = users.some(u => u.email === email && u.id !== id);
+    if (emailExists) {
+        return res.status(409).json({
+            success: false,
+            error: 'Email already in use by another user'
+        });
+    }
+
+    users[userIndex] = { ...users[userIndex], name, age, email };
+
+    res.json({
+        success: true,
+        message: 'User updated successfully',
+        data: users[userIndex]
+    });
+});
+
+// DELETE user
+app.delete('/api/users/:id', (req, res) => {
+    const id = parseInt(req.params.id);
+    const userIndex = users.findIndex(u => u.id === id);
+
+    if (userIndex === -1) {
+        return res.status(404).json({
+            success: false,
+            error: 'User not found'
+        });
+    }
+
+    const deletedUser = users.splice(userIndex, 1)[0];
+
+    res.json({
+        success: true,
+        message: 'User deleted successfully',
+        data: deletedUser
+    });
+});`
+    },
+    {
+        tabTitle: "Advanced Express Features",
+        title: "Production-Ready Express Applications",
+        content: `/*
+Production Best Practices:
+• Environment configuration
+• Security headers
+• Rate limiting
+• Request sanitization
+• Proper error handling
+• Logging
+• Performance optimization
+*/
+
+const cors = require('cors');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+const compression = require('compression');
+
+// Security middleware
+app.use(helmet({
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            styleSrc: ["'self'", "'unsafe-inline'"],
+            scriptSrc: ["'self'"],
+            imgSrc: ["'self'", "data:", "https:"],
+        },
+    },
+    crossOriginEmbedderPolicy: false
+}));
+
+// CORS configuration
+app.use(cors({
+    origin: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000'],
+    credentials: true
+}));
+
+// Rate limiting
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // limit each IP to 100 requests per windowMs
+    message: {
+        error: 'Too many requests from this IP, please try again later.'
+    }
+});
+app.use('/api/', limiter);
+
+// Compression
+app.use(compression());
+
+// Environment-based configuration
+const config = {
+    development: {
+        port: 4000,
+        host: 'localhost',
+        logLevel: 'debug'
+    },
+    production: {
+        port: process.env.PORT || 80,
+        host: '0.0.0.0',
+        logLevel: 'warn'
+    }
+};
+
+const environment = process.env.NODE_ENV || 'development';
+const currentConfig = config[environment];
+
+// Advanced error handling
+class AppError extends Error {
+    constructor(message, statusCode) {
+        super(message);
+        this.statusCode = statusCode;
+        this.isOperational = true;
+        Error.captureStackTrace(this, this.constructor);
+    }
+}
+
+// Async error wrapper (avoid try-catch in every route)
+const asyncHandler = (fn) => (req, res, next) => {
+    Promise.resolve(fn(req, res, next)).catch(next);
+};
+
+// Example with async handler
+app.get('/api/async-users', asyncHandler(async (req, res) => {
+    // Simulate async operation
+    const users = await Promise.resolve([...users]);
+    res.json({ success: true, data: users });
+}));
+
+// Global error handler
+app.use((err, req, res, next) => {
+    err.statusCode = err.statusCode || 500;
+    err.status = err.status || 'error';
+
+    if (process.env.NODE_ENV === 'development') {
+        res.status(err.statusCode).json({
+            status: err.status,
+            error: err,
+            message: err.message,
+            stack: err.stack
+        });
+    } else {
+        // Production: don't leak error details
+        if (err.isOperational) {
+            res.status(err.statusCode).json({
+                status: err.status,
+                message: err.message
+            });
+        } else {
+            console.error('ERROR 💥', err);
+            res.status(500).json({
+                status: 'error',
+                message: 'Something went wrong!'
+            });
+        }
+    }
+});
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+    console.log('SIGTERM received. Shutting down gracefully...');
+    server.close(() => {
+        console.log('Process terminated');
+    });
+});`
+    }
 ];
 
 // Enhanced Questions and Tasks with Node.js content
@@ -598,58 +808,55 @@ const questions = [
     // Node.js Fundamentals
     {
         type: "question",
-        question: "What is the purpose of the http.createServer() method?",
+        question: "What does the 'next' function do in Express middleware?",
         options: [
-            "To create a web browser",
-            "To create an HTTP server that listens for requests",
-            "To download files from the internet",
-            "To connect to a database"
+            "It sends a response to the client",
+            "It moves to the next middleware function in the stack",
+            "It skips the current request",
+            "It terminates the request-response cycle"
         ],
         correctIndex: 1
     },
+    // Practical Tasks - Express.js
     {
-        type: "question",
-        question: "What is the main advantage of using Express.js over the built-in HTTP module?",
-        options: [
-            "Express.js is faster than HTTP module",
-            "Express.js provides built-in database connectivity",
-            "Express.js offers a higher-level abstraction with routing and middleware support",
-            "Express.js doesn't require Node.js to run"
-        ],
-        correctIndex: 2
+        type: "task",
+        title: "Complete REST API Implementation",
+        content: "Build a complete REST API for a 'products' resource with full CRUD operations. Include input validation, proper HTTP status codes, error handling, and implement filtering, sorting, and pagination for the GET endpoints."
     },
     {
-        type: "question", 
-        question: "Which middleware is required to parse JSON request bodies in Express?",
-        options: [
-            "app.use(express.json())",
-            "app.use(bodyParser.json())", 
-            "app.use(JSON.parse())",
-            "JSON parsing is built-in and doesn't require middleware"
-        ],
-        correctIndex: 0
-    },
-    {
-        type: "question",
-        question: "Your Express app returns 404 for all routes. What could be the issue?",
-        options: [
-            "The server is not running",
-            "Routes are defined after error handling middleware",
-            "The port number is incorrect", 
-            "All of the above"
-        ],
-        correctIndex: 3
+        type: "task",
+        title: "Middleware Development",
+        content: "Create custom middleware for authentication, request logging, and rate limiting. Implement an error handling middleware that differentiates between operational errors and programming errors, providing appropriate responses for each."
     },
     {
         type: "task", 
-        title: "Basic HTTP Server",
-        content: "Create an HTTP server that handles different routes and HTTP methods. Implement a simple REST API for a resource (like 'users') with GET, POST, PUT, and DELETE operations. Test your API using curl or Postman."
+        title: "API Security Implementation",
+        content: "Secure your Express application by implementing CORS, Helmet for security headers, input sanitization, and parameter validation. Add rate limiting and implement proper authentication using JWT tokens."
+    },
+
+    // Search & Research Tasks
+    {
+        type: "search-task",
+        title: "Research: Express.js Best Practices",
+        content: "Research and document Express.js best practices for production applications. Include topics like project structure, environment configuration, performance optimization, security practices, and deployment strategies. Create a checklist for production-ready Express applications."
+    },
+    {
+        type: "search-task", 
+        title: "Study: Express Middleware Ecosystem",
+        content: "Explore the most popular Express middleware packages and their use cases. Research and compare packages for authentication (Passport.js, JWT), validation (Joi, Express-validator), logging (Morgan, Winston), and error handling. Create a guide on when to use each middleware."
     },
     {
         type: "search-task",
-        title: "Research: Node.js Event Loop",
-        content: "Research the Node.js event loop and how it handles asynchronous operations. Understand the differences between callbacks, promises, and async/await. Create a presentation explaining the event loop with diagrams and examples."
+        title: "Advanced: Express.js Performance Optimization",
+        content: "Research techniques for optimizing Express.js application performance. Study clustering with Node.js, caching strategies, database optimization, compression, and load balancing. Implement and benchmark different optimization techniques in a sample application."
     },
+
+    // Debugging & Problem Solving
+    {
+        type: "task",
+        title: "Debugging Challenge",
+        content: "Given a buggy Express application with multiple issues (CORS errors, memory leaks, route conflicts, middleware order problems), identify and fix all the issues. Document each problem and your solution approach."
+    }
     // Practical Tasks - Node.js
 ];// ==================== TEMPLATE RENDERING ====================
         // Functions to render the content - you don't need to modify these
