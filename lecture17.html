@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Focal X - Node.js Bootcamp: Lecture 16 </title>
+    <title>Focal X - Node.js Bootcamp: Lecture 17 </title>
     <style>
         * {
             margin: 0;
@@ -306,7 +306,7 @@
         // Lecture metadata
         const lectureConfig = {
             title: "Focal X - Node.js Bootcamp",
-            subtitle: "NPM, Development Tools & ExpressJS (Middlewares, Project Structure)"
+            subtitle: "ExpressJS (Advanced)"
         };
         
        // Lecture content organized by tabs
@@ -315,311 +315,8 @@ const lectureContent = [
         tabTitle: "Last Lesson",
         title: "Last Lesson Recap",
         content: `/*
-1- HTTP Module
-2- ExpressJS Setup
-3- ExpressJS Routing
+1- Solve Task 5
 */`
-    },
-    {
-        tabTitle: "NPM & Package Management",
-        title: "Node Package Manager Essentials",
-        content: `/*
-NPM (Node Package Manager) - Your development toolbox
-
-Why we need libraries?
-• Write code faster & more efficient
-• Solve common problems others have already solved
-• Focus on business logic rather than reinventing wheels
-
-Key Commands:
-• npm init / npm init -y - Create package.json
-• npm install <package> - Local installation
-• npm install -g <package> - Global installation
-• npm uninstall <package> - Remove package
-• npm update <package> - Update package
-
-Understanding package.json:
-• dependencies - Production packages
-• devDependencies - Development-only packages (nodemon, testing tools)
-• scripts - Custom automation commands
-
-What is node_modules?
-• Contains all modules and their dependencies
-• Can see library code (open source)
-• Be careful about package size and dependencies
-
-Security Best Practices:
-• Check package popularity and maintenance
-• Regular security audits: npm audit
-• Use specific versions, not wildcards
-*/
-
-// package.json example
-{
-  "name": "my-express-app",
-  "version": "1.0.0",
-  "description": "A sample Express application",
-  "main": "app.js",
-  "scripts": {
-    "start": "node app.js",
-    "dev": "nodemon app.js",
-    "test": "jest"
-  },
-  "dependencies": {
-    "express": "^4.18.0",
-    "cors": "^2.8.5"
-  },
-  "devDependencies": {
-    "nodemon": "^2.0.0",
-    "jest": "^28.0.0"
-  }
-}
-
-// Versioning: [major].[minor].[patch]
-// Example: 1.2.3 - Major changes . minor features . bug fixes`
-    },
-    {
-        tabTitle: "Development Tools & Environment",
-        title: "Essential Development Setup",
-        content: `/*
-Development Tools & Environment Configuration
-*/
-
-// 1. Nodemon - Auto-restart server on changes
-// Difference between nodemon and --watch?
-// nodemon: More features, watches multiple file types, configurable
-// --watch: Basic file watching built into Node.js
-
-// Installation: npm install -g nodemon
-// Usage: nodemon app.js instead of node app.js
-
-// 2. Environment Variables & .env Files
-// What is .env file?
-// - Configuration file for environment variables
-// - Stores sensitive data (API keys, database URLs, ports)
-// - Never commit to version control
-
-// How to use dotenv:
-const dotenv = require('dotenv');
-dotenv.config();
-
-// Access environment variables:
-const port = process.env.PORT || 3000;
-const dbUrl = process.env.DATABASE_URL;
-
-// Why process.env exists?
-// - Node.js provides access to system environment variables
-// - dotenv loads .env file into process.env
-
-// .env file example:
-/*
-PORT=4000
-DATABASE_URL=mongodb://localhost:27017/mydb
-JWT_SECRET=your-secret-key
-API_KEY=your-api-key
-NODE_ENV=development
-*/
-
-// 3. .gitignore - Files to exclude from version control
-// Essential entries for Node.js:
-/*
-node_modules/
-.env
-.env.local
-.DS_Store
-logs/
-*.log
-coverage/
-.nyc_output/
-*/
-
-// 4. API Testing Tools
-// Postman: https://www.postman.com/downloads/
-// - API development and testing environment
-// - Create, test, and document APIs
-// - Features: Collections, Environments, Automated testing
-
-// Thunder Client (VS Code Extension)
-// - Lightweight REST API client
-// - Integrated directly in VS Code
-// - No separate application needed
-
-// Why use these tools?
-// - Test APIs without building frontend
-// - Debug request/response cycles
-// - Document API endpoints
-// - Automated testing`
-    },
-    {
-        tabTitle: "Request & Response Objects",
-        title: "Mastering Request & Response",
-        content: `/*
-Request Object Properties:
-• req.params - Route parameters
-• req.query - URL query parameters  
-• req.body - Request body (needs middleware)
-• req.headers - HTTP headers
-• req.method - HTTP method
-• req.url - Request URL
-• req.ip - Client IP address
-
-Response Object Methods:
-• res.json() - Send JSON response
-• res.send() - Send various types
-• res.status() - Set status code
-• res.redirect() - Redirect request
-• res.render() - Render view template
-• res.set() - Set headers
-• res.cookie() - Set cookies
-
-Data Access Cheatsheet:
-| Data Type | Source                    | Example                          | Access Method            |
-|-----------|---------------------------|----------------------------------|--------------------------|
-| Params    | URL path segments         | GET /users/123 → 123             | req.params.id            |
-| Query     | URL query string          | GET /search?name=John → John     | req.query.name           |
-| Body      | Submitted data (POST/PUT) | { "name": "John" } → John       | req.body.name            |
-| Headers   | HTTP headers              | Authorization: Bearer token      | req.headers.authorization|
-*/
-
-// Body parsing middleware (REQUIRED for req.body)
-app.use(express.json()); // Parse JSON bodies
-app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
-
-// Request object deep dive
-app.post('/api/users', (req, res) => {
-    try {
-        console.log('Request Method:', req.method);
-        console.log('Request URL:', req.url);
-        console.log('Request Headers:', req.headers);
-        console.log('Request IP:', req.ip);
-        
-        // Body parsing (requires express.json() middleware)
-        const { name, email, age } = req.body;
-        
-        // Query parameters for debugging/options
-        const { debug, version } = req.query;
-        
-        // Response examples with proper error handling
-        if (debug === 'true') {
-            res.status(200).json({
-                success: true,
-                data: { name, email, age },
-                debug: { 
-                    headers: req.headers,
-                    ip: req.ip,
-                    timestamp: new Date().toISOString()
-                }
-            });
-        } else {
-            res.status(201).json({
-                success: true,
-                message: 'User created successfully',
-                data: { name, email, age }
-            });
-        }
-    } catch (error) {
-        console.error('Error processing request:', error);
-        res.status(500).json({
-            success: false,
-            error: 'Internal server error'
-        });
-    }
-});
-
-// Response methods examples
-app.get('/redirect-example', (req, res) => {
-    res.redirect('/new-location');
-});
-
-app.get('/set-headers', (req, res) => {
-    res.set({
-        'Content-Type': 'application/json',
-        'X-Custom-Header': 'MyValue',
-        'Cache-Control': 'no-cache'
-    });
-    res.json({ message: 'Custom headers set' });
-});`
-    },
-    {
-        tabTitle: "Middleware Concepts",
-        title: "Express Middleware Mastery",
-        content: `/*
-Middleware: Functions that have access to request, response, and next function
-
-Types of Middleware:
-1. Application-level middleware
-2. Router-level middleware  
-3. Error-handling middleware
-4. Built-in middleware
-5. Third-party middleware
-
-Execution Order Matters!
-
-Higher Order Functions (HOF) in Middleware:
-• Functions that return other functions
-• Used for configuration (like morgan("dev"))
-• Enable reusable, configurable middleware
-*/
-
-// Custom middleware example
-const loggerMiddleware = (req, res, next) => {
-    console.log(\`[\${new Date().toISOString()}] \${req.method} \${req.url}\`);
-    next(); // Continue to next middleware/route
-};
-
-// HOF Middleware example (configurable)
-const createAuthMiddleware = (requiredRole = 'user') => {
-    return (req, res, next) => {
-        const token = req.headers.authorization;
-        
-        if (!token) {
-            return res.status(401).json({ error: 'No token provided' });
-        }
-        
-        // Validate token and role (simplified)
-        const user = validateToken(token);
-        if (!user || (requiredRole !== 'user' && user.role !== requiredRole)) {
-            return res.status(403).json({ error: 'Insufficient permissions' });
-        }
-        
-        req.user = user;
-        next();
-    };
-};
-
-// Apply middleware in correct order
-app.use(express.json()); // Built-in - MUST come first for body parsing
-app.use(express.urlencoded({ extended: true })); // URL-encoded data
-app.use(loggerMiddleware); // Custom logging
-app.use('/api/admin', createAuthMiddleware('admin')); // Route-specific with HOF
-app.use('/api/protected', createAuthMiddleware()); // Route-specific
-
-// Error handling middleware (must be last)
-app.use((error, req, res, next) => {
-    console.error('Error:', error);
-    res.status(500).json({ 
-        error: 'Something went wrong!',
-        ...(process.env.NODE_ENV === 'development' && { stack: error.stack })
-    });
-});
-
-// 404 handler (must be last middleware)
-app.use('*', (req, res) => {
-    res.status(404).json({ error: 'Route not found' });
-});
-
-// Popular third-party middleware:
-// • cors - Enable CORS
-// • helmet - Security headers  
-// • morgan - HTTP request logger
-// • compression - Response compression
-// • cookie-parser - Parse cookies
-
-// API Logging options:
-// 1. Handmade logger (like above)
-// 2. Morgan: npm install morgan
-const morgan = require('morgan');
-app.use(morgan('dev')); // Pre-configured logging formats`
     },
     {
         tabTitle: "Project Structure & Organization",
@@ -722,82 +419,350 @@ module.exports = app;
 // Using plop.js for code generation (devDependencies)
 // Why in devDependencies? Only used during development, not in production`
     },
+    {
+        tabTitle: "CRUD Operations & Validation",
+        title: "Building Robust CRUD APIs",
+        content: `/*
+Complete CRUD Implementation with:
+• Input validation
+• Error handling with try-catch
+• Proper status codes
+• Data sanitization
+*/
+
+let users = [
+    { id: 1, name: "moones", age: 21, email: "moones@example.com" },
+    { id: 2, name: "rami", age: 31, email: "rami@example.com" },
+    { id: 3, name: "dana", age: 41, email: "dana@example.com" }
+];
+
+// Input validation middleware
+const validateUser = (req, res, next) => {
+    try {
+        const { name, age, email } = req.body;
+        const errors = [];
+
+        if (!name || typeof name !== 'string' || name.length < 2) {
+            errors.push('Name must be a string with at least 2 characters');
+        }
+
+        if (!age || typeof age !== 'number' || age < 18 || age > 120) {
+            errors.push('Age must be a number between 18 and 120');
+        }
+
+        if (!email || !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)) {
+            errors.push('Valid email is required');
+        }
+
+        if (errors.length > 0) {
+            return res.status(400).json({ 
+                success: false,
+                error: 'Validation failed', 
+                details: errors 
+            });
+        }
+
+        next();
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            error: 'Validation error'
+        });
+    }
+};
+
+// GET all users with filtering and error handling
+app.get('/api/users', async (req, res) => {
+    try {
+        const { minAge, maxAge, search } = req.query;
+        let filteredUsers = [...users];
+
+        if (minAge) {
+            filteredUsers = filteredUsers.filter(user => user.age >= parseInt(minAge));
+        }
+
+        if (maxAge) {
+            filteredUsers = filteredUsers.filter(user => user.age <= parseInt(maxAge));
+        }
+
+        if (search) {
+            filteredUsers = filteredUsers.filter(user => 
+                user.name.toLowerCase().includes(search.toLowerCase())
+            );
+        }
+
+        res.json({
+            success: true,
+            count: filteredUsers.length,
+            data: filteredUsers
+        });
+    } catch (error) {
+        console.error('Get users error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to fetch users'
+        });
+    }
+});
+
+// POST create user with validation
+app.post('/api/users', validateUser, async (req, res) => {
+    try {
+        const { name, age, email } = req.body;
+        
+        // Check for duplicate email
+        const existingUser = users.find(u => u.email === email);
+        if (existingUser) {
+            return res.status(409).json({
+                success: false,
+                error: 'User with this email already exists'
+            });
+        }
+
+        const newId = Math.max(...users.map(u => u.id)) + 1;
+        const newUser = { id: newId, name, age, email };
+        
+        users.push(newUser);
+        
+        res.status(201).json({
+            success: true,
+            message: 'User created successfully',
+            data: newUser
+        });
+    } catch (error) {
+        console.error('Create user error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to create user'
+        });
+    }
+});
+
+// PUT update user
+app.put('/api/users/:id', validateUser, async (req, res) => {
+    try {
+        const id = parseInt(req.params.id);
+        const userIndex = users.findIndex(u => u.id === id);
+
+        if (userIndex === -1) {
+            return res.status(404).json({
+                success: false,
+                error: 'User not found'
+            });
+        }
+
+        const { name, age, email } = req.body;
+        
+        // Check email uniqueness (excluding current user)
+        const emailExists = users.some(u => u.email === email && u.id !== id);
+        if (emailExists) {
+            return res.status(409).json({
+                success: false,
+                error: 'Email already in use by another user'
+            });
+        }
+
+        users[userIndex] = { ...users[userIndex], name, age, email };
+
+        res.json({
+            success: true,
+            message: 'User updated successfully',
+            data: users[userIndex]
+        });
+    } catch (error) {
+        console.error('Update user error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to update user'
+        });
+    }
+});`
+    },
+    {
+        tabTitle: "Advanced Express Features",
+        title: "Production-Ready Express Applications",
+        content: `/*
+Production Best Practices:
+• Environment configuration
+• Security headers
+• Rate limiting
+• Request sanitization
+• Proper error handling
+• Logging
+• Performance optimization
+*/
+
+const cors = require('cors');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+const compression = require('compression');
+
+// Security middleware
+app.use(helmet({
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            styleSrc: ["'self'", "'unsafe-inline'"],
+            scriptSrc: ["'self'"],
+            imgSrc: ["'self'", "data:", "https:"],
+        },
+    },
+    crossOriginEmbedderPolicy: false
+}));
+
+// CORS configuration
+app.use(cors({
+    origin: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000'],
+    credentials: true
+}));
+
+// Rate limiting
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // limit each IP to 100 requests per windowMs
+    message: {
+        error: 'Too many requests from this IP, please try again later.'
+    }
+});
+app.use('/api/', limiter);
+
+// Compression
+app.use(compression());
+
+// Environment-based configuration
+const config = {
+    development: {
+        port: 4000,
+        host: 'localhost',
+        logLevel: 'debug'
+    },
+    production: {
+        port: process.env.PORT || 80,
+        host: '0.0.0.0',
+        logLevel: 'warn'
+    }
+};
+
+const environment = process.env.NODE_ENV || 'development';
+const currentConfig = config[environment];
+
+// Advanced error handling
+class AppError extends Error {
+    constructor(message, statusCode) {
+        super(message);
+        this.statusCode = statusCode;
+        this.isOperational = true;
+        Error.captureStackTrace(this, this.constructor);
+    }
+}
+
+// Async error wrapper (avoid try-catch in every route)
+const asyncHandler = (fn) => (req, res, next) => {
+    Promise.resolve(fn(req, res, next)).catch(next);
+};
+
+// Example with async handler
+app.get('/api/async-users', asyncHandler(async (req, res) => {
+    // Simulate async operation
+    const users = await Promise.resolve([...users]);
+    res.json({ success: true, data: users });
+}));
+
+// Global error handler
+app.use((err, req, res, next) => {
+    err.statusCode = err.statusCode || 500;
+    err.status = err.status || 'error';
+
+    if (process.env.NODE_ENV === 'development') {
+        res.status(err.statusCode).json({
+            status: err.status,
+            error: err,
+            message: err.message,
+            stack: err.stack
+        });
+    } else {
+        // Production: don't leak error details
+        if (err.isOperational) {
+            res.status(err.statusCode).json({
+                status: err.status,
+                message: err.message
+            });
+        } else {
+            console.error('ERROR 💥', err);
+            res.status(500).json({
+                status: 'error',
+                message: 'Something went wrong!'
+            });
+        }
+    }
+});
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+    console.log('SIGTERM received. Shutting down gracefully...');
+    server.close(() => {
+        console.log('Process terminated');
+    });
+});`
+    }
 ];
 
 // Enhanced Questions and Tasks with new content
 const questions = [
-    // Development Tools & Environment
-    {
-        type: "question",
-        question: "What is the main purpose of a .env file in Node.js applications?",
-        options: [
-            "To store HTML templates",
-            "To store environment variables and configuration",
-            "To store JavaScript functions",
-            "To store database queries"
-        ],
-        correctIndex: 1
-    },
-    {
-        type: "question",
-        question: "Which files should be included in .gitignore for a Node.js project?",
-        options: [
-            "package.json and app.js",
-            "node_modules and .env",
-            "src folder and routes",
-            "README.md and documentation"
-        ],
-        correctIndex: 1
-    },
-    {
-        type: "question",
-        question: "What is the key difference between nodemon and Node.js --watch flag?",
-        options: [
-            "Nodemon only works on Windows",
-            "--watch has more features and configuration options",
-            "Nodemon watches more file types and is more configurable",
-            "There is no difference, they are the same"
-        ],
-        correctIndex: 2
-    },
-    {
-        type: "question",
-        question: "How do you access environment variables in a Node.js application?",
-        options: [
-            "Using process.config",
-            "Using global.env",
-            "Using process.env",
-            "Using require('env')"
-        ],
-        correctIndex: 2
-    },
-
     // Project Structure & Organization
+    {
+        type: "question",
+        question: "What is the main benefit of organizing code into controllers, routes, and models?",
+        options: [
+            "It makes the code run faster",
+            "It improves code organization and separation of concerns",
+            "It reduces the number of files",
+            "It eliminates the need for documentation"
+        ],
+        correctIndex: 1
+    },
+    {
+        type: "question",
+        question: "Why should plop.js be installed as a devDependency?",
+        options: [
+            "Because it's only used during development for code generation",
+            "Because it's too large for production",
+            "Because it conflicts with other dependencies",
+            "Because it's not compatible with production environments"
+        ],
+        correctIndex: 0
+    },
 
     // Middleware & Error Handling
     {
         type: "question",
-        question: "What does the 'next' function do in Express middleware?",
+        question: "What is the purpose of using try-catch blocks in controller methods?",
         options: [
-            "It sends a response to the client",
-            "It moves to the next middleware function in the stack",
-            "It skips the current request",
-            "It terminates the request-response cycle"
+            "To make code run faster",
+            "To handle synchronous and asynchronous errors gracefully",
+            "To reduce code length",
+            "To automatically log all requests"
         ],
         correctIndex: 1
     },
+
     // Practical Tasks - Development Tools
     {
         type: "task",
-        title: "Project Structure Implementation",
-        content: "Restructure an existing Express application using the recommended folder structure (src/ with controllers, routes, middlewares, models). Convert existing route handlers to OOP controller classes with proper error handling using try-catch. Implement a central error handling middleware."
+        title: "Environment Setup & API Testing",
+        content: "Set up a new Express project with proper environment configuration. Create a .env file with PORT, DATABASE_URL, and JWT_SECRET variables. Install and configure dotenv. Test your API endpoints using both Postman and Thunder Client, creating a collection of test cases."
     },
 
     // Practical Tasks - Express.js
     {
         type: "task",
-        title: "Middleware Development",
-        content: "Create custom middleware for authentication, request logging, and rate limiting. Implement HOF middleware for role-based access control. Create an error handling middleware that differentiates between operational errors and programming errors, providing appropriate responses for each."
+        title: "Complete REST API Implementation",
+        content: "Build a complete REST API for a 'products' resource with full CRUD operations. Include input validation, proper HTTP status codes, error handling with try-catch, and implement filtering, sorting, and pagination for the GET endpoints."
+    },
+    {
+        type: "task", 
+        title: "API Security Implementation",
+        content: "Secure your Express application by implementing CORS, Helmet for security headers, input sanitization, and parameter validation. Add rate limiting and implement proper authentication using JWT tokens with environment variables for secrets."
     },
 
     // Search & Research Tasks
@@ -807,10 +772,22 @@ const questions = [
         content: "Research and document Express.js best practices for production applications. Include topics like project structure, environment configuration, performance optimization, security practices, and deployment strategies. Create a checklist for production-ready Express applications."
     },
     {
-        type: "search-task", 
-        title: "Study: Express Middleware Ecosystem",
-        content: "Explore the most popular Express middleware packages and their use cases. Research and compare packages for authentication (Passport.js, JWT), validation (Joi, Express-validator), logging (Morgan, Winston), and error handling. Create a guide on when to use each middleware."
+        type: "search-task",
+        title: "Advanced: API Testing Strategies",
+        content: "Research different API testing approaches and tools. Compare Postman, Thunder Client, Jest for API testing, and automated testing strategies. Create a comprehensive testing suite for an Express API including unit tests, integration tests, and end-to-end tests."
     },
+
+    // Debugging & Problem Solving
+    {
+        type: "task",
+        title: "Debugging Challenge",
+        content: "Given a buggy Express application with multiple issues (CORS errors, environment variable problems, middleware order issues, route conflicts), identify and fix all the issues. Document each problem and your solution approach, focusing on proper error handling and project structure."
+    },
+    {
+        type: "task",
+        title: "Performance Optimization",
+        content: "Analyze an existing Express application for performance bottlenecks. Implement compression, caching strategies, database optimization, and proper error handling. Use tools to monitor and improve application performance."
+    }
 ];// Functions to render the content - you don't need to modify these
         
         // Set lecture title and subtitle
