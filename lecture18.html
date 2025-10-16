@@ -306,227 +306,489 @@
         // Lecture metadata
         const lectureConfig = {
             title: "Focal X - Node.js Bootcamp",
-            subtitle: "API Design & Practical Examples"
+            subtitle: "ExpressJS (Advanced)"
         };
         
-        // Lecture content organized by tabs
-        const lectureContent = [
-            {
-                tabTitle: "Last Lesson",
-                title: "Last Lesson Recap",
-                content: `/*
-1- NPM & Package Management
-2- Development Tools & Environment
-3- Request & Response Objects
-4- Middleware Concepts
-5- Project Structure & Organization
+       // Lecture content organized by tabs
+const lectureContent = [
+    {
+        tabTitle: "Last Lesson",
+        title: "Last Lesson Recap",
+        content: `/*
+1- Solve Task 5
 */`
-            },
-            {
-                tabTitle: "Solve Task 5",
-                title: "Git Branching and Module Management",
-                content: `https://github.com/MoonesMezher/solve-task-5`
-            },
-            {
-                tabTitle: "API Design Concepts",
-                title: "API Design Principles & Best Practices",
-                content: `/*
-API DESIGN PRINCIPLES:
+    },
+    {
+        tabTitle: "Project Structure & Organization",
+        title: "Scalable Express Application Architecture",
+        content: `/*
+Recommended Project Structure:
+src/
+  ├── controllers/     # Route handlers (OOP style)
+  ├── routes/         # Route definitions
+  ├── middlewares/    # Custom middleware functions
+  ├── models/         # Data models and schemas
+  ├── config/         # Configuration files
+  ├── utils/          # Utility functions
+  └── app.js          # Express app setup
 
-1. RESTful Architecture
-   - Use HTTP methods appropriately (GET, POST, PUT, DELETE)
-   - Use meaningful resource names
-   - Proper status codes (200, 201, 400, 404, 500)
-   - Consistent response formats
+Benefits:
+• Better code organization
+• Easier maintenance
+• Separation of concerns
+• Team collaboration
+• Testing simplicity
+*/
 
-2. Middleware Usage
-   - Authentication & Authorization
-   - Request validation
-   - Logging & monitoring
-   - Error handling
+// Example of OOP Controller with try-catch
+class UserController {
+    async getAllUsers(req, res) {
+        try {
+            // Business logic here
+            const users = await UserModel.findAll();
+            res.json({
+                success: true,
+                count: users.length,
+                data: users
+            });
+        } catch (error) {
+            console.error('Get users error:', error);
+            res.status(500).json({
+                success: false,
+                error: 'Failed to fetch users'
+            });
+        }
+    }
 
-3. Route Organization
-   - Group related endpoints
-   - Version your APIs
-   - Use clear naming conventions
-*/`
-            },
-            {
-                tabTitle: "API Examples",
-                title: "Practical API Design Examples",
-                content: `/*
-EXAMPLE 1: CAR DEALERSHIP API
+    async createUser(req, res) {
+        try {
+            const { name, email, age } = req.body;
+            
+            // Validation
+            if (!name || !email) {
+                return res.status(400).json({
+                    success: false,
+                    error: 'Name and email are required'
+                });
+            }
 
-Endpoints:
-- GET /api/v1/cars - List all cars (with filters)
-- GET /api/v1/cars/:id - Get specific car details
-- POST /api/v1/cars - Add new car (admin only)
-- PUT /api/v1/cars/:id - Update car information
-- DELETE /api/v1/cars/:id - Remove car from inventory
+            const newUser = await UserModel.create({ name, email, age });
+            
+            res.status(201).json({
+                success: true,
+                message: 'User created successfully',
+                data: newUser
+            });
+        } catch (error) {
+            console.error('Create user error:', error);
+            res.status(500).json({
+                success: false,
+                error: 'Failed to create user'
+            });
+        }
+    }
+}
 
-Middleware needed:
-- Authentication for admin actions
-- Validation for car data
-- Caching for frequently accessed data
-- Rate limiting for public endpoints
+// Route definition example (routes/users.js)
+const express = require('express');
+const router = express.Router();
+const userController = new UserController();
 
-EXAMPLE 2: RESTAURANT ORDERING API
+router.get('/', userController.getAllUsers.bind(userController));
+router.post('/', userController.createUser.bind(userController));
 
-Endpoints:
-- GET /api/v1/menu - Get restaurant menu
-- POST /api/v1/orders - Place new order
-- GET /api/v1/orders/:id - Get order status
-- PUT /api/v1/orders/:id - Update order
-- GET /api/v1/orders/history - Customer order history
+module.exports = router;
 
-Middleware needed:
-- Authentication for customers
-- Payment processing integration
-- Order validation
-- Real-time notifications
+// Main app.js structure
+const express = require('express');
+const app = express();
 
-EXAMPLE 3: E-COMMERCE STORE API
+// Middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-Endpoints:
-- GET /api/v1/products - Browse products
-- POST /api/v1/cart - Add to cart
-- GET /api/v1/cart - View cart
-- POST /api/v1/checkout - Process order
-- GET /api/v1/orders/:id - Track order
+// Routes
+app.use('/api/users', require('./src/routes/users'));
+app.use('/api/products', require('./src/routes/products'));
 
-Middleware needed:
-- User authentication
-- Inventory management
-- Payment gateway integration
-- Shipping calculation
-- Email notifications
-*/`
-            },
-        ];
+// Error handling middleware
+app.use(require('./src/middlewares/errorHandler'));
 
-        // Updated Questions and Tasks focusing on APIs, middleware, routes, and methods
-        const questions = [
-            // API Design & Structure
-            {
-                type: "question",
-                question: "Which HTTP method is most appropriate for creating a new resource in a RESTful API?",
-                options: [
-                    "GET",
-                    "POST", 
-                    "PUT",
-                    "DELETE"
-                ],
-                correctIndex: 1
-            },
-            {
-                type: "question",
-                question: "What is the primary purpose of middleware in an Express application?",
-                options: [
-                    "To render HTML templates",
-                    "To handle database connections only",
-                    "To process requests and responses in the request-response cycle",
-                    "To serve static files exclusively"
-                ],
-                correctIndex: 2
-            },
-            {
-                type: "question",
-                question: "Which HTTP status code should be returned when a resource is successfully created?",
-                options: [
-                    "200 OK",
-                    "201 Created",
-                    "400 Bad Request", 
-                    "404 Not Found"
-                ],
-                correctIndex: 1
-            },
-            {
-                type: "question",
-                question: "What is the correct order of middleware execution in Express?",
-                options: [
-                    "Random order based on performance",
-                    "The order they are defined in the code",
-                    "Alphabetical order by middleware name",
-                    "Based on the complexity of middleware"
-                ],
-                correctIndex: 1
-            },
-            {
-                type: "question",
-                question: "Which HTTP method is idempotent (can be called multiple times without changing the result)?",
-                options: [
-                    "POST",
-                    "PUT",
-                    "PATCH",
-                    "All of the above"
-                ],
-                correctIndex: 1
-            },
-            {
-                type: "question",
-                question: "What is the purpose of route parameters in Express?",
-                options: [
-                    "To store sensitive configuration data",
-                    "To capture values from the URL path",
-                    "To handle query string parameters",
-                    "To define middleware functions"
-                ],
-                correctIndex: 1
-            },
-            {
-                type: "question",
-                question: "Which Express method is used to handle all HTTP methods for a specific route?",
-                options: [
-                    "app.get()",
-                    "app.post()",
-                    "app.all()",
-                    "app.use()"
-                ],
-                correctIndex: 2
-            },
-            {
-                type: "question",
-                question: "What does the 'next' function do in Express middleware?",
-                options: [
-                    "It sends a response to the client",
-                    "It moves to the next middleware function in the stack",
-                    "It skips the current request",
-                    "It terminates the request-response cycle"
-                ],
-                correctIndex: 1
-            },
+module.exports = app;
 
-            // Practical Tasks
-            {
-                type: "task",
-                title: "Car Dealership API Design",
-                content: "Design the complete backend structure for a car dealership API. Include routes for inventory management, customer inquiries, and admin functions. Plan the middleware needed for authentication, validation, and error handling."
-            },
-            {
-                type: "task",
-                title: "Restaurant Ordering System",
-                content: "Create the API specification for a restaurant ordering system. Define endpoints for menu management, order processing, and payment integration. Consider the middleware required for order validation and real-time updates."
-            },
-            {
-                type: "task",
-                title: "E-commerce API Implementation Plan",
-                content: "Plan the backend implementation for an e-commerce store. Outline the routes, middleware, and data models needed for product catalog, shopping cart, checkout process, and order management."
-            },
+// Using plop.js for code generation (devDependencies)
+// Why in devDependencies? Only used during development, not in production`
+    },
+    {
+        tabTitle: "CRUD Operations & Validation",
+        title: "Building Robust CRUD APIs",
+        content: `/*
+Complete CRUD Implementation with:
+• Input validation
+• Error handling with try-catch
+• Proper status codes
+• Data sanitization
+*/
 
-            // Search & Research Tasks
-            {
-                type: "search-task",
-                title: "Research: REST API Best Practices",
-                content: "Research and document REST API best practices including naming conventions, versioning strategies, error handling patterns, and security considerations. Create a checklist for designing production-ready APIs."
-            },
-            {
-                type: "search-task", 
-                title: "Study: Express Middleware Patterns",
-                content: "Explore different middleware patterns in Express applications. Research error handling middleware, authentication middleware, validation middleware, and logging middleware. Document when and how to use each pattern effectively."
-            },
-        ];
+let users = [
+    { id: 1, name: "moones", age: 21, email: "moones@example.com" },
+    { id: 2, name: "rami", age: 31, email: "rami@example.com" },
+    { id: 3, name: "dana", age: 41, email: "dana@example.com" }
+];
 
-        // Functions to render the content - you don't need to modify these
+// Input validation middleware
+const validateUser = (req, res, next) => {
+    try {
+        const { name, age, email } = req.body;
+        const errors = [];
+
+        if (!name || typeof name !== 'string' || name.length < 2) {
+            errors.push('Name must be a string with at least 2 characters');
+        }
+
+        if (!age || typeof age !== 'number' || age < 18 || age > 120) {
+            errors.push('Age must be a number between 18 and 120');
+        }
+
+        if (!email || !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)) {
+            errors.push('Valid email is required');
+        }
+
+        if (errors.length > 0) {
+            return res.status(400).json({ 
+                success: false,
+                error: 'Validation failed', 
+                details: errors 
+            });
+        }
+
+        next();
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            error: 'Validation error'
+        });
+    }
+};
+
+// GET all users with filtering and error handling
+app.get('/api/users', async (req, res) => {
+    try {
+        const { minAge, maxAge, search } = req.query;
+        let filteredUsers = [...users];
+
+        if (minAge) {
+            filteredUsers = filteredUsers.filter(user => user.age >= parseInt(minAge));
+        }
+
+        if (maxAge) {
+            filteredUsers = filteredUsers.filter(user => user.age <= parseInt(maxAge));
+        }
+
+        if (search) {
+            filteredUsers = filteredUsers.filter(user => 
+                user.name.toLowerCase().includes(search.toLowerCase())
+            );
+        }
+
+        res.json({
+            success: true,
+            count: filteredUsers.length,
+            data: filteredUsers
+        });
+    } catch (error) {
+        console.error('Get users error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to fetch users'
+        });
+    }
+});
+
+// POST create user with validation
+app.post('/api/users', validateUser, async (req, res) => {
+    try {
+        const { name, age, email } = req.body;
+        
+        // Check for duplicate email
+        const existingUser = users.find(u => u.email === email);
+        if (existingUser) {
+            return res.status(409).json({
+                success: false,
+                error: 'User with this email already exists'
+            });
+        }
+
+        const newId = Math.max(...users.map(u => u.id)) + 1;
+        const newUser = { id: newId, name, age, email };
+        
+        users.push(newUser);
+        
+        res.status(201).json({
+            success: true,
+            message: 'User created successfully',
+            data: newUser
+        });
+    } catch (error) {
+        console.error('Create user error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to create user'
+        });
+    }
+});
+
+// PUT update user
+app.put('/api/users/:id', validateUser, async (req, res) => {
+    try {
+        const id = parseInt(req.params.id);
+        const userIndex = users.findIndex(u => u.id === id);
+
+        if (userIndex === -1) {
+            return res.status(404).json({
+                success: false,
+                error: 'User not found'
+            });
+        }
+
+        const { name, age, email } = req.body;
+        
+        // Check email uniqueness (excluding current user)
+        const emailExists = users.some(u => u.email === email && u.id !== id);
+        if (emailExists) {
+            return res.status(409).json({
+                success: false,
+                error: 'Email already in use by another user'
+            });
+        }
+
+        users[userIndex] = { ...users[userIndex], name, age, email };
+
+        res.json({
+            success: true,
+            message: 'User updated successfully',
+            data: users[userIndex]
+        });
+    } catch (error) {
+        console.error('Update user error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to update user'
+        });
+    }
+});`
+    },
+    {
+        tabTitle: "Advanced Express Features",
+        title: "Production-Ready Express Applications",
+        content: `/*
+Production Best Practices:
+• Environment configuration
+• Security headers
+• Rate limiting
+• Request sanitization
+• Proper error handling
+• Logging
+• Performance optimization
+*/
+
+const cors = require('cors');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+const compression = require('compression');
+
+// Security middleware
+app.use(helmet({
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            styleSrc: ["'self'", "'unsafe-inline'"],
+            scriptSrc: ["'self'"],
+            imgSrc: ["'self'", "data:", "https:"],
+        },
+    },
+    crossOriginEmbedderPolicy: false
+}));
+
+// CORS configuration
+app.use(cors({
+    origin: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000'],
+    credentials: true
+}));
+
+// Rate limiting
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // limit each IP to 100 requests per windowMs
+    message: {
+        error: 'Too many requests from this IP, please try again later.'
+    }
+});
+app.use('/api/', limiter);
+
+// Compression
+app.use(compression());
+
+// Environment-based configuration
+const config = {
+    development: {
+        port: 4000,
+        host: 'localhost',
+        logLevel: 'debug'
+    },
+    production: {
+        port: process.env.PORT || 80,
+        host: '0.0.0.0',
+        logLevel: 'warn'
+    }
+};
+
+const environment = process.env.NODE_ENV || 'development';
+const currentConfig = config[environment];
+
+// Advanced error handling
+class AppError extends Error {
+    constructor(message, statusCode) {
+        super(message);
+        this.statusCode = statusCode;
+        this.isOperational = true;
+        Error.captureStackTrace(this, this.constructor);
+    }
+}
+
+// Async error wrapper (avoid try-catch in every route)
+const asyncHandler = (fn) => (req, res, next) => {
+    Promise.resolve(fn(req, res, next)).catch(next);
+};
+
+// Example with async handler
+app.get('/api/async-users', asyncHandler(async (req, res) => {
+    // Simulate async operation
+    const users = await Promise.resolve([...users]);
+    res.json({ success: true, data: users });
+}));
+
+// Global error handler
+app.use((err, req, res, next) => {
+    err.statusCode = err.statusCode || 500;
+    err.status = err.status || 'error';
+
+    if (process.env.NODE_ENV === 'development') {
+        res.status(err.statusCode).json({
+            status: err.status,
+            error: err,
+            message: err.message,
+            stack: err.stack
+        });
+    } else {
+        // Production: don't leak error details
+        if (err.isOperational) {
+            res.status(err.statusCode).json({
+                status: err.status,
+                message: err.message
+            });
+        } else {
+            console.error('ERROR 💥', err);
+            res.status(500).json({
+                status: 'error',
+                message: 'Something went wrong!'
+            });
+        }
+    }
+});
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+    console.log('SIGTERM received. Shutting down gracefully...');
+    server.close(() => {
+        console.log('Process terminated');
+    });
+});`
+    }
+];
+
+// Enhanced Questions and Tasks with new content
+const questions = [
+    // Project Structure & Organization
+    {
+        type: "question",
+        question: "What is the main benefit of organizing code into controllers, routes, and models?",
+        options: [
+            "It makes the code run faster",
+            "It improves code organization and separation of concerns",
+            "It reduces the number of files",
+            "It eliminates the need for documentation"
+        ],
+        correctIndex: 1
+    },
+    {
+        type: "question",
+        question: "Why should plop.js be installed as a devDependency?",
+        options: [
+            "Because it's only used during development for code generation",
+            "Because it's too large for production",
+            "Because it conflicts with other dependencies",
+            "Because it's not compatible with production environments"
+        ],
+        correctIndex: 0
+    },
+
+    // Middleware & Error Handling
+    {
+        type: "question",
+        question: "What is the purpose of using try-catch blocks in controller methods?",
+        options: [
+            "To make code run faster",
+            "To handle synchronous and asynchronous errors gracefully",
+            "To reduce code length",
+            "To automatically log all requests"
+        ],
+        correctIndex: 1
+    },
+
+    // Practical Tasks - Development Tools
+    {
+        type: "task",
+        title: "Environment Setup & API Testing",
+        content: "Set up a new Express project with proper environment configuration. Create a .env file with PORT, DATABASE_URL, and JWT_SECRET variables. Install and configure dotenv. Test your API endpoints using both Postman and Thunder Client, creating a collection of test cases."
+    },
+
+    // Practical Tasks - Express.js
+    {
+        type: "task",
+        title: "Complete REST API Implementation",
+        content: "Build a complete REST API for a 'products' resource with full CRUD operations. Include input validation, proper HTTP status codes, error handling with try-catch, and implement filtering, sorting, and pagination for the GET endpoints."
+    },
+    {
+        type: "task", 
+        title: "API Security Implementation",
+        content: "Secure your Express application by implementing CORS, Helmet for security headers, input sanitization, and parameter validation. Add rate limiting and implement proper authentication using JWT tokens with environment variables for secrets."
+    },
+
+    // Search & Research Tasks
+    {
+        type: "search-task",
+        title: "Research: Express.js Best Practices",
+        content: "Research and document Express.js best practices for production applications. Include topics like project structure, environment configuration, performance optimization, security practices, and deployment strategies. Create a checklist for production-ready Express applications."
+    },
+    {
+        type: "search-task",
+        title: "Advanced: API Testing Strategies",
+        content: "Research different API testing approaches and tools. Compare Postman, Thunder Client, Jest for API testing, and automated testing strategies. Create a comprehensive testing suite for an Express API including unit tests, integration tests, and end-to-end tests."
+    },
+
+    // Debugging & Problem Solving
+    {
+        type: "task",
+        title: "Debugging Challenge",
+        content: "Given a buggy Express application with multiple issues (CORS errors, environment variable problems, middleware order issues, route conflicts), identify and fix all the issues. Document each problem and your solution approach, focusing on proper error handling and project structure."
+    },
+    {
+        type: "task",
+        title: "Performance Optimization",
+        content: "Analyze an existing Express application for performance bottlenecks. Implement compression, caching strategies, database optimization, and proper error handling. Use tools to monitor and improve application performance."
+    }
+];// Functions to render the content - you don't need to modify these
         
         // Set lecture title and subtitle
         document.getElementById('lecture-title').textContent = lectureConfig.title;
