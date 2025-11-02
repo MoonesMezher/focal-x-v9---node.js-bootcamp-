@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Focal X - Node.js Bootcamp: Lecture 19 </title>
+    <title>Focal X - Node.js Bootcamp: Lecture 20 </title>
     <style>
         * {
             margin: 0;
@@ -306,7 +306,7 @@
         // Lecture metadata
         const lectureConfig = {
             title: "Focal X - Node.js Bootcamp",
-            subtitle: "MongoDB & Mongoose"
+            subtitle: "MongoDB & ExpressJS (Advanced)"
         };
         
        // Lecture content organized by tabs
@@ -315,149 +315,11 @@ const lectureContent = [
         tabTitle: "Last Lesson",
         title: "Last Lesson Recap",
         content: `/*
-1- Postman
-2- Plop 
-3- Database Fundamentals
-4- MongoDB
-5- MongoDB Setup
-*/`
-    },
-    {
-        tabTitle: "MongoDB Setup",
-        title: "MongoDB Atlas & Local Installation",
-        content: `/*
-Option A: MongoDB Atlas (Cloud - Recommended for Production)
-1. Create account at https://www.mongodb.com/cloud/atlas
-2. Build a Cluster:
-   - Choose cloud provider (AWS, Google Cloud, Azure)
-   - Select region closest to your users
-   - Choose M0 (Free tier) for development
-3. Security Configuration:
-   - Create database user with read/write privileges
-   - Add IP whitelist: 0.0.0.0/0 (all IPs) for development
-4. Get Connection String:
-mongodb+srv://username:password@cluster0.xzyr.mongodb.net/databaseName?retryWrites=true&w=majority
-
-Option B: Local Installation (Development)
-1. Download MongoDB Community Server
-2. Installation:
-   - Windows: MSI installer with MongoDB Compass
-   - macOS: brew install mongodb-community
-   - Linux: apt-get install mongodb
-3. Start MongoDB service
-4. Connect: mongodb://localhost:27017/databaseName
-
-Connection String Options:
-• Local: mongodb://localhost:27017/yourDatabase
-• Atlas: mongodb+srv://username:password@cluster.mongodb.net/yourDatabase
-• With options: mongodb+srv://username:password@cluster.mongodb.net/yourDatabase?retryWrites=true&w=majority&appName=YourAppName
-*/`
-    },
-    {
-        tabTitle: "MongoDB Compass",
-        title: "MongoDB Compass GUI - Visual Database Management",
-        content: `/*
-MongoDB Compass Features:
-• Visual document explorer and editor
-• Query performance analytics
-• Index management and optimization
-• Schema analysis and validation
-• Aggregation pipeline builder
-• Import/Export capabilities
-• Real-time server statistics
-*/
-
-// ## Connecting to Databases with Compass
-
-/*
-Supported Connection Types:
-1. Local MongoDB: mongodb://localhost:27017
-2. MongoDB Atlas: mongodb+srv://username:password@cluster...
-3. SSH Tunnel connections
-4. TLS/SSL encrypted connections
-*/
-
-// ## Key Compass Features in Detail
-
-// 1. Document Visualization and Editing
-/*
-• Tree and table view of documents
-• JSON editor with syntax highlighting
-• In-place document editing
-• Array and sub-document navigation
-*/
-
-// 2. Query Building
-/*
-• Visual query builder for beginners
-• JSON query input for advanced users
-• Filter, project, sort, and limit queries
-• Save frequently used queries
-*/
-
-// 3. Index Management
-/*
-• View existing indexes
-• Create new indexes (single field, compound, unique)
-• Analyze index usage and performance
-• Drop unused indexes
-*/
-
-// 4. Aggregation Pipeline Builder
-/*
-• Visual aggregation pipeline stages
-• Stage-by-stage document preview
-• Export aggregation queries to code
-• Common pipeline templates
-*/
-
-// 5. Schema Analysis
-/*
-• Automatic schema inference
-• Data type frequency analysis
-• Schema validation rules generator
-• Data distribution insights
-*/
-
-// ## Practical Compass Workflow
-
-// Example: User Management in Compass
-/*
-1. Connect to your database
-2. Navigate to 'users' collection
-3. Create a new document:
-{
-  "name": "John Doe",
-  "email": "john@example.com",
-  "age": 30,
-  "createdAt": new Date()
-}
-4. Run a query: { "age": { "$gte": 25 } }
-5. Create an index on email field
-6. Analyze the schema of your collection
-*/
-
-// ## Import/Export Operations
-
-/*
-Import Options:
-• JSON files
-• CSV files
-• BSON files (for backups)
-
-Export Options:
-• JSON (canonical, relaxed)
-• CSV
-• Full database backup
-*/
-
-// ## Performance Monitoring
-
-/*
-• Real-time operation monitoring
-• Slow query identification
-• Memory and storage usage
-• Connection statistics
+1- MongoDB Setup
+2- MongoDB Compass
+3- Mongoose Basics
+4- Mongoose Schemas
+5- Mongoose CRUD
 */`
     },
     {
@@ -1247,6 +1109,510 @@ module.exports = {
     getUsersPaginated
 };`
     },
+    {
+        tabTitle: "Advanced Mongoose",
+        title: "Advanced Mongoose Features & Best Practices",
+        content: `// ## Advanced Mongoose Patterns
+
+// ## 1. Database Transactions
+
+const transferOwnership = async (fromUserId, toUserId, assetId) => {
+    const session = await mongoose.startSession();
+    
+    try {
+        session.startTransaction();
+        
+        // Remove asset from current owner
+        const fromUser = await User.findByIdAndUpdate(
+            fromUserId,
+            { $pull: { assets: assetId } },
+            { session, new: true }
+        );
+        
+        // Add asset to new owner
+        const toUser = await User.findByIdAndUpdate(
+            toUserId,
+            { $push: { assets: assetId } },
+            { session, new: true }
+        );
+        
+        // Update asset ownership
+        const asset = await Asset.findByIdAndUpdate(
+            assetId,
+            { owner: toUserId },
+            { session, new: true }
+        );
+        
+        await session.commitTransaction();
+        
+        return { fromUser, toUser, asset };
+    } catch (error) {
+        await session.abortTransaction();
+        throw error;
+    } finally {
+        session.endSession();
+    }
+};
+
+// ## 2. Advanced Middleware Patterns
+
+const advancedUserSchema = new Schema({
+    // ... schema fields
+}, {
+    timestamps: true
+});
+
+// Conditional middleware
+advancedUserSchema.pre('save', function(next) {
+    if (this.isModified('email')) {
+        this.emailVerified = false;
+        this.verificationToken = generateToken();
+    }
+    next();
+});
+
+// Async middleware
+advancedUserSchema.pre('save', async function(next) {
+    if (this.isModified('password')) {
+        this.password = await bcrypt.hash(this.password, 12);
+    }
+    next();
+});
+
+// Error handling in middleware
+advancedUserSchema.post('save', function(error, doc, next) {
+    if (error.name === 'MongoError' && error.code === 11000) {
+        next(new Error('Duplicate key error'));
+    } else {
+        next(error);
+    }
+});
+
+// ## 3. Plugins System
+
+// Reusable plugin for soft delete
+function softDeletePlugin(schema) {
+    schema.add({
+        isDeleted: {
+            type: Boolean,
+            default: false,
+            select: false
+        },
+        deletedAt: Date
+    });
+    
+    // Exclude deleted documents by default
+    schema.pre(/^find/, function(next) {
+        if (!this.getOptions().includeDeleted) {
+            this.where({ isDeleted: { $ne: true } });
+        }
+        next();
+    });
+    
+    // Soft delete method
+    schema.methods.softDelete = function() {
+        this.isDeleted = true;
+        this.deletedAt = new Date();
+        return this.save();
+    };
+    
+    // Restore method
+    schema.methods.restore = function() {
+        this.isDeleted = false;
+        this.deletedAt = undefined;
+        return this.save();
+    };
+    
+    // Static method to find including deleted
+    schema.statics.findIncludingDeleted = function(conditions) {
+        return this.find(conditions).setOptions({ includeDeleted: true });
+    };
+}
+
+// Apply plugin to schema
+advancedUserSchema.plugin(softDeletePlugin);
+
+// ## 4. Advanced Validation
+
+const advancedValidationSchema = new Schema({
+    username: {
+        type: String,
+        required: true,
+        validate: {
+            validator: async function(username) {
+                // Async validation - check if username is unique
+                const user = await this.constructor.findOne({ username });
+                return !user || this._id.equals(user._id);
+            },
+            message: 'Username already exists'
+        }
+    },
+    password: {
+        type: String,
+        validate: {
+            validator: function(password) {
+                return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$/.test(password);
+            },
+            message: 'Password must contain uppercase, lowercase, number, and be at least 8 characters'
+        }
+    },
+    birthDate: {
+        type: Date,
+        validate: {
+            validator: function(date) {
+                return date < new Date();
+            },
+            message: 'Birth date cannot be in the future'
+        }
+    }
+});
+
+// ## 5. Discriminators (Schema Inheritance)
+
+const optionsSchema = new Schema({
+    settings: Schema.Types.Mixed,
+    preferences: Schema.Types.Mixed
+}, { discriminatorKey: 'userType' });
+
+const BaseUser = mongoose.model('BaseUser', optionsSchema);
+
+// Admin user discriminator
+const AdminUser = BaseUser.discriminator('AdminUser', new Schema({
+    permissions: [String],
+    adminLevel: {
+        type: String,
+        enum: ['super', 'normal', 'limited']
+    }
+}));
+
+// Customer user discriminator
+const CustomerUser = BaseUser.discriminator('CustomerUser', new Schema({
+    subscription: String,
+    loyaltyPoints: Number
+}));
+
+// ## 6. Advanced Query Building
+
+class UserQueryBuilder {
+    constructor() {
+        this.query = User.find();
+    }
+    
+    active() {
+        this.query = this.query.where('isActive').equals(true);
+        return this;
+    }
+    
+    withRole(role) {
+        this.query = this.query.where('role').equals(role);
+        return this;
+    }
+    
+    createdAfter(date) {
+        this.query = this.query.where('createdAt').gte(date);
+        return this;
+    }
+    
+    withTags(tags) {
+        this.query = this.query.where('tags').in(tags);
+        return this;
+    }
+    
+    paginate(page = 1, limit = 10) {
+        const skip = (page - 1) * limit;
+        this.query = this.query.skip(skip).limit(limit);
+        return this;
+    }
+    
+    sort(field, direction = 'asc') {
+        const sortOrder = direction === 'desc' ? -1 : 1;
+        this.query = this.query.sort({ [field]: sortOrder });
+        return this;
+    }
+    
+    async execute() {
+        return await this.query.exec();
+    }
+}
+
+// Usage
+const users = await new UserQueryBuilder()
+    .active()
+    .withRole('admin')
+    .createdAfter(new Date('2023-01-01'))
+    .paginate(1, 20)
+    .sort('createdAt', 'desc')
+    .execute();
+
+// ## 7. Performance Optimization
+
+const performanceOptimizedSchema = new Schema({
+    // Schema with performance considerations
+    email: { type: String, index: true },
+    role: { type: String, index: true },
+    createdAt: { type: Date, index: true }
+});
+
+// Compound indexes for common query patterns
+performanceOptimizedSchema.index({ role: 1, createdAt: -1 });
+performanceOptimizedSchema.index({ isActive: 1, lastLogin: -1 });
+
+// Partial indexes
+performanceOptimizedSchema.index(
+    { email: 1 },
+    { 
+        partialFilterExpression: { 
+            email: { $exists: true } 
+        } 
+    }
+);
+
+// ## 8. Advanced Aggregation
+
+const getUserStatistics = async () => {
+    return await User.aggregate([
+        {
+            $facet: {
+                // Total statistics
+                totalStats: [
+                    {
+                        $group: {
+                            _id: null,
+                            totalUsers: { $sum: 1 },
+                            averageAge: { $avg: '$age' },
+                            activeUsers: {
+                                $sum: { $cond: ['$isActive', 1, 0] }
+                            }
+                        }
+                    }
+                ],
+                
+                // Role distribution
+                roleDistribution: [
+                    {
+                        $group: {
+                            _id: '$role',
+                            count: { $sum: 1 },
+                            averageAge: { $avg: '$age' }
+                        }
+                    },
+                    { $sort: { count: -1 } }
+                ],
+                
+                // Monthly signups
+                monthlySignups: [
+                    {
+                        $group: {
+                            _id: {
+                                year: { $year: '$createdAt' },
+                                month: { $month: '$createdAt' }
+                            },
+                            signups: { $sum: 1 }
+                        }
+                    },
+                    { $sort: { '_id.year': 1, '_id.month': 1 } }
+                ],
+                
+                // Age groups
+                ageGroups: [
+                    {
+                        $bucket: {
+                            groupBy: '$age',
+                            boundaries: [18, 25, 35, 45, 55, 65, 120],
+                            default: 'Other',
+                            output: {
+                                count: { $sum: 1 },
+                                users: { $push: '$name' }
+                            }
+                        }
+                    }
+                ]
+            }
+        }
+    ]);
+};
+
+// ## 9. Change Streams (Real-time updates)
+
+const setupUserChangeStream = () => {
+    const changeStream = User.watch();
+    
+    changeStream.on('change', (change) => {
+        console.log('Change detected:', change);
+        
+        // Handle different operation types
+        switch (change.operationType) {
+            case 'insert':
+                console.log('New user created:', change.fullDocument);
+                break;
+            case 'update':
+                console.log('User updated:', change.documentKey);
+                break;
+            case 'delete':
+                console.log('User deleted:', change.documentKey);
+                break;
+        }
+    });
+    
+    changeStream.on('error', (error) => {
+        console.error('Change stream error:', error);
+    });
+    
+    return changeStream;
+};
+
+// ## 10. Best Practices Summary
+
+/*
+Production Best Practices:
+1. Always use connection pooling
+2. Implement proper error handling
+3. Use transactions for multiple operations
+4. Create indexes for frequent queries
+5. Monitor query performance
+6. Use lean() for read-only operations
+7. Implement proper validation
+8. Use middleware for cross-cutting concerns
+9. Monitor memory usage with large datasets
+10. Implement proper logging and monitoring
+*/
+
+module.exports = {
+    transferOwnership,
+    UserQueryBuilder,
+    getUserStatistics,
+    setupUserChangeStream,
+    AdminUser,
+    CustomerUser
+};`
+    },
+    {
+        tabTitle: "Advanced Express",
+        title: "Production-Ready Express Applications",
+        content: `/*
+Production Best Practices:
+• Environment configuration
+• Security headers
+• Rate limiting
+• Request sanitization
+• Proper error handling
+• Logging
+• Performance optimization
+*/
+
+const cors = require('cors');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+const compression = require('compression');
+
+// Security middleware
+app.use(helmet({
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            styleSrc: ["'self'", "'unsafe-inline'"],
+            scriptSrc: ["'self'"],
+            imgSrc: ["'self'", "data:", "https:"],
+        },
+    },
+    crossOriginEmbedderPolicy: false
+}));
+
+// CORS configuration
+app.use(cors({
+    origin: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000'],
+    credentials: true
+}));
+
+// Rate limiting
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // limit each IP to 100 requests per windowMs
+    message: {
+        error: 'Too many requests from this IP, please try again later.'
+    }
+});
+app.use('/api/', limiter);
+
+// Compression
+app.use(compression());
+
+// Environment-based configuration
+const config = {
+    development: {
+        port: 4000,
+        host: 'localhost',
+        logLevel: 'debug'
+    },
+    production: {
+        port: process.env.PORT || 80,
+        host: '0.0.0.0',
+        logLevel: 'warn'
+    }
+};
+
+const environment = process.env.NODE_ENV || 'development';
+const currentConfig = config[environment];
+
+// Advanced error handling
+class AppError extends Error {
+    constructor(message, statusCode) {
+        super(message);
+        this.statusCode = statusCode;
+        this.isOperational = true;
+        Error.captureStackTrace(this, this.constructor);
+    }
+}
+
+// Async error wrapper (avoid try-catch in every route)
+const asyncHandler = (fn) => (req, res, next) => {
+    Promise.resolve(fn(req, res, next)).catch(next);
+};
+
+// Example with async handler
+app.get('/api/async-users', asyncHandler(async (req, res) => {
+    // Simulate async operation
+    const users = await Promise.resolve([...users]);
+    res.json({ success: true, data: users });
+}));
+
+// Global error handler
+app.use((err, req, res, next) => {
+    err.statusCode = err.statusCode || 500;
+    err.status = err.status || 'error';
+
+    if (process.env.NODE_ENV === 'development') {
+        res.status(err.statusCode).json({
+            status: err.status,
+            error: err,
+            message: err.message,
+            stack: err.stack
+        });
+    } else {
+        // Production: don't leak error details
+        if (err.isOperational) {
+            res.status(err.statusCode).json({
+                status: err.status,
+                message: err.message
+            });
+        } else {
+            console.error('ERROR 💥', err);
+            res.status(500).json({
+                status: 'error',
+                message: 'Something went wrong!'
+            });
+        }
+    }
+});
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+    console.log('SIGTERM received. Shutting down gracefully...');
+    server.close(() => {
+        console.log('Process terminated');
+    });
+});`
+    }
 ];
 
 // Updated Questions array aligned with the new topics
