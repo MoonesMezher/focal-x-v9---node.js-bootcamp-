@@ -481,7 +481,7 @@ const getMovieById = async (req, res, next) => {
         const movie = await Movie.findById(req.params.id).populate('genre');
         
         if (!movie) {
-            throw new Error('Movie not found');
+            return res.status(404).json({ message: 'Movie not found' });
         }
         
         res.status(200).json({
@@ -526,6 +526,32 @@ const getMovieById = async (req, res, next) => {
                     },
                     {
                         type: "list",
+                        title: "Postman Testing & Documentation:",
+                        items: [
+                            "Create comprehensive API tests in Postman for all endpoints",
+                            "Test all CRUD operations for both Genre and Movie endpoints",
+                            "Include test cases for success scenarios, error handling, and validation",
+                            "Publish the Postman collection to your workspace",
+                            "Add the public Postman collection link in your README.md file",
+                            "Include setup instructions and environment variables in the documentation"
+                        ]
+                    },
+                    {
+                        type: "list",
+                        title: "GitHub Submission:",
+                        items: [
+                            "Push your complete project to GitHub repository",
+                            "Include a detailed README.md with:",
+                            "Project description and features",
+                            "Setup and installation instructions",
+                            "Environment variables configuration",
+                            "API endpoints documentation",
+                            "Postman collection link for testing",
+                            "Ensure the repository is public and properly organized"
+                        ]
+                    },
+                    {
+                        type: "list",
                         title: "Key Features to Implement:",
                         items: [
                             "Proper relation between Movie and Genre using references",
@@ -534,7 +560,9 @@ const getMovieById = async (req, res, next) => {
                             "Error handling with try-catch in all controllers",
                             "Custom error messages in catch blocks",
                             "Request validation middleware",
-                            "Global error handling middleware"
+                            "Global error handling middleware",
+                            "Postman API testing collection",
+                            "GitHub repository with proper documentation"
                         ]
                     },
                     {
@@ -566,7 +594,7 @@ const getMovieById = async (req, res, next) => {
                     "CRUD Operations: `Model.find()`, `Model.findById()`, `Model.create()`, `findByIdAndUpdate()`, `findByIdAndDelete()`",
                     "Middleware: `app.use(errorHandler)`, custom validation middlewares"
                 ]
-            }
+            },
         ],
         timer: {
             title: "Time Remaining to Complete Task",
@@ -578,7 +606,7 @@ const getMovieById = async (req, res, next) => {
         },
         thankYou: "\"Thank you for your hard work and dedication. Your efforts are appreciated!\"",
         buttonText: "العربية / English",
-        finishDate: "Finish by: November 8, 2024"
+        finishDate: "Finish by: November 11, 2025"
     },
     ar: {
         title: "المهمة: واجهة برمجة تطبيقات متجر أفلام باستخدام Express.js وMongoDB",
@@ -715,7 +743,7 @@ const getMovieById = async (req, res, next) => {
         const movie = await Movie.findById(req.params.id).populate('genre');
         
         if (!movie) {
-            throw new Error('الفيلم غير موجود');
+            return res.status(404).json({ message: 'الفيلم غير موجود' });
         }
         
         res.status(200).json({
@@ -729,6 +757,32 @@ const getMovieById = async (req, res, next) => {
                     },
                     {
                         type: "list",
+                        title: "اختبارات Postman والتوثيق:",
+                        items: [
+                            "أنشئ اختبارات شاملة لـ API في Postman لجميع النقاط الطرفية",
+                            "اختبر جميع عمليات CRUD لنقاط Genre و Movie الطرفية",
+                            "أضف حالات اختبار للسيناريوهات الناجحة، معالجة الأخطاء، والتحقق",
+                            "انشر مجموعة Postman في مساحة العمل الخاصة بك",
+                            "أضف رابط مجموعة Postman العامة في ملف README.md",
+                            "أضف تعليمات الإعداد ومتغيرات البيئة في التوثيق"
+                        ]
+                    },
+                    {
+                        type: "list",
+                        title: "التسليم على GitHub:",
+                        items: [
+                            "ادفع مشروعك الكامل إلى مستودع GitHub",
+                            "أضف ملف README.md مفصل يحتوي على:",
+                            "وصف المشروع والميزات",
+                            "تعليمات الإعداد والتثبيت",
+                            "تهيئة متغيرات البيئة",
+                            "توثيق نقاط API الطرفية",
+                            "رابط مجموعة Postman للاختبار",
+                            "تأكد أن المستودع عام ومنظم بشكل صحيح"
+                        ]
+                    },
+                    {
+                        type: "list",
                         title: "الميزات الرئيسية المطلوبة:",
                         items: [
                             "علاقة صحيحة بين Movie و Genre باستخدام المراجع",
@@ -737,7 +791,9 @@ const getMovieById = async (req, res, next) => {
                             "معالجة الأخطاء باستخدام try-catch في جميع المتحكمات",
                             "رسائل خطأ مخصصة في كتل catch",
                             "middleware للتحقق من صحة الطلبات",
-                            "middleware لمعالجة الأخطاء بشكل عام"
+                            "middleware لمعالجة الأخطاء بشكل عام",
+                            "مجموعة اختبارات Postman لـ API",
+                            "مستودع GitHub مع توثيق مناسب"
                         ]
                     },
                     {
@@ -769,7 +825,7 @@ const getMovieById = async (req, res, next) => {
                     "عمليات CRUD: `Model.find()`, `Model.findById()`, `Model.create()`, `findByIdAndUpdate()`, `findByIdAndDelete()`",
                     "الـ Middleware: `app.use(errorHandler)`, middleware تحقق مخصص"
                 ]
-            }
+            },
         ],
         timer: {
             title: "الوقت المتبقي لإكمال المهمة",
@@ -781,7 +837,7 @@ const getMovieById = async (req, res, next) => {
         },
         thankYou: "\"شكرًا لجهودك الجادة وتفانيك. نقدر جهودك!\"",
         buttonText: "English / العربية", 
-        finishDate: "الانتهاء بحلول: 8 نوفمبر 2024"
+        finishDate: "الانتهاء بحلول: 11 نوفمبر 2025"
     }
 };
 
@@ -886,7 +942,7 @@ const getMovieById = async (req, res, next) => {
         // Timer functionality
         function startCountdown() {
             // Set the date we're counting down to (September 27, 2025)
-            const countDownDate = new Date("Nov 8, 2025 23:59:59").getTime();
+            const countDownDate = new Date("Nov 11, 2025 23:59:59").getTime();
             
             // Update the countdown every 1 second
             const countdown = setInterval(() => {
