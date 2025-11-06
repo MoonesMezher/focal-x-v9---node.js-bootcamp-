@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Focal X - Node.js Bootcamp Resources</title>
-    <link rel="manifest" href="../manifest.json" />
-    <link rel="apple-touch-icon" href="../logo.jpg">
+    <link rel="shortcut icon" href="./logo.jpg" type="image/x-icon">
+    <title>Focal X - Node.js Bootcamp Lecture Portal</title>
+    <link rel="manifest" href="./manifest.json" />
+    <link rel="apple-touch-icon" href="./logo.jpg">
     <meta name="apple-mobile-web-app-status-bar" content="#aa7700">
     <meta name="theme-color" content="#b21f1f">
-    <link rel="shortcut icon" href="../logo.jpg" type="image/x-icon">
     <style>
         * {
             margin: 0;
@@ -27,19 +27,6 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-        }
-
-        .img {
-            width: 100%;
-            border-radius: 5px;
-        }
-
-        .img img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            border: 1px solid black;
-            border-radius: 5px;
         }
 
         .footer {
@@ -81,6 +68,17 @@
             color: white;
             padding: 30px;
             text-align: center;
+        }
+
+        header div {
+            padding-top: 20px;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        header div a {
+            color: white;
         }
         
         h1 {
@@ -203,100 +201,18 @@
     <div class="container">
         <header>
             <h1>Focal X V9 - Node.js Bootcamp</h1>
-            <p class="subtitle">Resources Portal - Browse All Resources</p>
+            <p class="subtitle">Sorry!</p>
+            <p>You can't visit this page in offline mode in the current time!</p>
+            <div>
+                <a href="/" target="_blank" rel="noopener noreferrer">Go Home</a>
+            </div>
         </header>
-        
-        <div class="lectures-container">
-            <h2>Available Resources</h2>
-                        
-            <table class="lectures-table">
-                <thead>
-                    <tr>
-                        <th>Resources</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td class="img">
-                            <h3>Event Loop 1</h3>
-                            <img src="./event loop.jpeg" alt="Resource 1" loading="lazy">
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="img">
-                            <h3>Event Loop 2</h3>
-                            <img src="./event loop 2.jpeg" alt="Resource 2" loading="lazy">
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="img">
-                            <h3>API</h3>
-                            <img src="./api.png" alt="Resource 3" loading="lazy">
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="img">
-                            <h3>REST API 1</h3>
-                            <img src="./rest.png" alt="Resource 4" loading="lazy">
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="img">
-                            <h3>REST API 2</h3>
-                            <img src="./rest api.png" alt="Resource 5" loading="lazy">
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="img">
-                            <h3>Project Versions (Before Git)</h3>
-                            <img src="./git3.png" alt="Resource 8" loading="lazy">
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="img">
-                            <h3>Git Environment Areas 1</h3>
-                            <img src="./git1.png" alt="Resource 6" loading="lazy">
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="img">
-                            <h3>Git Environment Areas 2</h3>
-                            <img src="./git2.jpg" alt="Resource 7" loading="lazy">
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="img">
-                            <h3>Git Environment Areas 3</h3>
-                            <img src="./git4.png" alt="Resource 9" loading="lazy">
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="img">
-                            <h3>Branches Cons</h3>
-                            <img src="./git5.png" alt="Resource 10" loading="lazy">
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="img">
-                            <h3>Request -> Response</h3>
-                            <img src="./http1.png" alt="Resource 11" loading="lazy">
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="img">
-                            <h3>HTTP Basics</h3>
-                            <img src="./http2.png" alt="Resource 12" loading="lazy">
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
     </div>
 
     <footer class="footer">
         <p>&copy; 2025 <a rel="noopener" href="https://focal-x.com/" target="_blank">Focal X</a> All Rights Reserved</p>
     </footer>
 
-    <script src="../reg.js"></script>
+    <script src="./reg.js"></script>
 </body>
 </html>

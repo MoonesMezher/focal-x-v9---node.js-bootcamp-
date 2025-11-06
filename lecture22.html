@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Focal X - Node.js Bootcamp: Lecture 20 </title><link rel="manifest" href="./manifest.json" />
+    <title>Focal X - Node.js Bootcamp: Lecture 22 </title><link rel="manifest" href="./manifest.json" />
     <link rel="apple-touch-icon" href="./logo.jpg">
     <meta name="apple-mobile-web-app-status-bar" content="#aa7700">
     <meta name="theme-color" content="#b21f1f">
@@ -310,7 +310,7 @@
         // Lecture metadata
         const lectureConfig = {
             title: "Focal X - Node.js Bootcamp",
-            subtitle: "Mongoose (Schema, Chaining, Populate)"
+            subtitle: "MongoDB & ExpressJS (Advanced)"
         };
         
        // Lecture content organized by tabs
@@ -325,793 +325,6 @@ const lectureContent = [
 4- Mongoose Schemas
 5- Mongoose CRUD
 */`
-    },
-    {
-        tabTitle: "Mongoose Basics",
-        title: "Mongoose ODM - Fundamentals & Connection",
-        content: `// ## What is Mongoose?
-
-/*
-Mongoose is an Object Data Modeling (ODM) library for MongoDB and Node.js.
-It provides:
-• Schema-based solution to model application data
-• Built-in type casting, validation, query building
-• Business logic hooks
-• Easy population of related data
-*/
-
-// 1. Installation: npm install mongoose
-
-// 2. Database Connection Configuration
-const mongoose = require('mongoose');
-
-// Basic connection
-const connectDB = async () => {
-    try {
-        const conn = await mongoose.connect(process.env.MONGODB_URI, {
-            // Connection options (Mongoose 6+)
-            maxPoolSize: 10, // Maximum number of sockets in connection pool
-            serverSelectionTimeoutMS: 5000, // Timeout for server selection
-            socketTimeoutMS: 45000, // Socket timeout
-            bufferCommands: false, // Disable mongoose buffering
-            bufferMaxEntries: 0, // Disable MongoDB driver buffering
-        });
-
-        console.log(\`MongoDB Connected: \${conn.connection.host}\`);
-        console.log(\`Database Name: \${conn.connection.name}\`);
-    } catch (error) {
-        console.error('Database connection error:', error);
-        process.exit(1);
-    }
-};
-
-// Advanced connection configuration for production
-const connectDBAdvanced = async () => {
-    try {
-        const conn = await mongoose.connect(process.env.MONGODB_URI, {
-            // Connection pooling
-            maxPoolSize: process.env.NODE_ENV === 'production' ? 50 : 10,
-            minPoolSize: 5,
-            
-            // Timeout configurations
-            serverSelectionTimeoutMS: 30000,
-            socketTimeoutMS: 45000,
-            connectTimeoutMS: 30000,
-            
-            // Write concerns
-            w: 'majority',
-            journal: true,
-            
-            // Retry configuration
-            retryWrites: true,
-            retryReads: true
-        });
-
-        console.log(\`MongoDB Connected: \${conn.connection.host}\`);
-    } catch (error) {
-        console.error('Database connection error:', error);
-        process.exit(1);
-    }
-};
-
-// ## Connection Event Handling
-
-// Modern connection event handling
-mongoose.connection.on('connected', () => {
-    console.log('Mongoose connected to MongoDB');
-});
-
-mongoose.connection.on('error', (err) => {
-    console.error('Mongoose connection error:', err);
-});
-
-mongoose.connection.on('disconnected', () => {
-    console.log('Mongoose disconnected');
-});
-
-mongoose.connection.on('reconnected', () => {
-    console.log('Mongoose reconnected to MongoDB');
-});
-
-// ## Connection States
-console.log('Connection state:', mongoose.connection.readyState);
-/*
-Connection States:
-0: disconnected
-1: connected
-2: connecting
-3: disconnecting
-*/
-
-// ## Graceful shutdown
-process.on('SIGINT', async () => {
-    await mongoose.connection.close();
-    console.log('MongoDB connection closed due to app termination');
-    process.exit(0);
-});
-
-process.on('SIGTERM', async () => {
-    await mongoose.connection.close();
-    console.log('MongoDB connection closed due to app termination');
-    process.exit(0);
-});
-
-// ## Connection Best Practices
-
-/*
-Production Tips:
-1. Use environment variables for connection strings
-2. Implement connection pooling
-3. Handle connection errors gracefully
-4. Monitor connection health
-5. Use retry logic for initial connections
-6. Close connections properly on app shutdown
-*/
-
-module.exports = connectDB;`
-    },
-    {
-        tabTitle: "Mongoose Schemas",
-        title: "Mongoose Schema Design & Data Modeling",
-        content: `// ## Mongoose Schema Fundamentals
-
-/*
-What is a Schema?
-• Blueprint for documents in a collection
-• Defines structure and data types
-• Enforces validation rules
-• Supports middleware and methods
-*/
-
-// Basic Schema Definition
-const mongoose = require('mongoose');
-const { Schema } = mongoose;
-
-const userSchema = new Schema({
-    // String type with validation
-    name: { 
-        type: String, 
-        required: [true, 'Name is required'],
-        trim: true,
-        minlength: [2, 'Name must be at least 2 characters'],
-        maxlength: [50, 'Name cannot exceed 50 characters'],
-        index: true // Create database index
-    },
-    
-    // Email with custom validation
-    email: {
-        type: String,
-        required: [true, 'Email is required'],
-        unique: true,
-        lowercase: true,
-        validate: {
-            validator: function(email) {
-                return /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email);
-            },
-            message: 'Please provide a valid email address'
-        }
-    },
-    
-    // Number with range validation
-    age: {
-        type: Number,
-        min: [18, 'Age must be at least 18'],
-        max: [120, 'Age cannot exceed 120'],
-        validate: {
-            validator: Number.isInteger,
-            message: 'Age must be an integer'
-        }
-    },
-    
-    // Enum with predefined values
-    role: {
-        type: String,
-        enum: {
-            values: ['user', 'admin', 'moderator'],
-            message: 'Role must be either user, admin, or moderator'
-        },
-        default: 'user'
-    },
-    
-    // Nested objects
-    profile: {
-        bio: {
-            type: String,
-            maxlength: 500
-        },
-        avatar: String,
-        website: {
-            type: String,
-            validate: {
-                validator: function(url) {
-                    return url === '' || /^https?:\\/\\/.+\\..+/.test(url);
-                },
-                message: 'Please provide a valid URL'
-            }
-        }
-    },
-    
-    // Arrays
-    tags: [{
-        type: String,
-        lowercase: true
-    }],
-    
-    // References to other collections
-    department: {
-        type: Schema.Types.ObjectId,
-        ref: 'Department' // Reference to Department model
-    },
-    
-    // GeoJSON for location data
-    location: {
-        type: {
-            type: String,
-            enum: ['Point'],
-            default: 'Point'
-        },
-        coordinates: {
-            type: [Number], // [longitude, latitude]
-            index: '2dsphere'
-        }
-    },
-    
-    // Mixed type for flexible data
-    metadata: Schema.Types.Mixed,
-    
-    // Boolean with default
-    isActive: {
-        type: Boolean,
-        default: true
-    }
-    
-}, {
-    // Schema Options
-    timestamps: true, // Adds createdAt and updatedAt automatically
-    toJSON: { 
-        virtuals: true,
-        transform: function(doc, ret) {
-            // Remove sensitive data when converting to JSON
-            delete ret.password;
-            delete ret.__v;
-            return ret;
-        }
-    },
-    toObject: { 
-        virtuals: true,
-        transform: function(doc, ret) {
-            delete ret.password;
-            delete ret.__v;
-            return ret;
-        }
-    },
-    id: false // Disable the default _id to id conversion
-});
-
-// ## Virtual Properties
-
-// Virtual properties (not stored in database)
-userSchema.virtual('displayName').get(function() {
-    return \`\${this.name} (\${this.email})\`;
-});
-
-userSchema.virtual('profileUrl').get(function() {
-    return \`/users/\${this._id}/profile\`;
-});
-
-// ## Instance Methods
-
-// Methods available on document instances
-userSchema.methods.getProfileInfo = function() {
-    return \`Name: \${this.name}, Email: \${this.email}, Role: \${this.role}\`;
-};
-
-userSchema.methods.isAdmin = function() {
-    return this.role === 'admin';
-};
-
-userSchema.methods.updateLastActive = function() {
-    this.lastActive = new Date();
-    return this.save();
-};
-
-// ## Static Methods
-
-// Methods available on the model
-userSchema.statics.findByEmail = function(email) {
-    return this.findOne({ email: email.toLowerCase() });
-};
-
-userSchema.statics.findAdmins = function() {
-    return this.find({ role: 'admin' });
-};
-
-userSchema.statics.findByRole = function(role) {
-    return this.find({ role: role.toLowerCase() });
-};
-
-// ## Query Helpers
-
-// Chainable query methods
-userSchema.query.byName = function(name) {
-    return this.where({ name: new RegExp(name, 'i') });
-};
-
-userSchema.query.active = function() {
-    return this.where({ isActive: true });
-};
-
-// ## Indexes
-
-// Compound indexes for better query performance
-userSchema.index({ email: 1 }); // Single field index
-userSchema.index({ name: 1, role: 1 }); // Compound index
-userSchema.index({ 'location.coordinates': '2dsphere' }); // Geospatial index
-
-// ## Middleware (Hooks)
-
-// Pre-save middleware
-userSchema.pre('save', function(next) {
-    console.log(\`Saving user: \${this.name}\`);
-    
-    // Example: Hash password before saving
-    if (this.isModified('password')) {
-        // this.password = hashPassword(this.password);
-    }
-    
-    next();
-});
-
-userSchema.pre('save', function(next) {
-    // Set default values or transform data
-    if (this.isNew) {
-        this.createdAt = new Date();
-    }
-    next();
-});
-
-// Post-save middleware
-userSchema.post('save', function(doc, next) {
-    console.log(\`User \${doc.name} saved successfully\`);
-    // Example: Send welcome email
-    next();
-});
-
-// Query middleware
-userSchema.pre(/^find/, function(next) {
-    // Automatically populate department for all find queries
-    this.populate('department');
-    next();
-});
-
-// ## Validation
-
-// Custom async validation
-userSchema.path('email').validate(async function(email) {
-    if (!this.isModified('email')) return true;
-    
-    const User = mongoose.model('User');
-    const existingUser = await User.findOne({ email });
-    return !existingUser;
-}, 'Email already exists');
-
-const User = mongoose.model('User', userSchema);
-module.exports = User;`
-    },
-    {
-        tabTitle: "Mongoose CRUD",
-        title: "CRUD Operations & Data Manipulation",
-        content: `// ## Complete CRUD Operations with Mongoose
-
-const User = require('./models/User'); // Assuming User model is imported
-
-// ## CREATE Operations
-
-// Method 1: Using create() - returns promise
-const createUser = async (userData) => {
-    try {
-        const newUser = await User.create({
-            name: 'Alice Johnson',
-            email: 'alice@example.com',
-            age: 28,
-            role: 'user',
-            profile: {
-                bio: 'Software developer from New York',
-                website: 'https://alice.dev'
-            },
-            tags: ['developer', 'javascript', 'nodejs']
-        });
-        
-        console.log('User created:', newUser);
-        return newUser;
-    } catch (error) {
-        console.error('Error creating user:', error);
-        throw error;
-    }
-};
-
-// Method 2: Using save() with new instance
-const createUserWithSave = async () => {
-    const user = new User({
-        name: 'Bob Smith',
-        email: 'bob@example.com',
-        age: 32
-    });
-    
-    try {
-        const savedUser = await user.save();
-        console.log('User saved:', savedUser);
-        return savedUser;
-    } catch (error) {
-        console.error('Error saving user:', error);
-        throw error;
-    }
-};
-
-// Method 3: Insert multiple documents
-const createMultipleUsers = async () => {
-    const users = [
-        { name: 'Charlie Brown', email: 'charlie@example.com', age: 25 },
-        { name: 'Diana Prince', email: 'diana@example.com', age: 30 },
-        { name: 'Edward Wilson', email: 'edward@example.com', age: 28 }
-    ];
-    
-    try {
-        const result = await User.insertMany(users);
-        console.log('Users created:', result.length);
-        return result;
-    } catch (error) {
-        console.error('Error creating multiple users:', error);
-        throw error;
-    }
-};
-
-// ## READ Operations
-
-// Find all users
-const getAllUsers = async () => {
-    try {
-        const users = await User.find();
-        console.log('Total users:', users.length);
-        return users;
-    } catch (error) {
-        console.error('Error fetching users:', error);
-        throw error;
-    }
-};
-
-// Find with conditions
-const getAdultUsers = async () => {
-    try {
-        const users = await User.find({ 
-            age: { $gte: 18 },
-            isActive: true 
-        });
-        return users;
-    } catch (error) {
-        console.error('Error fetching adult users:', error);
-        throw error;
-    }
-};
-
-// Find single document
-const getUserByEmail = async (email) => {
-    try {
-        const user = await User.findOne({ email: email.toLowerCase() });
-        return user;
-    } catch (error) {
-        console.error('Error finding user:', error);
-        throw error;
-    }
-};
-
-// Find by ID
-const getUserById = async (id) => {
-    try {
-        const user = await User.findById(id);
-        if (!user) {
-            throw new Error('User not found');
-        }
-        return user;
-    } catch (error) {
-        console.error('Error finding user by ID:', error);
-        throw error;
-    }
-};
-
-// Advanced queries with projection
-const getUsersWithProjection = async () => {
-    try {
-        const users = await User.find(
-            { role: 'user' }, // Filter
-            'name email age' // Projection (include only these fields)
-        );
-        return users;
-    } catch (error) {
-        console.error('Error with projection:', error);
-        throw error;
-    }
-};
-
-// Complex queries with operators
-const advancedQueries = async () => {
-    try {
-        // Users between 25 and 35 years old
-        const ageRangeUsers = await User.find({
-            age: { $gte: 25, $lte: 35 }
-        });
-        
-        // Users with specific tags
-        const taggedUsers = await User.find({
-            tags: { $in: ['developer', 'javascript'] }
-        });
-        
-        // Text search (requires text index)
-        const searchedUsers = await User.find({
-            $text: { $search: 'software developer' }
-        });
-        
-        // Geospatial queries
-        const nearbyUsers = await User.find({
-            'location.coordinates': {
-                $near: {
-                    $geometry: {
-                        type: 'Point',
-                        coordinates: [longitude, latitude]
-                    },
-                    $maxDistance: 10000 // 10km radius
-                }
-            }
-        });
-        
-        return {
-            ageRangeUsers,
-            taggedUsers,
-            searchedUsers,
-            nearbyUsers
-        };
-    } catch (error) {
-        console.error('Error in advanced queries:', error);
-        throw error;
-    }
-};
-
-// ## UPDATE Operations
-
-// Update single document
-const updateUserAge = async (userId, newAge) => {
-    try {
-        const result = await User.updateOne(
-            { _id: userId },
-            { 
-                $set: { 
-                    age: newAge,
-                    updatedAt: new Date()
-                } 
-            }
-        );
-        
-        console.log('Update result:', result);
-        return result;
-    } catch (error) {
-        console.error('Error updating user:', error);
-        throw error;
-    }
-};
-
-// Find and update (returns updated document)
-const findAndUpdateUser = async (email, updates) => {
-    try {
-        const updatedUser = await User.findOneAndUpdate(
-            { email: email },
-            { $set: updates },
-            { 
-                new: true, // Return updated document
-                runValidators: true // Run schema validators
-            }
-        );
-        
-        return updatedUser;
-    } catch (error) {
-        console.error('Error in find and update:', error);
-        throw error;
-    }
-};
-
-// Update multiple documents
-const updateMultipleUsers = async () => {
-    try {
-        const result = await User.updateMany(
-            { role: 'user' },
-            { 
-                $set: { 
-                    lastLogin: new Date(),
-                    loginCount: { $inc: 1 } // Increment login count
-                } 
-            }
-        );
-        
-        console.log('Updated users:', result.modifiedCount);
-        return result;
-    } catch (error) {
-        console.error('Error updating multiple users:', error);
-        throw error;
-    }
-};
-
-// ## DELETE Operations
-
-// Delete single document
-const deleteUser = async (userId) => {
-    try {
-        const result = await User.deleteOne({ _id: userId });
-        console.log('Delete result:', result);
-        return result;
-    } catch (error) {
-        console.error('Error deleting user:', error);
-        throw error;
-    }
-};
-
-// Find and delete
-const findAndDeleteUser = async (email) => {
-    try {
-        const deletedUser = await User.findOneAndDelete({ email: email });
-        return deletedUser;
-    } catch (error) {
-        console.error('Error in find and delete:', error);
-        throw error;
-    }
-};
-
-// Delete multiple documents
-const deleteInactiveUsers = async () => {
-    try {
-        const result = await User.deleteMany({
-            isActive: false,
-            lastLogin: { $lt: new Date(Date.now() - 365 * 24 * 60 * 60 * 1000) } // Older than 1 year
-        });
-        
-        console.log('Deleted inactive users:', result.deletedCount);
-        return result;
-    } catch (error) {
-        console.error('Error deleting inactive users:', error);
-        throw error;
-    }
-};
-
-// ## Aggregation Operations
-
-const userAnalytics = async () => {
-    try {
-        const analytics = await User.aggregate([
-            // Stage 1: Match active users
-            {
-                $match: {
-                    isActive: true
-                }
-            },
-            
-            // Stage 2: Group by role and calculate statistics
-            {
-                $group: {
-                    _id: '$role',
-                    count: { $sum: 1 },
-                    averageAge: { $avg: '$age' },
-                    minAge: { $min: '$age' },
-                    maxAge: { $max: '$age' },
-                    users: { $push: '$name' }
-                }
-            },
-            
-            // Stage 3: Sort by count descending
-            {
-                $sort: { count: -1 }
-            },
-            
-            // Stage 4: Project final format
-            {
-                $project: {
-                    role: '$_id',
-                    _id: 0,
-                    count: 1,
-                    averageAge: { $round: ['$averageAge', 1] },
-                    ageRange: {
-                        min: '$minAge',
-                        max: '$maxAge'
-                    },
-                    sampleUsers: { $slice: ['$users', 3] } // First 3 users
-                }
-            }
-        ]);
-        
-        return analytics;
-    } catch (error) {
-        console.error('Error in aggregation:', error);
-        throw error;
-    }
-};
-
-// ## Population (Joins)
-
-const getUsersWithDepartments = async () => {
-    try {
-        const users = await User.find()
-            .populate('department') // Populate department reference
-            .populate('manager', 'name email') // Populate with selected fields
-            .exec();
-        
-        return users;
-    } catch (error) {
-        console.error('Error populating users:', error);
-        throw error;
-    }
-};
-
-// ## Advanced Query Techniques
-
-// Pagination
-const getUsersPaginated = async (page = 1, limit = 10) => {
-    try {
-        const skip = (page - 1) * limit;
-        
-        const [users, total] = await Promise.all([
-            User.find()
-                .skip(skip)
-                .limit(limit)
-                .sort({ createdAt: -1 }),
-            User.countDocuments()
-        ]);
-        
-        return {
-            users,
-            pagination: {
-                page,
-                limit,
-                total,
-                pages: Math.ceil(total / limit)
-            }
-        };
-    } catch (error) {
-        console.error('Error in pagination:', error);
-        throw error;
-    }
-};
-
-// Transaction example
-const transferUserData = async (fromUserId, toUserId) => {
-    const session = await mongoose.startSession();
-    
-    try {
-        session.startTransaction();
-        
-        const fromUser = await User.findById(fromUserId).session(session);
-        const toUser = await User.findById(toUserId).session(session);
-        
-        // Perform operations within transaction
-        // await User.updateOne({ _id: fromUserId }, { $set: {...} }).session(session);
-        // await User.updateOne({ _id: toUserId }, { $set: {...} }).session(session);
-        
-        await session.commitTransaction();
-        console.log('Transaction completed');
-    } catch (error) {
-        await session.abortTransaction();
-        console.error('Transaction aborted:', error);
-        throw error;
-    } finally {
-        session.endSession();
-    }
-};
-
-module.exports = {
-    createUser,
-    getAllUsers,
-    getUserById,
-    updateUserAge,
-    deleteUser,
-    userAnalytics,
-    getUsersPaginated
-};`
     },
     {
         tabTitle: "Chaining & Pagination",
@@ -1163,69 +376,575 @@ const getPaginatedUsers = async (page = 1, limit = 10, filters = {}) => {
 const result = await getPaginatedUsers(1, 10, { role: 'user' });
 console.log(result.pagination); // { page: 1, limit: 10, total: 100, pages: 10 }`
     },
-    {
-        tabTitle: "Error Middlewares",
-        title: "Error Handling & Middlewares",
-        content: `// ## Error Handling Middlewares
+     {
+        tabTitle: "Relationships",
+        title: "MongoDB Relationships & Population",
+        content: `// ## MongoDB Relationships
 
-// 1. Schema-Level Error Middleware
-userSchema.post('save', function(error, doc, next) {
+// 1. One-to-Many (Reference)
+const userSchema = new Schema({
+    name: String,
+    posts: [{ type: Schema.Types.ObjectId, ref: 'Post' }] // Array of references
+});
+
+const postSchema = new Schema({
+    title: String,
+    author: { type: Schema.Types.ObjectId, ref: 'User' }, // Single reference
+    content: String
+});
+
+// 2. Embedding (One-to-Few)
+const userWithAddressSchema = new Schema({
+    name: String,
+    addresses: [{  // Embedded array
+        street: String,
+        city: String,
+        country: String,
+        isPrimary: Boolean
+    }]
+});
+
+// 3. Junction Model (Many-to-Many)
+const orderSchema = new Schema({
+    user: { type: Schema.Types.ObjectId, ref: 'User' },
+    products: [{
+        product: { type: Schema.Types.ObjectId, ref: 'Product' },
+        quantity: Number,
+        price: Number
+    }]
+});
+
+// ## Population Examples
+
+// Basic population
+const user = await User.findById(userId).populate('posts');
+
+// Selective population
+const userWithPosts = await User.findById(userId)
+    .populate('posts', 'title createdAt')  // Only get title and createdAt
+    .populate('department', 'name');
+
+// Nested population
+const postWithAuthor = await Post.findById(postId)
+    .populate({
+        path: 'author',
+        select: 'name email',
+        populate: {
+            path: 'department',
+            select: 'name'
+        }
+    });
+
+// Multiple populations
+const populatedUser = await User.findById(userId)
+    .populate('posts')
+    .populate('comments')
+    .populate('likes');`
+    },
+   {
+        tabTitle: "Advanced Mongoose",
+        title: "Advanced Mongoose Features & Best Practices",
+        content: `// ## Advanced Mongoose Patterns
+
+// ## 1. Database Transactions
+
+const transferOwnership = async (fromUserId, toUserId, assetId) => {
+    const session = await mongoose.startSession();
+    
+    try {
+        session.startTransaction();
+        
+        // Remove asset from current owner
+        const fromUser = await User.findByIdAndUpdate(
+            fromUserId,
+            { $pull: { assets: assetId } },
+            { session, new: true }
+        );
+        
+        // Add asset to new owner
+        const toUser = await User.findByIdAndUpdate(
+            toUserId,
+            { $push: { assets: assetId } },
+            { session, new: true }
+        );
+        
+        // Update asset ownership
+        const asset = await Asset.findByIdAndUpdate(
+            assetId,
+            { owner: toUserId },
+            { session, new: true }
+        );
+        
+        await session.commitTransaction();
+        
+        return { fromUser, toUser, asset };
+    } catch (error) {
+        await session.abortTransaction();
+        throw error;
+    } finally {
+        session.endSession();
+    }
+};
+
+// ## 2. Advanced Middleware Patterns
+
+const advancedUserSchema = new Schema({
+    // ... schema fields
+}, {
+    timestamps: true
+});
+
+// Conditional middleware
+advancedUserSchema.pre('save', function(next) {
+    if (this.isModified('email')) {
+        this.emailVerified = false;
+        this.verificationToken = generateToken();
+    }
+    next();
+});
+
+// Async middleware
+advancedUserSchema.pre('save', async function(next) {
+    if (this.isModified('password')) {
+        this.password = await bcrypt.hash(this.password, 12);
+    }
+    next();
+});
+
+// Error handling in middleware
+advancedUserSchema.post('save', function(error, doc, next) {
     if (error.name === 'MongoError' && error.code === 11000) {
-        next(new Error('Email already exists'));
-    } else if (error.name === 'ValidationError') {
-        const messages = Object.values(error.errors).map(err => err.message);
-        next(new Error(messages.join(', ')));
+        next(new Error('Duplicate key error'));
     } else {
         next(error);
     }
 });
 
-// 2. Async Error Handler for Express
+// ## 3. Plugins System
+
+// Reusable plugin for soft delete
+function softDeletePlugin(schema) {
+    schema.add({
+        isDeleted: {
+            type: Boolean,
+            default: false,
+            select: false
+        },
+        deletedAt: Date
+    });
+    
+    // Exclude deleted documents by default
+    schema.pre(/^find/, function(next) {
+        if (!this.getOptions().includeDeleted) {
+            this.where({ isDeleted: { $ne: true } });
+        }
+        next();
+    });
+    
+    // Soft delete method
+    schema.methods.softDelete = function() {
+        this.isDeleted = true;
+        this.deletedAt = new Date();
+        return this.save();
+    };
+    
+    // Restore method
+    schema.methods.restore = function() {
+        this.isDeleted = false;
+        this.deletedAt = undefined;
+        return this.save();
+    };
+    
+    // Static method to find including deleted
+    schema.statics.findIncludingDeleted = function(conditions) {
+        return this.find(conditions).setOptions({ includeDeleted: true });
+    };
+}
+
+// Apply plugin to schema
+advancedUserSchema.plugin(softDeletePlugin);
+
+// ## 4. Advanced Validation
+
+const advancedValidationSchema = new Schema({
+    username: {
+        type: String,
+        required: true,
+        validate: {
+            validator: async function(username) {
+                // Async validation - check if username is unique
+                const user = await this.constructor.findOne({ username });
+                return !user || this._id.equals(user._id);
+            },
+            message: 'Username already exists'
+        }
+    },
+    password: {
+        type: String,
+        validate: {
+            validator: function(password) {
+                return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$/.test(password);
+            },
+            message: 'Password must contain uppercase, lowercase, number, and be at least 8 characters'
+        }
+    },
+    birthDate: {
+        type: Date,
+        validate: {
+            validator: function(date) {
+                return date < new Date();
+            },
+            message: 'Birth date cannot be in the future'
+        }
+    }
+});
+
+// ## 5. Discriminators (Schema Inheritance)
+
+const optionsSchema = new Schema({
+    settings: Schema.Types.Mixed,
+    preferences: Schema.Types.Mixed
+}, { discriminatorKey: 'userType' });
+
+const BaseUser = mongoose.model('BaseUser', optionsSchema);
+
+// Admin user discriminator
+const AdminUser = BaseUser.discriminator('AdminUser', new Schema({
+    permissions: [String],
+    adminLevel: {
+        type: String,
+        enum: ['super', 'normal', 'limited']
+    }
+}));
+
+// Customer user discriminator
+const CustomerUser = BaseUser.discriminator('CustomerUser', new Schema({
+    subscription: String,
+    loyaltyPoints: Number
+}));
+
+// ## 6. Advanced Query Building
+
+class UserQueryBuilder {
+    constructor() {
+        this.query = User.find();
+    }
+    
+    active() {
+        this.query = this.query.where('isActive').equals(true);
+        return this;
+    }
+    
+    withRole(role) {
+        this.query = this.query.where('role').equals(role);
+        return this;
+    }
+    
+    createdAfter(date) {
+        this.query = this.query.where('createdAt').gte(date);
+        return this;
+    }
+    
+    withTags(tags) {
+        this.query = this.query.where('tags').in(tags);
+        return this;
+    }
+    
+    paginate(page = 1, limit = 10) {
+        const skip = (page - 1) * limit;
+        this.query = this.query.skip(skip).limit(limit);
+        return this;
+    }
+    
+    sort(field, direction = 'asc') {
+        const sortOrder = direction === 'desc' ? -1 : 1;
+        this.query = this.query.sort({ [field]: sortOrder });
+        return this;
+    }
+    
+    async execute() {
+        return await this.query.exec();
+    }
+}
+
+// Usage
+const users = await new UserQueryBuilder()
+    .active()
+    .withRole('admin')
+    .createdAfter(new Date('2023-01-01'))
+    .paginate(1, 20)
+    .sort('createdAt', 'desc')
+    .execute();
+
+// ## 7. Performance Optimization
+
+const performanceOptimizedSchema = new Schema({
+    // Schema with performance considerations
+    email: { type: String, index: true },
+    role: { type: String, index: true },
+    createdAt: { type: Date, index: true }
+});
+
+// Compound indexes for common query patterns
+performanceOptimizedSchema.index({ role: 1, createdAt: -1 });
+performanceOptimizedSchema.index({ isActive: 1, lastLogin: -1 });
+
+// Partial indexes
+performanceOptimizedSchema.index(
+    { email: 1 },
+    { 
+        partialFilterExpression: { 
+            email: { $exists: true } 
+        } 
+    }
+);
+
+// ## 8. Advanced Aggregation
+
+const getUserStatistics = async () => {
+    return await User.aggregate([
+        {
+            $facet: {
+                // Total statistics
+                totalStats: [
+                    {
+                        $group: {
+                            _id: null,
+                            totalUsers: { $sum: 1 },
+                            averageAge: { $avg: '$age' },
+                            activeUsers: {
+                                $sum: { $cond: ['$isActive', 1, 0] }
+                            }
+                        }
+                    }
+                ],
+                
+                // Role distribution
+                roleDistribution: [
+                    {
+                        $group: {
+                            _id: '$role',
+                            count: { $sum: 1 },
+                            averageAge: { $avg: '$age' }
+                        }
+                    },
+                    { $sort: { count: -1 } }
+                ],
+                
+                // Monthly signups
+                monthlySignups: [
+                    {
+                        $group: {
+                            _id: {
+                                year: { $year: '$createdAt' },
+                                month: { $month: '$createdAt' }
+                            },
+                            signups: { $sum: 1 }
+                        }
+                    },
+                    { $sort: { '_id.year': 1, '_id.month': 1 } }
+                ],
+                
+                // Age groups
+                ageGroups: [
+                    {
+                        $bucket: {
+                            groupBy: '$age',
+                            boundaries: [18, 25, 35, 45, 55, 65, 120],
+                            default: 'Other',
+                            output: {
+                                count: { $sum: 1 },
+                                users: { $push: '$name' }
+                            }
+                        }
+                    }
+                ]
+            }
+        }
+    ]);
+};
+
+// ## 9. Change Streams (Real-time updates)
+
+const setupUserChangeStream = () => {
+    const changeStream = User.watch();
+    
+    changeStream.on('change', (change) => {
+        console.log('Change detected:', change);
+        
+        // Handle different operation types
+        switch (change.operationType) {
+            case 'insert':
+                console.log('New user created:', change.fullDocument);
+                break;
+            case 'update':
+                console.log('User updated:', change.documentKey);
+                break;
+            case 'delete':
+                console.log('User deleted:', change.documentKey);
+                break;
+        }
+    });
+    
+    changeStream.on('error', (error) => {
+        console.error('Change stream error:', error);
+    });
+    
+    return changeStream;
+};
+
+// ## 10. Best Practices Summary
+
+/*
+Production Best Practices:
+1. Always use connection pooling
+2. Implement proper error handling
+3. Use transactions for multiple operations
+4. Create indexes for frequent queries
+5. Monitor query performance
+6. Use lean() for read-only operations
+7. Implement proper validation
+8. Use middleware for cross-cutting concerns
+9. Monitor memory usage with large datasets
+10. Implement proper logging and monitoring
+*/
+
+module.exports = {
+    transferOwnership,
+    UserQueryBuilder,
+    getUserStatistics,
+    setupUserChangeStream,
+    AdminUser,
+    CustomerUser
+};`
+    },
+    {
+        tabTitle: "Advanced Express",
+        title: "Production-Ready Express Applications",
+        content: `/*
+Production Best Practices:
+• Environment configuration
+• Security headers
+• Rate limiting
+• Request sanitization
+• Proper error handling
+• Logging
+• Performance optimization
+*/
+
+const cors = require('cors');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+const compression = require('compression');
+
+// Security middleware
+app.use(helmet({
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            styleSrc: ["'self'", "'unsafe-inline'"],
+            scriptSrc: ["'self'"],
+            imgSrc: ["'self'", "data:", "https:"],
+        },
+    },
+    crossOriginEmbedderPolicy: false
+}));
+
+// CORS configuration
+app.use(cors({
+    origin: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000'],
+    credentials: true
+}));
+
+// Rate limiting
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // limit each IP to 100 requests per windowMs
+    message: {
+        error: 'Too many requests from this IP, please try again later.'
+    }
+});
+app.use('/api/', limiter);
+
+// Compression
+app.use(compression());
+
+// Environment-based configuration
+const config = {
+    development: {
+        port: 4000,
+        host: 'localhost',
+        logLevel: 'debug'
+    },
+    production: {
+        port: process.env.PORT || 80,
+        host: '0.0.0.0',
+        logLevel: 'warn'
+    }
+};
+
+const environment = process.env.NODE_ENV || 'development';
+const currentConfig = config[environment];
+
+// Advanced error handling
+class AppError extends Error {
+    constructor(message, statusCode) {
+        super(message);
+        this.statusCode = statusCode;
+        this.isOperational = true;
+        Error.captureStackTrace(this, this.constructor);
+    }
+}
+
+// Async error wrapper (avoid try-catch in every route)
 const asyncHandler = (fn) => (req, res, next) => {
     Promise.resolve(fn(req, res, next)).catch(next);
 };
 
-// Usage in routes
-app.get('/users/:id', asyncHandler(async (req, res) => {
-    const user = await User.findById(req.params.id);
-    if (!user) {
-        const error = new Error('User not found');
-        error.status = 404;
-        throw error;
-    }
-    res.json(user);
+// Example with async handler
+app.get('/api/async-users', asyncHandler(async (req, res) => {
+    // Simulate async operation
+    const users = await Promise.resolve([...users]);
+    res.json({ success: true, data: users });
 }));
 
-// 3. Global Error Handler
-app.use((error, req, res, next) => {
-    const status = error.status || 500;
-    const message = error.message || 'Internal Server Error';
-    
-    res.status(status).json({
-        success: false,
-        error: message,
-        ...(process.env.NODE_ENV === 'development' && { stack: error.stack })
-    });
+// Global error handler
+app.use((err, req, res, next) => {
+    err.statusCode = err.statusCode || 500;
+    err.status = err.status || 'error';
+
+    if (process.env.NODE_ENV === 'development') {
+        res.status(err.statusCode).json({
+            status: err.status,
+            error: err,
+            message: err.message,
+            stack: err.stack
+        });
+    } else {
+        // Production: don't leak error details
+        if (err.isOperational) {
+            res.status(err.statusCode).json({
+                status: err.status,
+                message: err.message
+            });
+        } else {
+            console.error('ERROR 💥', err);
+            res.status(500).json({
+                status: 'error',
+                message: 'Something went wrong!'
+            });
+        }
+    }
 });
 
-// 4. Common Error Types
-// - ValidationError: Schema validation failed
-// - CastError: Invalid ObjectId
-// - MongoError (code 11000): Duplicate key
-// - DocumentNotFoundError: No document found
-
-// Simple Error Check
-try {
-    await user.save();
-} catch (error) {
-    if (error.code === 11000) {
-        console.log('Duplicate email!');
+// Graceful shutdown
+process.on('SIGTERM', () => {
+    console.log('SIGTERM received. Shutting down gracefully...');
+    server.close(() => {
+        console.log('Process terminated');
+    });
+});`
     }
-    if (error.name === 'ValidationError') {
-        console.log('Validation failed:', error.message);
-    }
-}`
-    },
 ];
 
 // Updated Questions array aligned with the new topics

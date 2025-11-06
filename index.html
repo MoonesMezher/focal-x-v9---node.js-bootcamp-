@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="shortcut icon" href="./logo.jpg" type="image/x-icon">
     <title>Focal X - Node.js Bootcamp Lecture Portal</title>
+    <link rel="manifest" href="./manifest.json" />
+    <link rel="apple-touch-icon" href="./logo.jpg">
+    <meta name="apple-mobile-web-app-status-bar" content="#aa7700">
+    <meta name="theme-color" content="#b21f1f">
     <style>
         * {
             margin: 0;
@@ -346,6 +350,12 @@
                         <td>Mongoose (Schema, Chaining, Populate)</td>
                         <td><span class="status-badge status-completed">Completed</span></td>
                     </tr>
+                    <tr onclick="window.location.href='lecture21.html'">
+                        <td>21*</td>
+                        <td><a href="lecture21.html" class="lecture-link">Solve Task 6</a></td>
+                        <td>Solve Task 6</td>
+                        <td><span class="status-badge status-completed">Completed</span></td>
+                    </tr>
                 </tbody>
             </table>
         </div>
@@ -355,7 +365,8 @@
         <p>&copy; 2025 <a rel="noopener" href="https://focal-x.com/" target="_blank">Focal X</a> All Rights Reserved</p>
     </footer>
 
-    <script>
+        <script src="./reg.js"></script>
+<script>
         // Simple search functionality
         document.getElementById('searchInput').addEventListener('keyup', function() {
             const searchText = this.value.toLowerCase();

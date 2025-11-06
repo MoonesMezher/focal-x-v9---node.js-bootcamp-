@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Focal X - Node.js Bootcamp: Lecture 21 </title>
+    <title>Focal X - Node.js Bootcamp: Lecture 21 </title><link rel="manifest" href="./manifest.json" />
+    <link rel="apple-touch-icon" href="./logo.jpg">
+    <meta name="apple-mobile-web-app-status-bar" content="#aa7700">
+    <meta name="theme-color" content="#b21f1f">
     <style>
         * {
             margin: 0;
@@ -299,14 +302,15 @@
         <p>&copy; 2025 <a rel="noopener" href="https://focal-x.com/" target="_blank">Focal X</a> All Right Reserved</p>
     </footer>
 
-    <script>
+        <script src="./reg.js"></script>
+<script>
         // ==================== CONFIGURATION ====================
         // Update these arrays to change the content of your lecture
         
         // Lecture metadata
         const lectureConfig = {
             title: "Focal X - Node.js Bootcamp",
-            subtitle: "MongoDB & ExpressJS (Advanced)"
+            subtitle: "Solve Task 6"
         };
         
        // Lecture content organized by tabs
@@ -315,632 +319,18 @@ const lectureContent = [
         tabTitle: "Last Lesson",
         title: "Last Lesson Recap",
         content: `/*
-1- MongoDB Setup
-2- MongoDB Compass
-3- Mongoose Basics
-4- Mongoose Schemas
-5- Mongoose CRUD
+1- Mongoose Basics
+2- Mongoose Schemas
+3- Mongoose CRUD
+4- Chaining
+5- Not Found & Error Middlewares
 */`
     },
     {
-        tabTitle: "Chaining & Pagination",
-        title: "Query Chaining, Pagination & Projection",
-        content: `// ## Mongoose Query Chaining & Pagination
-
-// Basic Chaining Examples
-const users = await User.find()
-  .where('age').gte(18)
-  .where('isActive').equals(true)
-  .select('name email age')  // Projection - include only these fields
-  .sort({ createdAt: -1 })   // Sort by newest first
-  .skip(10)                  // Pagination - skip first 10
-  .limit(5);                 // Pagination - get 5 documents
-
-// Projection - Include/Exclude fields
-User.find().select('name email -_id');        // Include name, email, exclude _id
-User.find().select('-password -__v');         // Exclude sensitive fields
-
-// Counting documents
-const count = await User.countDocuments({ age: { $gt: 18 } });
-const activeCount = await User.countDocuments({ isActive: true });
-
-// Complete Pagination Function
-const getPaginatedUsers = async (page = 1, limit = 10, filters = {}) => {
-    const skip = (page - 1) * limit;
-    
-    const [data, total] = await Promise.all([
-        User.find(filters)
-            .select('-password')
-            .sort({ createdAt: -1 })
-            .skip(skip)
-            .limit(limit),
-        User.countDocuments(filters)
-    ]);
-    
-    return {
-        data,
-        pagination: {
-            page,
-            limit,
-            total,
-            pages: Math.ceil(total / limit)
-        }
-    };
-};
-
-// Usage
-const result = await getPaginatedUsers(1, 10, { role: 'user' });
-console.log(result.pagination); // { page: 1, limit: 10, total: 100, pages: 10 }`
+        tabTitle: "Solve Task 6",
+        title: "Solve Task (Express.js Product Management Server)",
+        content: `https://github.com/MoonesMezher/solve-task-6-focal-v9`
     },
-     {
-        tabTitle: "Relationships",
-        title: "MongoDB Relationships & Population",
-        content: `// ## MongoDB Relationships
-
-// 1. One-to-Many (Reference)
-const userSchema = new Schema({
-    name: String,
-    posts: [{ type: Schema.Types.ObjectId, ref: 'Post' }] // Array of references
-});
-
-const postSchema = new Schema({
-    title: String,
-    author: { type: Schema.Types.ObjectId, ref: 'User' }, // Single reference
-    content: String
-});
-
-// 2. Embedding (One-to-Few)
-const userWithAddressSchema = new Schema({
-    name: String,
-    addresses: [{  // Embedded array
-        street: String,
-        city: String,
-        country: String,
-        isPrimary: Boolean
-    }]
-});
-
-// 3. Junction Model (Many-to-Many)
-const orderSchema = new Schema({
-    user: { type: Schema.Types.ObjectId, ref: 'User' },
-    products: [{
-        product: { type: Schema.Types.ObjectId, ref: 'Product' },
-        quantity: Number,
-        price: Number
-    }]
-});
-
-// ## Population Examples
-
-// Basic population
-const user = await User.findById(userId).populate('posts');
-
-// Selective population
-const userWithPosts = await User.findById(userId)
-    .populate('posts', 'title createdAt')  // Only get title and createdAt
-    .populate('department', 'name');
-
-// Nested population
-const postWithAuthor = await Post.findById(postId)
-    .populate({
-        path: 'author',
-        select: 'name email',
-        populate: {
-            path: 'department',
-            select: 'name'
-        }
-    });
-
-// Multiple populations
-const populatedUser = await User.findById(userId)
-    .populate('posts')
-    .populate('comments')
-    .populate('likes');`
-    },
-   {
-        tabTitle: "Advanced Mongoose",
-        title: "Advanced Mongoose Features & Best Practices",
-        content: `// ## Advanced Mongoose Patterns
-
-// ## 1. Database Transactions
-
-const transferOwnership = async (fromUserId, toUserId, assetId) => {
-    const session = await mongoose.startSession();
-    
-    try {
-        session.startTransaction();
-        
-        // Remove asset from current owner
-        const fromUser = await User.findByIdAndUpdate(
-            fromUserId,
-            { $pull: { assets: assetId } },
-            { session, new: true }
-        );
-        
-        // Add asset to new owner
-        const toUser = await User.findByIdAndUpdate(
-            toUserId,
-            { $push: { assets: assetId } },
-            { session, new: true }
-        );
-        
-        // Update asset ownership
-        const asset = await Asset.findByIdAndUpdate(
-            assetId,
-            { owner: toUserId },
-            { session, new: true }
-        );
-        
-        await session.commitTransaction();
-        
-        return { fromUser, toUser, asset };
-    } catch (error) {
-        await session.abortTransaction();
-        throw error;
-    } finally {
-        session.endSession();
-    }
-};
-
-// ## 2. Advanced Middleware Patterns
-
-const advancedUserSchema = new Schema({
-    // ... schema fields
-}, {
-    timestamps: true
-});
-
-// Conditional middleware
-advancedUserSchema.pre('save', function(next) {
-    if (this.isModified('email')) {
-        this.emailVerified = false;
-        this.verificationToken = generateToken();
-    }
-    next();
-});
-
-// Async middleware
-advancedUserSchema.pre('save', async function(next) {
-    if (this.isModified('password')) {
-        this.password = await bcrypt.hash(this.password, 12);
-    }
-    next();
-});
-
-// Error handling in middleware
-advancedUserSchema.post('save', function(error, doc, next) {
-    if (error.name === 'MongoError' && error.code === 11000) {
-        next(new Error('Duplicate key error'));
-    } else {
-        next(error);
-    }
-});
-
-// ## 3. Plugins System
-
-// Reusable plugin for soft delete
-function softDeletePlugin(schema) {
-    schema.add({
-        isDeleted: {
-            type: Boolean,
-            default: false,
-            select: false
-        },
-        deletedAt: Date
-    });
-    
-    // Exclude deleted documents by default
-    schema.pre(/^find/, function(next) {
-        if (!this.getOptions().includeDeleted) {
-            this.where({ isDeleted: { $ne: true } });
-        }
-        next();
-    });
-    
-    // Soft delete method
-    schema.methods.softDelete = function() {
-        this.isDeleted = true;
-        this.deletedAt = new Date();
-        return this.save();
-    };
-    
-    // Restore method
-    schema.methods.restore = function() {
-        this.isDeleted = false;
-        this.deletedAt = undefined;
-        return this.save();
-    };
-    
-    // Static method to find including deleted
-    schema.statics.findIncludingDeleted = function(conditions) {
-        return this.find(conditions).setOptions({ includeDeleted: true });
-    };
-}
-
-// Apply plugin to schema
-advancedUserSchema.plugin(softDeletePlugin);
-
-// ## 4. Advanced Validation
-
-const advancedValidationSchema = new Schema({
-    username: {
-        type: String,
-        required: true,
-        validate: {
-            validator: async function(username) {
-                // Async validation - check if username is unique
-                const user = await this.constructor.findOne({ username });
-                return !user || this._id.equals(user._id);
-            },
-            message: 'Username already exists'
-        }
-    },
-    password: {
-        type: String,
-        validate: {
-            validator: function(password) {
-                return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$/.test(password);
-            },
-            message: 'Password must contain uppercase, lowercase, number, and be at least 8 characters'
-        }
-    },
-    birthDate: {
-        type: Date,
-        validate: {
-            validator: function(date) {
-                return date < new Date();
-            },
-            message: 'Birth date cannot be in the future'
-        }
-    }
-});
-
-// ## 5. Discriminators (Schema Inheritance)
-
-const optionsSchema = new Schema({
-    settings: Schema.Types.Mixed,
-    preferences: Schema.Types.Mixed
-}, { discriminatorKey: 'userType' });
-
-const BaseUser = mongoose.model('BaseUser', optionsSchema);
-
-// Admin user discriminator
-const AdminUser = BaseUser.discriminator('AdminUser', new Schema({
-    permissions: [String],
-    adminLevel: {
-        type: String,
-        enum: ['super', 'normal', 'limited']
-    }
-}));
-
-// Customer user discriminator
-const CustomerUser = BaseUser.discriminator('CustomerUser', new Schema({
-    subscription: String,
-    loyaltyPoints: Number
-}));
-
-// ## 6. Advanced Query Building
-
-class UserQueryBuilder {
-    constructor() {
-        this.query = User.find();
-    }
-    
-    active() {
-        this.query = this.query.where('isActive').equals(true);
-        return this;
-    }
-    
-    withRole(role) {
-        this.query = this.query.where('role').equals(role);
-        return this;
-    }
-    
-    createdAfter(date) {
-        this.query = this.query.where('createdAt').gte(date);
-        return this;
-    }
-    
-    withTags(tags) {
-        this.query = this.query.where('tags').in(tags);
-        return this;
-    }
-    
-    paginate(page = 1, limit = 10) {
-        const skip = (page - 1) * limit;
-        this.query = this.query.skip(skip).limit(limit);
-        return this;
-    }
-    
-    sort(field, direction = 'asc') {
-        const sortOrder = direction === 'desc' ? -1 : 1;
-        this.query = this.query.sort({ [field]: sortOrder });
-        return this;
-    }
-    
-    async execute() {
-        return await this.query.exec();
-    }
-}
-
-// Usage
-const users = await new UserQueryBuilder()
-    .active()
-    .withRole('admin')
-    .createdAfter(new Date('2023-01-01'))
-    .paginate(1, 20)
-    .sort('createdAt', 'desc')
-    .execute();
-
-// ## 7. Performance Optimization
-
-const performanceOptimizedSchema = new Schema({
-    // Schema with performance considerations
-    email: { type: String, index: true },
-    role: { type: String, index: true },
-    createdAt: { type: Date, index: true }
-});
-
-// Compound indexes for common query patterns
-performanceOptimizedSchema.index({ role: 1, createdAt: -1 });
-performanceOptimizedSchema.index({ isActive: 1, lastLogin: -1 });
-
-// Partial indexes
-performanceOptimizedSchema.index(
-    { email: 1 },
-    { 
-        partialFilterExpression: { 
-            email: { $exists: true } 
-        } 
-    }
-);
-
-// ## 8. Advanced Aggregation
-
-const getUserStatistics = async () => {
-    return await User.aggregate([
-        {
-            $facet: {
-                // Total statistics
-                totalStats: [
-                    {
-                        $group: {
-                            _id: null,
-                            totalUsers: { $sum: 1 },
-                            averageAge: { $avg: '$age' },
-                            activeUsers: {
-                                $sum: { $cond: ['$isActive', 1, 0] }
-                            }
-                        }
-                    }
-                ],
-                
-                // Role distribution
-                roleDistribution: [
-                    {
-                        $group: {
-                            _id: '$role',
-                            count: { $sum: 1 },
-                            averageAge: { $avg: '$age' }
-                        }
-                    },
-                    { $sort: { count: -1 } }
-                ],
-                
-                // Monthly signups
-                monthlySignups: [
-                    {
-                        $group: {
-                            _id: {
-                                year: { $year: '$createdAt' },
-                                month: { $month: '$createdAt' }
-                            },
-                            signups: { $sum: 1 }
-                        }
-                    },
-                    { $sort: { '_id.year': 1, '_id.month': 1 } }
-                ],
-                
-                // Age groups
-                ageGroups: [
-                    {
-                        $bucket: {
-                            groupBy: '$age',
-                            boundaries: [18, 25, 35, 45, 55, 65, 120],
-                            default: 'Other',
-                            output: {
-                                count: { $sum: 1 },
-                                users: { $push: '$name' }
-                            }
-                        }
-                    }
-                ]
-            }
-        }
-    ]);
-};
-
-// ## 9. Change Streams (Real-time updates)
-
-const setupUserChangeStream = () => {
-    const changeStream = User.watch();
-    
-    changeStream.on('change', (change) => {
-        console.log('Change detected:', change);
-        
-        // Handle different operation types
-        switch (change.operationType) {
-            case 'insert':
-                console.log('New user created:', change.fullDocument);
-                break;
-            case 'update':
-                console.log('User updated:', change.documentKey);
-                break;
-            case 'delete':
-                console.log('User deleted:', change.documentKey);
-                break;
-        }
-    });
-    
-    changeStream.on('error', (error) => {
-        console.error('Change stream error:', error);
-    });
-    
-    return changeStream;
-};
-
-// ## 10. Best Practices Summary
-
-/*
-Production Best Practices:
-1. Always use connection pooling
-2. Implement proper error handling
-3. Use transactions for multiple operations
-4. Create indexes for frequent queries
-5. Monitor query performance
-6. Use lean() for read-only operations
-7. Implement proper validation
-8. Use middleware for cross-cutting concerns
-9. Monitor memory usage with large datasets
-10. Implement proper logging and monitoring
-*/
-
-module.exports = {
-    transferOwnership,
-    UserQueryBuilder,
-    getUserStatistics,
-    setupUserChangeStream,
-    AdminUser,
-    CustomerUser
-};`
-    },
-    {
-        tabTitle: "Advanced Express",
-        title: "Production-Ready Express Applications",
-        content: `/*
-Production Best Practices:
-• Environment configuration
-• Security headers
-• Rate limiting
-• Request sanitization
-• Proper error handling
-• Logging
-• Performance optimization
-*/
-
-const cors = require('cors');
-const helmet = require('helmet');
-const rateLimit = require('express-rate-limit');
-const compression = require('compression');
-
-// Security middleware
-app.use(helmet({
-    contentSecurityPolicy: {
-        directives: {
-            defaultSrc: ["'self'"],
-            styleSrc: ["'self'", "'unsafe-inline'"],
-            scriptSrc: ["'self'"],
-            imgSrc: ["'self'", "data:", "https:"],
-        },
-    },
-    crossOriginEmbedderPolicy: false
-}));
-
-// CORS configuration
-app.use(cors({
-    origin: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000'],
-    credentials: true
-}));
-
-// Rate limiting
-const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // limit each IP to 100 requests per windowMs
-    message: {
-        error: 'Too many requests from this IP, please try again later.'
-    }
-});
-app.use('/api/', limiter);
-
-// Compression
-app.use(compression());
-
-// Environment-based configuration
-const config = {
-    development: {
-        port: 4000,
-        host: 'localhost',
-        logLevel: 'debug'
-    },
-    production: {
-        port: process.env.PORT || 80,
-        host: '0.0.0.0',
-        logLevel: 'warn'
-    }
-};
-
-const environment = process.env.NODE_ENV || 'development';
-const currentConfig = config[environment];
-
-// Advanced error handling
-class AppError extends Error {
-    constructor(message, statusCode) {
-        super(message);
-        this.statusCode = statusCode;
-        this.isOperational = true;
-        Error.captureStackTrace(this, this.constructor);
-    }
-}
-
-// Async error wrapper (avoid try-catch in every route)
-const asyncHandler = (fn) => (req, res, next) => {
-    Promise.resolve(fn(req, res, next)).catch(next);
-};
-
-// Example with async handler
-app.get('/api/async-users', asyncHandler(async (req, res) => {
-    // Simulate async operation
-    const users = await Promise.resolve([...users]);
-    res.json({ success: true, data: users });
-}));
-
-// Global error handler
-app.use((err, req, res, next) => {
-    err.statusCode = err.statusCode || 500;
-    err.status = err.status || 'error';
-
-    if (process.env.NODE_ENV === 'development') {
-        res.status(err.statusCode).json({
-            status: err.status,
-            error: err,
-            message: err.message,
-            stack: err.stack
-        });
-    } else {
-        // Production: don't leak error details
-        if (err.isOperational) {
-            res.status(err.statusCode).json({
-                status: err.status,
-                message: err.message
-            });
-        } else {
-            console.error('ERROR 💥', err);
-            res.status(500).json({
-                status: 'error',
-                message: 'Something went wrong!'
-            });
-        }
-    }
-});
-
-// Graceful shutdown
-process.on('SIGTERM', () => {
-    console.log('SIGTERM received. Shutting down gracefully...');
-    server.close(() => {
-        console.log('Process terminated');
-    });
-});`
-    }
 ];
 
 // Updated Questions array aligned with the new topics
@@ -981,17 +371,6 @@ const questions = [
         ],
         correctIndex: 1
     },
-    {
-        type: "question",
-        question: "Which feature in MongoDB Compass allows you to visually build aggregation pipelines?",
-        options: [
-            "Document Validation",
-            "Aggregation Pipeline Builder", 
-            "Index Manager",
-            "Schema Analyzer"
-        ],
-        correctIndex: 1
-    },
 
     // Mongoose Basics
     {
@@ -1002,17 +381,6 @@ const questions = [
             "An Object Data Modeling (ODM) library that provides schema-based solution",
             "A testing framework for JavaScript applications",
             "A package manager for Node.js"
-        ],
-        correctIndex: 1
-    },
-    {
-        type: "question",
-        question: "Which Mongoose connection option controls the maximum number of sockets in the connection pool?",
-        options: [
-            "socketTimeoutMS",
-            "maxPoolSize",
-            "connectTimeoutMS", 
-            "serverSelectionTimeoutMS"
         ],
         correctIndex: 1
     },
@@ -1029,29 +397,6 @@ const questions = [
         ],
         correctIndex: 0
     },
-    {
-        type: "question",
-        question: "Which Mongoose feature allows you to create properties that are computed from other fields but not stored in the database?",
-        options: [
-            "Instance methods",
-            "Static methods",
-            "Virtual properties",
-            "Middleware hooks"
-        ],
-        correctIndex: 2
-    },
-    {
-        type: "question",
-        question: "What is the main purpose of Mongoose middleware (pre and post hooks)?",
-        options: [
-            "To create database indexes automatically",
-            "To execute logic before or after specific operations like save, find, etc.",
-            "To generate API documentation from schemas",
-            "To optimize database queries for better performance"
-        ],
-        correctIndex: 1
-    },
-
     // Mongoose CRUD
     {
         type: "question",
@@ -1083,65 +428,6 @@ const questions = [
             "To replace document references with actual documents from other collections",
             "To increase database performance by caching queries",
             "To validate all documents in a collection"
-        ],
-        correctIndex: 1
-    },
-
-    // Advanced Mongoose
-    {
-        type: "question",
-        question: "What are Mongoose discriminators used for?",
-        options: [
-            "To distinguish between different error types",
-            "To create schema inheritance and model different types of documents in the same collection",
-            "To discriminate between valid and invalid queries",
-            "To create different database connections for different environments"
-        ],
-        correctIndex: 1
-    },
-    {
-        type: "question",
-        question: "Which Mongoose feature allows you to group multiple database operations into a single atomic transaction?",
-        options: [
-            "Aggregation pipelines",
-            "Middleware hooks",
-            "Sessions with transactions",
-            "Query builders"
-        ],
-        correctIndex: 2
-    },
-    {
-        type: "question",
-        question: "What is the purpose of the lean() method in Mongoose queries?",
-        options: [
-            "To make queries run faster by returning plain JavaScript objects instead of Mongoose documents",
-            "To reduce the memory usage of the Node.js application",
-            "To remove all validation from the query results",
-            "To automatically remove sensitive fields from returned documents"
-        ],
-        correctIndex: 0
-    },
-
-    // Advanced Express
-    {
-        type: "question",
-        question: "What is the main purpose of the Helmet.js middleware in Express applications?",
-        options: [
-            "To compress response bodies",
-            "To set various HTTP headers for security protection",
-            "To rate limit incoming requests",
-            "To handle CORS configuration"
-        ],
-        correctIndex: 1
-    },
-    {
-        type: "question",
-        question: "In Express error handling, what is the advantage of using asyncHandler?",
-        options: [
-            "It makes all routes run asynchronously by default",
-            "It automatically catches both synchronous and asynchronous errors in route handlers",
-            "It converts callback-based functions to promise-based ones",
-            "It adds retry logic for failed database operations"
         ],
         correctIndex: 1
     },
@@ -1182,18 +468,6 @@ const questions = [
         content: "Create advanced Mongoose queries including aggregation pipelines, text search, geospatial queries, and complex filtering. Implement query performance optimization and indexing strategies."
     },
 
-    // Practical Tasks - Advanced Mongoose
-    {
-        type: "task",
-        title: "Mongoose Plugins & Middleware",
-        content: "Create reusable Mongoose plugins for common functionality like soft delete, audit logging, and data encryption. Implement advanced middleware patterns for cross-cutting concerns."
-    },
-    {
-        type: "task",
-        title: "Database Transactions & Change Streams",
-        content: "Implement complex database transactions for multi-document operations and set up change streams for real-time data updates. Create proper error handling and rollback mechanisms."
-    },
-
     // Search & Research Tasks
     {
         type: "search-task",
@@ -1206,17 +480,6 @@ const questions = [
         content: "Research MongoDB best practices for schema design, indexing, aggregation pipelines, and data modeling. Compare different approaches for common use cases and create implementation guidelines."
     },
 
-    // Integration & Production Tasks
-    {
-        type: "task",
-        title: "Full Stack Application Integration",
-        content: "Build a complete full-stack application integrating Express.js, Mongoose, and MongoDB Atlas. Implement user authentication, real-time features, proper error handling, and production-ready configurations."
-    },
-    {
-        type: "task",
-        title: "Production Deployment & Monitoring",
-        content: "Prepare your Mongoose/Express application for production deployment. Configure environment variables, set up monitoring, implement health checks, create backup strategies, and set up performance monitoring."
-    }
 ];    // Set lecture title and subtitle
         document.getElementById('lecture-title').textContent = lectureConfig.title;
         document.getElementById('lecture-subtitle').textContent = lectureConfig.subtitle;
