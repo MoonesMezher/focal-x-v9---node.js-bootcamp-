@@ -310,7 +310,7 @@
         // Lecture metadata
         const lectureConfig = {
             title: "Focal X - Node.js Bootcamp",
-            subtitle: "MongoDB & ExpressJS (Advanced)"
+            subtitle: "Mongoose (Advanced)"
         };
         
        // Lecture content organized by tabs
@@ -319,11 +319,8 @@ const lectureContent = [
         tabTitle: "Last Lesson",
         title: "Last Lesson Recap",
         content: `/*
-1- MongoDB Setup
-2- MongoDB Compass
-3- Mongoose Basics
-4- Mongoose Schemas
-5- Mongoose CRUD
+1- Solve Task 6
+2- Recap (Mongoose)
 */`
     },
     {
@@ -818,133 +815,6 @@ module.exports = {
     CustomerUser
 };`
     },
-    {
-        tabTitle: "Advanced Express",
-        title: "Production-Ready Express Applications",
-        content: `/*
-Production Best Practices:
-• Environment configuration
-• Security headers
-• Rate limiting
-• Request sanitization
-• Proper error handling
-• Logging
-• Performance optimization
-*/
-
-const cors = require('cors');
-const helmet = require('helmet');
-const rateLimit = require('express-rate-limit');
-const compression = require('compression');
-
-// Security middleware
-app.use(helmet({
-    contentSecurityPolicy: {
-        directives: {
-            defaultSrc: ["'self'"],
-            styleSrc: ["'self'", "'unsafe-inline'"],
-            scriptSrc: ["'self'"],
-            imgSrc: ["'self'", "data:", "https:"],
-        },
-    },
-    crossOriginEmbedderPolicy: false
-}));
-
-// CORS configuration
-app.use(cors({
-    origin: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000'],
-    credentials: true
-}));
-
-// Rate limiting
-const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // limit each IP to 100 requests per windowMs
-    message: {
-        error: 'Too many requests from this IP, please try again later.'
-    }
-});
-app.use('/api/', limiter);
-
-// Compression
-app.use(compression());
-
-// Environment-based configuration
-const config = {
-    development: {
-        port: 4000,
-        host: 'localhost',
-        logLevel: 'debug'
-    },
-    production: {
-        port: process.env.PORT || 80,
-        host: '0.0.0.0',
-        logLevel: 'warn'
-    }
-};
-
-const environment = process.env.NODE_ENV || 'development';
-const currentConfig = config[environment];
-
-// Advanced error handling
-class AppError extends Error {
-    constructor(message, statusCode) {
-        super(message);
-        this.statusCode = statusCode;
-        this.isOperational = true;
-        Error.captureStackTrace(this, this.constructor);
-    }
-}
-
-// Async error wrapper (avoid try-catch in every route)
-const asyncHandler = (fn) => (req, res, next) => {
-    Promise.resolve(fn(req, res, next)).catch(next);
-};
-
-// Example with async handler
-app.get('/api/async-users', asyncHandler(async (req, res) => {
-    // Simulate async operation
-    const users = await Promise.resolve([...users]);
-    res.json({ success: true, data: users });
-}));
-
-// Global error handler
-app.use((err, req, res, next) => {
-    err.statusCode = err.statusCode || 500;
-    err.status = err.status || 'error';
-
-    if (process.env.NODE_ENV === 'development') {
-        res.status(err.statusCode).json({
-            status: err.status,
-            error: err,
-            message: err.message,
-            stack: err.stack
-        });
-    } else {
-        // Production: don't leak error details
-        if (err.isOperational) {
-            res.status(err.statusCode).json({
-                status: err.status,
-                message: err.message
-            });
-        } else {
-            console.error('ERROR 💥', err);
-            res.status(500).json({
-                status: 'error',
-                message: 'Something went wrong!'
-            });
-        }
-    }
-});
-
-// Graceful shutdown
-process.on('SIGTERM', () => {
-    console.log('SIGTERM received. Shutting down gracefully...');
-    server.close(() => {
-        console.log('Process terminated');
-    });
-});`
-    }
 ];
 
 // Updated Questions array aligned with the new topics
