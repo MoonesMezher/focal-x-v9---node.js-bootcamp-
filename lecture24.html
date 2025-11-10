@@ -1,0 +1,1397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Focal X - Node.js Bootcamp: Lecture 24 </title>
+    <link rel="manifest" href="./manifest.json" />
+    <link rel="apple-touch-icon" href="./logo.jpg">
+    <meta name="apple-mobile-web-app-status-bar" content="#aa7700">
+    <meta name="theme-color" content="#b21f1f">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .footer {
+            padding-top: 30px;
+        }
+
+        .footer a {
+            color: black;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .coach {
+            background-color: white;
+            width: 80px;
+            border-radius: 0 0 50% 0;
+            color: black;
+            padding: 10px;
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+        
+        header {
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            padding: 20px;
+            height: 65vh;
+        }
+        
+        .lecture-content {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+        }
+        
+        .interactive-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+        }
+        
+        h2 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #3498db;
+            font-size: 1.5rem;
+        }
+        
+        h3 {
+            color: #2980b9;
+            margin: 20px 0 12px;
+            font-size: 1.2rem;
+        }
+        
+        pre {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 12px;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin: 12px 0;
+            font-size: 0.9rem;
+        }
+        
+        code {
+            font-family: 'Fira Code', monospace;
+        }
+        
+        .question {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .options {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+            margin: 12px 0;
+        }
+        
+        .option {
+            padding: 10px;
+            background: #e8f4fc;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+            font-size: 0.9rem;
+        }
+        
+        .option:hover {
+            background: #d1e9fa;
+        }
+        
+        .correct {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .incorrect {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .task {
+            background: #fff3cd;
+            padding: 12px;
+            border-left: 5px solid #ffc107;
+            margin: 15px 0;
+            border-radius: 5px;
+            font-size: 0.9rem;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background 0.3s;
+            margin-top: 8px;
+        }
+        
+        .btn:hover {
+            background: #2980b9;
+        }
+        
+        .result {
+            margin-top: 12px;
+            padding: 12px;
+            border-radius: 5px;
+            display: none;
+            font-size: 0.9rem;
+        }
+        
+        .search-task {
+            background: #e7f5e9;
+            padding: 12px;
+            border-radius: 5px;
+            margin: 15px 0;
+            border-left: 5px solid #28a745;
+            font-size: 0.9rem;
+        }
+        
+        .tabs {
+            display: flex;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .tab {
+            padding: 8px 15px;
+            cursor: pointer;
+            background: #f1f1f1;
+            border: 1px solid #ddd;
+            border-bottom: none;
+            border-radius: 5px 5px 0 0;
+            margin-right: 5px;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+        
+        .tab.active {
+            background: #6f42c1;
+            color: white;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 12px 0;
+            font-size: 0.9rem;
+        }
+        
+        .comparison-table th, .comparison-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        
+        .comparison-table th {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        .comparison-table tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        
+        @media (max-width: 900px) {
+            .content {
+                grid-template-columns: 1fr;
+                height: auto;
+            }
+            
+            .lecture-content, .interactive-section {
+                height: 50vh;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <p class="coach">Moones Mezher</p>
+        <header>
+            <h1 id="lecture-title">Focal X - Node.js Bootcamp</h1>
+            <p class="subtitle" id="lecture-subtitle">Node</p>
+        </header>
+        
+        <div class="content">
+            <div class="lecture-content">
+                <h2>Lecture Content</h2>
+                <div id="tabs-container"></div>
+                <div id="tab-content-container"></div>
+            </div>
+            
+            <div class="interactive-section">
+                <h2>Interactive Questions & Tasks</h2>
+                <div id="questions-container"></div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2025 <a rel="noopener" href="https://focal-x.com/" target="_blank">Focal X</a> All Right Reserved</p>
+    </footer>
+
+        <script src="./reg.js"></script>
+<script>
+        // ==================== CONFIGURATION ====================
+        // Update these arrays to change the content of your lecture
+        
+        // Lecture metadata
+        const lectureConfig = {
+            title: "Focal X - Node.js Bootcamp",
+            subtitle: "Authentication & Authorization"
+        };
+        
+       // Lecture content organized by tabs
+const lectureContent = [
+    {
+        tabTitle: "Last Lesson",
+        title: "Last Lesson Recap",
+        content: `/*
+1- Authentication & Authorization Fundamentals
+2- JWT Tokens & Implementation
+3- Secure Cookie Management 
+*/`
+    },  
+    {
+        tabTitle: "Auth Middleware",
+        title: "Authentication Middleware & Authorization",
+        content: `// ###################### AUTHENTICATION MIDDLEWARE ##############################
+
+// Main authentication middleware
+const authenticateToken = asyncHandler(async (req, res, next) => {
+    // Get token from cookie (preferred) or Authorization header
+    const token = req.cookies.accessToken || 
+                 req.headers.authorization?.replace('Bearer ', '');
+
+    if (!token) {
+        throw new AppError('Access token required', 401);
+    }
+
+    try {
+        const decoded = tokenService.verifyAccessToken(token);
+        
+        // Optional: Verify user still exists and is active
+        const user = await User.findById(decoded.id).select('-password');
+        if (!user) {
+            throw new AppError('User no longer exists', 401);
+        }
+        
+        if (user.isSuspended) {
+            throw new AppError('Account suspended', 403);
+        }
+
+        // Attach user to request object
+        req.user = {
+            id: user._id,
+            email: user.email,
+            role: user.role,
+            permissions: user.permissions,
+            isVerified: user.isVerified
+        };
+
+        next();
+    } catch (error) {
+        if (error.name === 'TokenExpiredError') {
+            throw new AppError('Access token expired', 401);
+        }
+        throw new AppError('Invalid access token', 401);
+    }
+});
+
+// Optional authentication (user might be logged in)
+const optionalAuth = asyncHandler(async (req, res, next) => {
+    const token = req.cookies.accessToken || 
+                 req.headers.authorization?.replace('Bearer ', '');
+
+    if (token) {
+        try {
+            const decoded = tokenService.verifyAccessToken(token);
+            const user = await User.findById(decoded.id).select('-password');
+            
+            if (user && !user.isSuspended) {
+                req.user = {
+                    id: user._id,
+                    email: user.email,
+                    role: user.role,
+                    permissions: user.permissions
+                };
+            }
+        } catch (error) {
+            // Silently fail for optional auth
+        }
+    }
+
+    next();
+});
+
+// ###################### AUTHORIZATION MIDDLEWARE ##############################
+
+// Role-based authorization
+const authorize = (...allowedRoles) => {
+    return (req, res, next) => {
+        if (!req.user) {
+            throw new AppError('Authentication required', 401);
+        }
+
+        if (!allowedRoles.includes(req.user.role)) {
+            throw new AppError('Insufficient permissions', 403);
+        }
+
+        next();
+    };
+};
+
+// Permission-based authorization
+const requirePermission = (permission) => {
+    return asyncHandler(async (req, res, next) => {
+        if (!req.user) {
+            throw new AppError('Authentication required', 401);
+        }
+
+        // Check user permissions (you might fetch from database)
+        const userPermissions = req.user.permissions || [];
+        
+        if (!userPermissions.includes(permission)) {
+            throw new AppError('Insufficient permissions', 403);
+        }
+
+        next();
+    });
+};
+
+// Resource ownership check
+const checkResourceOwnership = (model, paramName = 'id') => {
+    return asyncHandler(async (req, res, next) => {
+        if (!req.user) {
+            throw new AppError('Authentication required', 401);
+        }
+
+        const resourceId = req.params[paramName];
+        const resource = await model.findById(resourceId);
+
+        if (!resource) {
+            throw new AppError('Resource not found', 404);
+        }
+
+        // Check if user owns resource or is admin
+        const isOwner = resource.userId && resource.userId.toString() === req.user.id;
+        const isAdmin = req.user.role === 'admin' || req.user.role === 'superadmin';
+
+        if (!isOwner && !isAdmin) {
+            throw new AppError('Access denied to this resource', 403);
+        }
+
+        req.resource = resource;
+        next();
+    });
+};
+
+// ###################### COMPOSITE MIDDLEWARE EXAMPLES ##############################
+
+// Admin-only middleware (composition of auth + role check)
+const requireAdmin = [authenticateToken, authorize('admin', 'superadmin')];
+
+// Verified user middleware
+const requireVerifiedUser = [
+    authenticateToken,
+    (req, res, next) => {
+        if (!req.user.isVerified) {
+            throw new AppError('Please verify your email address', 403);
+        }
+        next();
+    }
+];
+
+// Self or admin middleware (users can access their own data)
+const requireSelfOrAdmin = (paramName = 'id') => {
+    return [
+        authenticateToken,
+        (req, res, next) => {
+            const targetUserId = req.params[paramName];
+            const isSelf = targetUserId === req.user.id;
+            const isAdmin = ['admin', 'superadmin'].includes(req.user.role);
+
+            if (!isSelf && !isAdmin) {
+                throw new AppError('Access denied', 403);
+            }
+            next();
+        }
+    ];
+};
+
+// ###################### ROUTE IMPLEMENTATIONS ##############################
+
+// Public route (no auth required)
+app.get('/api/public/data', (req, res) => {
+    res.json({ message: 'This is public data' });
+});
+
+// Protected route (auth required)
+app.get('/api/profile', authenticateToken, asyncHandler(async (req, res) => {
+    const user = await User.findById(req.user.id).select('-password');
+    res.json({
+        success: true,
+        data: { user }
+    });
+}));
+
+// Admin-only route
+app.get('/api/admin/users', 
+    requireAdmin, // Composite middleware
+    asyncHandler(async (req, res) => {
+        const users = await User.find().select('-password');
+        res.json({
+            success: true,
+            data: { users }
+        });
+    })
+);
+
+// User can access their own data, admin can access any
+app.get('/api/users/:userId', 
+    requireSelfOrAdmin('userId'),
+    asyncHandler(async (req, res) => {
+        const user = await User.findById(req.params.userId).select('-password');
+        res.json({
+            success: true,
+            data: { user }
+        });
+    })
+);
+
+// Resource ownership example (user can only update their own posts)
+app.put('/api/posts/:postId',
+    [authenticateToken, checkResourceOwnership(Post, 'postId')],
+    asyncHandler(async (req, res) => {
+        const updatedPost = await Post.findByIdAndUpdate(
+            req.params.postId,
+            req.body,
+            { new: true, runValidators: true }
+        );
+        
+        res.json({
+            success: true,
+            data: { post: updatedPost }
+        });
+    })
+);
+
+// Permission-based route
+app.delete('/api/users/:userId',
+    [authenticateToken, requirePermission('users:delete')],
+    asyncHandler(async (req, res) => {
+        await User.findByIdAndDelete(req.params.userId);
+        res.json({
+            success: true,
+            message: 'User deleted successfully'
+        });
+    })
+);
+
+// ###################### ERROR HANDLING FOR AUTH ##############################
+
+// Custom error classes for auth
+class AuthenticationError extends AppError {
+    constructor(message = 'Authentication failed') {
+        super(message, 401);
+    }
+}
+
+class AuthorizationError extends AppError {
+    constructor(message = 'Insufficient permissions') {
+        super(message, 403);
+    }
+}
+
+class TokenExpiredError extends AppError {
+    constructor(message = 'Token expired') {
+        super(message, 401);
+    }
+}
+
+// Enhanced global error handler for auth errors
+app.use((err, req, res, next) => {
+    // Handle JWT errors
+    if (err.name === 'JsonWebTokenError') {
+        err = new AuthenticationError('Invalid token');
+    }
+    if (err.name === 'TokenExpiredError') {
+        err = new TokenExpiredError('Token expired');
+    }
+
+    // Handle mongoose validation errors for auth
+    if (err.name === 'ValidationError') {
+        const messages = Object.values(err.errors).map(val => val.message);
+        err = new AppError(messages.join(', '), 400);
+    }
+
+    // Handle duplicate key errors (registration)
+    if (err.code === 11000) {
+        const field = Object.keys(err.keyValue)[0];
+        err = new AppError(\`\${field} already exists\`, 409);
+    }
+
+    // Pass to default error handler
+    next(err);
+});`
+    },
+    {
+        tabTitle: "Security Practices",
+        title: "Advanced Security & Best Practices",
+        content: `// ###################### SECURITY BEST PRACTICES ##############################
+
+/*
+MODERN SECURITY MEASURES:
+
+1. Password Security:
+   - Minimum 8 characters with complexity requirements
+   - Breached password detection (Have I Been Pwned)
+   - Regular password rotation policies
+   - Secure password reset flows
+
+2. Token Security:
+   - Short-lived access tokens (15-30 minutes)
+   - Long-lived refresh tokens (7 days) with rotation
+   - Token blacklisting/revocation capabilities
+   - Secure storage (HTTP-only, Secure, SameSite cookies)
+
+3. Rate Limiting:
+   - Stricter limits on authentication endpoints
+   - Account lockout after failed attempts
+   - IP-based and user-based rate limiting
+*/
+
+// ###################### ENHANCED RATE LIMITING ##############################
+
+const rateLimit = require('express-rate-limit');
+
+// General API rate limiting
+const apiLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // Limit each IP to 100 requests per windowMs
+    message: {
+        error: 'Too many requests from this IP, please try again later.'
+    },
+    standardHeaders: true,
+    legacyHeaders: false
+});
+
+// Stricter limits for auth endpoints
+const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 5, // 5 attempts per window for sensitive endpoints
+    message: {
+        error: 'Too many authentication attempts, please try again later.'
+    },
+    skipSuccessfulRequests: true, // Only count failed attempts
+    keyGenerator: (req) => {
+        // Use IP + user agent for more precise limiting
+        return \`\${req.ip}-\${req.get('User-Agent')}\`;
+    }
+});
+
+// Bruteforce protection for login
+const loginLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000, // 1 hour
+    max: 10, // Max 10 failed attempts per hour
+    skipSuccessfulRequests: true,
+    handler: (req, res) => {
+        // Log security event
+        console.warn(\`Bruteforce attempt detected from IP: \${req.ip}\`);
+        res.status(429).json({
+            error: 'Too many failed login attempts. Please try again in an hour.'
+        });
+    }
+});
+
+// Apply rate limiting
+app.use('/api/', apiLimiter);
+app.use('/api/auth/login', [authLimiter, loginLimiter]);
+app.use('/api/auth/register', authLimiter);
+app.use('/api/auth/forgot-password', authLimiter);
+
+// ###################### ACCOUNT LOCKOUT MECHANISM ##############################
+
+const accountLockout = {
+    async handleFailedLogin(userId) {
+        const user = await User.findById(userId);
+        if (!user) return;
+
+        user.failedLoginAttempts = (user.failedLoginAttempts || 0) + 1;
+        
+        // Lock account after 5 failed attempts
+        if (user.failedLoginAttempts >= 5) {
+            user.isLocked = true;
+            user.lockedUntil = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes
+        }
+
+        await user.save();
+    },
+
+    async resetFailedAttempts(userId) {
+        await User.findByIdAndUpdate(userId, {
+            failedLoginAttempts: 0,
+            isLocked: false,
+            lockedUntil: null
+        });
+    },
+
+    async isAccountLocked(userId) {
+        const user = await User.findById(userId);
+        if (!user) return false;
+
+        // Check if lock period has expired
+        if (user.lockedUntil && user.lockedUntil > new Date()) {
+            return true;
+        }
+
+        // Auto-unlock if lock period expired
+        if (user.isLocked && user.lockedUntil && user.lockedUntil <= new Date()) {
+            user.isLocked = false;
+            user.lockedUntil = null;
+            user.failedLoginAttempts = 0;
+            await user.save();
+            return false;
+        }
+
+        return user.isLocked;
+    }
+};
+
+// ###################### PASSWORD SECURITY ENHANCEMENTS ##############################
+
+const passwordPolicy = {
+    async isPasswordBreached(password) {
+        // In production, integrate with Have I Been Pwned API
+        // This is a simplified version
+        const breachedPasswords = ['password123', '12345678', 'qwerty'];
+        return breachedPasswords.includes(password);
+    },
+
+    validatePasswordHistory(userId, newPassword) {
+        // Check if password was used before (simplified)
+        // In reality, you'd check against previously hashed passwords
+        return false;
+    },
+
+    generatePasswordRequirements() {
+        return {
+            minLength: 8,
+            requireUppercase: true,
+            requireLowercase: true,
+            requireNumbers: true,
+            requireSpecialChars: true,
+            maxAge: 90 // days until password expiry
+        };
+    }
+};
+
+// ###################### SECURITY HEADERS ENHANCEMENT ##############################
+
+// Enhanced security headers specifically for auth
+app.use(helmet({
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+            scriptSrc: ["'self'", "'unsafe-inline'"],
+            imgSrc: ["'self'", "data:", "https:"],
+            connectSrc: ["'self'", "https://api.yourdomain.com"],
+            fontSrc: ["'self'", "https://fonts.gstatic.com"],
+            frameAncestors: ["'none'"], // Prevent clickjacking
+            formAction: ["'self'"] // Restrict form submissions
+        },
+    },
+    crossOriginEmbedderPolicy: false,
+    hsts: {
+        maxAge: 31536000, // 1 year
+        includeSubDomains: true,
+        preload: true
+    },
+    referrerPolicy: { policy: 'strict-origin-when-cross-origin' }
+}));
+
+// Additional security headers
+app.use((req, res, next) => {
+    // Prevent MIME type sniffing
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    
+    // Prevent clickjacking
+    res.setHeader('X-Frame-Options', 'DENY');
+    
+    // Enable XSS filter
+    res.setHeader('X-XSS-Protection', '1; mode=block');
+    
+    // Remove server information
+    res.removeHeader('X-Powered-By');
+    
+    next();
+});
+
+// ###################### SECURITY MONITORING & AUDITING ##############################
+
+const securityLogger = {
+    logAuthAttempt(email, success, ip, userAgent) {
+        const logEntry = {
+            timestamp: new Date(),
+            event: success ? 'LOGIN_SUCCESS' : 'LOGIN_FAILED',
+            email: success ? email : undefined, // Don't log failed emails for privacy
+            ip,
+            userAgent: userAgent?.substring(0, 100), // Limit length
+            success
+        };
+
+        console.log('AUTH_ATTEMPT:', logEntry);
+        
+        // In production, send to security monitoring service
+        // await SecurityLog.create(logEntry);
+    },
+
+    logTokenRefresh(userId, success) {
+        console.log(\`TOKEN_REFRESH: user=\${userId} success=\${success}\`);
+    },
+
+    logSecurityEvent(event, details) {
+        const securityEvent = {
+            timestamp: new Date(),
+            event,
+            ...details
+        };
+
+        console.warn('SECURITY_EVENT:', securityEvent);
+    }
+};
+
+// ###################### PRODUCTION SECURITY CHECKLIST ##############################
+
+/*
+✅ Environment Variables:
+   - JWT secrets set and strong
+   - Database credentials secure
+   - API keys not in code
+
+✅ HTTPS Enforcement:
+   - SSL certificate valid
+   - HTTP to HTTPS redirect
+   - HSTS headers enabled
+
+✅ Cookie Security:
+   - HTTP-only flag set
+   - Secure flag in production
+   - SameSite policy configured
+   - Proper domain and path settings
+
+✅ Rate Limiting:
+   - Authentication endpoints protected
+   - API endpoints limited
+   - Bruteforce protection enabled
+
+✅ Input Validation:
+   - Request body validation
+   - SQL injection prevention
+   - XSS protection
+
+✅ Error Handling:
+   - No sensitive data in errors
+   - Proper logging
+   - Generic error messages in production
+
+✅ Dependency Security:
+   - Regular dependency updates
+   - Security audits
+   - Vulnerability monitoring
+
+✅ Monitoring:
+   - Failed login attempts logged
+   - Suspicious activity detection
+   - Regular security audits
+*/
+
+// ###################### REGULAR SECURITY AUDITS ##############################
+
+const securityAudit = {
+    async runSecurityCheck() {
+        const checks = {
+            weakPasswords: await this.checkWeakPasswords(),
+            expiredTokens: await this.cleanExpiredTokens(),
+            oldSessions: await this.checkOldSessions(),
+            adminUsers: await this.auditAdminUsers()
+        };
+
+        return checks;
+    },
+
+    async checkWeakPasswords() {
+        // Check for users with weak passwords (simplified)
+        // In reality, you'd check password strength
+        return { checked: true, issues: [] };
+    },
+
+    async cleanExpiredTokens() {
+        // Clean up expired refresh tokens
+        const result = await RefreshToken.deleteMany({
+            expiresAt: { $lt: new Date() }
+        });
+        return \`Cleaned \${result.deletedCount} expired tokens\`;
+    },
+
+    async checkOldSessions() {
+        // Check for suspiciously long sessions
+        const oldSessions = await RefreshToken.find({
+            createdAt: { $lt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) } // 30 days
+        });
+        return oldSessions.length;
+    },
+
+    async auditAdminUsers() {
+        // Audit admin users and their activity
+        const adminUsers = await User.find({ role: { $in: ['admin', 'superadmin'] } });
+        return adminUsers.map(user => ({
+            id: user._id,
+            email: user.email,
+            lastLogin: user.lastLogin
+        }));
+    }
+};`
+    },{
+        tabTitle: "Advanced Express",
+        title: "Production-Ready Express Applications",
+        content: `/*
+Production Best Practices:
+• Environment configuration
+• Security headers
+• Rate limiting
+• Request sanitization
+• Proper error handling
+• Logging
+• Performance optimization
+*/
+
+const cors = require('cors');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+const compression = require('compression');
+
+// Security middleware
+app.use(helmet({
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            styleSrc: ["'self'", "'unsafe-inline'"],
+            scriptSrc: ["'self'"],
+            imgSrc: ["'self'", "data:", "https:"],
+        },
+    },
+    crossOriginEmbedderPolicy: false
+}));
+
+// CORS configuration
+app.use(cors({
+    origin: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000'],
+    credentials: true
+}));
+
+// Rate limiting
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // limit each IP to 100 requests per windowMs
+    message: {
+        error: 'Too many requests from this IP, please try again later.'
+    }
+});
+app.use('/api/', limiter);
+
+// Compression
+app.use(compression());
+
+// Environment-based configuration
+const config = {
+    development: {
+        port: 4000,
+        host: 'localhost',
+        logLevel: 'debug'
+    },
+    production: {
+        port: process.env.PORT || 80,
+        host: '0.0.0.0',
+        logLevel: 'warn'
+    }
+};
+
+const environment = process.env.NODE_ENV || 'development';
+const currentConfig = config[environment];
+
+// Advanced error handling
+class AppError extends Error {
+    constructor(message, statusCode) {
+        super(message);
+        this.statusCode = statusCode;
+        this.isOperational = true;
+        Error.captureStackTrace(this, this.constructor);
+    }
+}
+
+// Async error wrapper (avoid try-catch in every route)
+const asyncHandler = (fn) => (req, res, next) => {
+    Promise.resolve(fn(req, res, next)).catch(next);
+};
+
+// Example with async handler
+app.get('/api/async-users', asyncHandler(async (req, res) => {
+    // Simulate async operation
+    const users = await Promise.resolve([...users]);
+    res.json({ success: true, data: users });
+}));
+
+// Global error handler
+app.use((err, req, res, next) => {
+    err.statusCode = err.statusCode || 500;
+    err.status = err.status || 'error';
+
+    if (process.env.NODE_ENV === 'development') {
+        res.status(err.statusCode).json({
+            status: err.status,
+            error: err,
+            message: err.message,
+            stack: err.stack
+        });
+    } else {
+        // Production: don't leak error details
+        if (err.isOperational) {
+            res.status(err.statusCode).json({
+                status: err.status,
+                message: err.message
+            });
+        } else {
+            console.error('ERROR 💥', err);
+            res.status(500).json({
+                status: 'error',
+                message: 'Something went wrong!'
+            });
+        }
+    }
+});
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+    console.log('SIGTERM received. Shutting down gracefully...');
+    server.close(() => {
+        console.log('Process terminated');
+    });
+});`
+    },
+        ];
+
+// Updated Questions array aligned with authentication & security topics
+const questions = [
+    // Authentication Fundamentals
+    {
+        type: "question",
+        question: "What is the fundamental difference between Hashing and Encryption for passwords?",
+        options: [
+            "Hashing is faster than Encryption",
+            "Hashing is two-way, Encryption is one-way",
+            "Hashing is one-way, Encryption is two-way",
+            "Hashing uses less memory than Encryption"
+        ],
+        correctIndex: 2
+    },
+
+    // Cookie Security
+    {
+        type: "question",
+        question: "What does the 'httpOnly' cookie flag protect against?",
+        options: [
+            "CSRF attacks",
+            "XSS attacks",
+            "SQL injection",
+            "Man-in-the-middle attacks"
+        ],
+        correctIndex: 1
+    },
+
+    // Auth Middleware
+    {
+        type: "question",
+        question: "What does Role-Based Access Control (RBAC) primarily manage?",
+        options: [
+            "User authentication methods",
+            "Token expiration times",
+            "User permissions based on roles",
+            "Password complexity requirements"
+        ],
+        correctIndex: 2
+    },
+    {
+        type: "question",
+        question: "In the token refresh flow, why do we implement token rotation?",
+        options: [
+            "To reduce database queries",
+            "To automatically extend token expiration",
+            "To enhance security by issuing new refresh tokens",
+            "To support multiple devices simultaneously"
+        ],
+        correctIndex: 2
+    },
+
+    // Security Practices
+    {
+        type: "question",
+        question: "What is the recommended bcrypt salt rounds value for modern applications?",
+        options: [
+            "8",
+            "10",
+            "12",
+            "16"
+        ],
+        correctIndex: 2
+    },
+    {
+        type: "question",
+        question: "Which security measure helps prevent brute force attacks on login endpoints?",
+        options: [
+            "JWT tokens",
+            "Rate limiting",
+            "CORS configuration",
+            "Cookie flags"
+        ],
+        correctIndex: 1
+    },
+    {
+        type: "question",
+        question: "What is the purpose of the 'jti' (JWT ID) claim in tokens?",
+        options: [
+            "To identify the token type",
+            "To enable token revocation capabilities",
+            "To specify the token algorithm",
+            "To indicate token creation time"
+        ],
+        correctIndex: 1
+    },
+
+    {
+        type: "task",
+        title: "Secure Password Management",
+        content: "Create a password service with bcrypt hashing, password strength validation, and breach detection. Implement secure password reset flow with expiration tokens and rate limiting."
+    },
+    {
+        type: "task",
+        title: "Authentication Middleware Suite",
+        content: "Develop a comprehensive middleware suite including token authentication, role-based authorization, permission checks, and resource ownership validation. Implement proper error handling for auth failures."
+    },
+    {
+        type: "task",
+        title: "Rate Limiting & Security Headers",
+        content: "Configure advanced rate limiting for authentication endpoints and apply security headers using Helmet.js. Implement account lockout mechanisms and security event logging."
+    },
+
+    // Security Configuration Tasks
+    {
+        type: "task",
+        title: "Production Security Audit",
+        content: "Perform a comprehensive security audit of an authentication system. Check for weak passwords, expired tokens, implement security headers, and set up monitoring for suspicious activities."
+    },
+    {
+        type: "task",
+        title: "Multi-role Authorization System",
+        content: "Design and implement a multi-role authorization system with hierarchical permissions. Create middleware for role checks, permission validation, and resource-based access control."
+    },
+
+    // Research & Analysis Tasks
+    {
+        type: "search-task",
+        title: "Research: OAuth 2.0 & Social Authentication",
+        content: "Research OAuth 2.0 flows and social authentication providers. Compare implementation strategies for Google, GitHub, and Facebook OAuth. Document security considerations and best practices."
+    },
+    {
+        type: "search-task",
+        title: "Research: Advanced Security Threats",
+        content: "Research modern authentication security threats including JWT vulnerabilities, timing attacks, session fixation, and token sidejacking. Document prevention strategies and mitigation techniques."
+    },
+    {
+        type: "search-task",
+        title: "Research: Passwordless Authentication",
+        content: "Research passwordless authentication methods including magic links, WebAuthn, and biometric authentication. Compare security, user experience, and implementation complexity across different approaches."
+    },
+
+    // Integration & Production Tasks
+    {
+        type: "task",
+        title: "Full Authentication System Integration",
+        content: "Build a complete production-ready authentication system integrating JWT tokens, secure cookies, role-based access control, and comprehensive security measures. Include proper error handling, logging, and monitoring."
+    },
+    {
+        type: "task",
+        title: "Security Hardening & Compliance",
+        content: "Harden an authentication system for production deployment. Implement security headers, CORS policies, input validation, audit logging, and compliance with security standards like OWASP Top 10."
+    }
+];     document.getElementById('lecture-title').textContent = lectureConfig.title;
+        document.getElementById('lecture-subtitle').textContent = lectureConfig.subtitle;
+        
+        // Render tabs and content
+        function renderTabsAndContent() {
+            const tabsContainer = document.getElementById('tabs-container');
+            const contentContainer = document.getElementById('tab-content-container');
+            
+            // Create tabs
+            const tabs = document.createElement('div');
+            tabs.className = 'tabs';
+            
+            // Create tab content areas
+            lectureContent.forEach((content, index) => {
+                // Create tab
+                const tab = document.createElement('div');
+                tab.className = 'tab' + (index === 0 ? ' active' : '');
+                tab.textContent = content.tabTitle;
+                tab.onclick = () => switchTab(index);
+                tabs.appendChild(tab);
+                
+                // Create content
+                const tabContent = document.createElement('div');
+                tabContent.className = 'tab-content' + (index === 0 ? ' active' : '');
+                tabContent.id = 'tab-' + index;
+                
+                // Add title
+                const title = document.createElement('h3');
+                title.textContent = content.title;
+                tabContent.appendChild(title);
+                
+                // Add code content
+                const pre = document.createElement('pre');
+                const code = document.createElement('code');
+                code.textContent = content.content;
+                pre.appendChild(code);
+                tabContent.appendChild(pre);
+
+                // Add table if exists
+                if (content.table) {
+                    const table = document.createElement('table');
+                    table.className = 'comparison-table';
+                    
+                    // Create header
+                    const thead = document.createElement('thead');
+                    const headerRow = document.createElement('tr');
+                    content.table.headers.forEach(headerText => {
+                        const th = document.createElement('th');
+                        th.textContent = headerText;
+                        headerRow.appendChild(th);
+                    });
+                    thead.appendChild(headerRow);
+                    table.appendChild(thead);
+                    
+                    // Create body
+                    const tbody = document.createElement('tbody');
+                    content.table.rows.forEach(rowData => {
+                        const row = document.createElement('tr');
+                        rowData.forEach(cellData => {
+                            const td = document.createElement('td');
+                            td.textContent = cellData;
+                            row.appendChild(td);
+                        });
+                        tbody.appendChild(row);
+                    });
+                    table.appendChild(tbody);
+                    
+                    tabContent.appendChild(table);
+                }
+                
+                
+                contentContainer.appendChild(tabContent);
+            });
+            
+            tabsContainer.appendChild(tabs);
+        }
+        
+        // Switch tabs function
+        function switchTab(index) {
+            // Remove active class from all tabs
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            // Add active class to clicked tab
+            tabs[index].classList.add('active');
+            
+            // Hide all tab content
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(content => content.classList.remove('active'));
+            
+            // Show selected tab content
+            document.getElementById('tab-' + index).classList.add('active');
+        }
+        
+        // Render questions and tasks
+        function renderQuestions() {
+            const container = document.getElementById('questions-container');
+            
+            questions.forEach((q, index) => {
+                if (q.type === 'question') {
+                    const questionDiv = document.createElement('div');
+                    questionDiv.className = 'question';
+                    
+                    const questionTitle = document.createElement('h3');
+                    questionTitle.textContent = `Question ${index + 1}: ${q.question}`;
+                    questionDiv.appendChild(questionTitle);
+                    
+                    if (q.code) {
+                        const pre = document.createElement('pre');
+                        const code = document.createElement('code');
+                        code.textContent = q.code;
+                        pre.appendChild(code);
+                        questionDiv.appendChild(pre);
+                    }
+                    
+                    const optionsDiv = document.createElement('div');
+                    optionsDiv.className = 'options';
+                    
+                    q.options.forEach((option, optIndex) => {
+                        const optionDiv = document.createElement('div');
+                        optionDiv.className = 'option';
+                        optionDiv.textContent = option;
+                        optionDiv.onclick = function() {
+                            checkAnswer(this, optIndex === q.correctIndex ? 'correct' : 'incorrect');
+                        };
+                        optionsDiv.appendChild(optionDiv);
+                    });
+                    
+                    questionDiv.appendChild(optionsDiv);
+                    
+                    const resultDiv = document.createElement('div');
+                    resultDiv.className = 'result';
+                    resultDiv.id = 'result-' + index;
+                    questionDiv.appendChild(resultDiv);
+                    
+                    container.appendChild(questionDiv);
+                } else if (q.type === 'task') {
+                    const taskDiv = document.createElement('div');
+                    taskDiv.className = 'task';
+                    
+                    const taskTitle = document.createElement('h3');
+                    taskTitle.textContent = q.title;
+                    taskDiv.appendChild(taskTitle);
+                    
+                    const taskContent = document.createElement('p');
+                    taskContent.textContent = q.content;
+                    taskDiv.appendChild(taskContent);
+                    
+                    container.appendChild(taskDiv);
+                } else if (q.type === 'search-task') {
+                    const searchTaskDiv = document.createElement('div');
+                    searchTaskDiv.className = 'search-task';
+                    
+                    const taskTitle = document.createElement('h3');
+                    taskTitle.textContent = q.title;
+                    searchTaskDiv.appendChild(taskTitle);
+                    
+                    const taskContent = document.createElement('p');
+                    taskContent.textContent = q.content;
+                    searchTaskDiv.appendChild(taskContent);
+                    
+                    container.appendChild(searchTaskDiv);
+                }
+            });
+        }
+        
+        // Check answer function
+        function checkAnswer(element, type) {
+            const options = element.parentElement.querySelectorAll('.option');
+            options.forEach(opt => {
+                opt.classList.remove('correct', 'incorrect');
+                opt.onclick = null;
+            });
+            
+            element.classList.add(type);
+            
+            const resultId = element.closest('.question').querySelector('.result').id;
+            const resultDiv = document.getElementById(resultId);
+            resultDiv.style.display = 'block';
+            
+            if (type === 'correct') {
+                resultDiv.innerHTML = '<p style="color: #155724">✅ Correct! Good job.</p>';
+                resultDiv.style.backgroundColor = '#d4edda';
+            } else {
+                resultDiv.innerHTML = '<p style="color: #721c24">❌ Incorrect. Try to understand why.</p>';
+                resultDiv.style.backgroundColor = '#f8d7da';
+            }
+        }
+        
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            renderTabsAndContent();
+            renderQuestions();
+        });
+    </script>
+</body>
+</html>

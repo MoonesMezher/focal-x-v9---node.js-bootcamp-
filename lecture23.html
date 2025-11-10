@@ -311,7 +311,7 @@
         // Lecture metadata
         const lectureConfig = {
             title: "Focal X - Node.js Bootcamp",
-            subtitle: "MongoDB & ExpressJS (Advanced)"
+            subtitle: "Authentication & Authorization"
         };
         
        // Lecture content organized by tabs
@@ -322,7 +322,7 @@ const lectureContent = [
         content: `/*
 1- Populate
 2- Pagination
-3- Static 
+3- Statics 
 4- Plugins
 */`
     },
@@ -547,6 +547,15 @@ const tokenService = {
 };
 
 // ###################### PASSWORD SECURITY ##############################
+Hashing vs Encryption - Key Difference:
+- Hashing: One-way function (cannot be reversed)
+
+- Encryption: Two-way function (can be decrypted with key)
+
+=> Passwords should always be HASHED, never encrypted.
+
+=> There are many Hashing algorithms but Argon2 is the current winner of the Password Hashing 
+Competition and is considered the most secure option for modern applications.
 
 const bcrypt = require('bcryptjs');
 
@@ -895,1012 +904,166 @@ const cookieSecurity = {
     }
 };`
     },
-    {
-        tabTitle: "Auth Middleware",
-        title: "Authentication Middleware & Authorization",
-        content: `// ###################### AUTHENTICATION MIDDLEWARE ##############################
-
-// Main authentication middleware
-const authenticateToken = asyncHandler(async (req, res, next) => {
-    // Get token from cookie (preferred) or Authorization header
-    const token = req.cookies.accessToken || 
-                 req.headers.authorization?.replace('Bearer ', '');
-
-    if (!token) {
-        throw new AppError('Access token required', 401);
-    }
-
-    try {
-        const decoded = tokenService.verifyAccessToken(token);
-        
-        // Optional: Verify user still exists and is active
-        const user = await User.findById(decoded.id).select('-password');
-        if (!user) {
-            throw new AppError('User no longer exists', 401);
-        }
-        
-        if (user.isSuspended) {
-            throw new AppError('Account suspended', 403);
-        }
-
-        // Attach user to request object
-        req.user = {
-            id: user._id,
-            email: user.email,
-            role: user.role,
-            permissions: user.permissions,
-            isVerified: user.isVerified
-        };
-
-        next();
-    } catch (error) {
-        if (error.name === 'TokenExpiredError') {
-            throw new AppError('Access token expired', 401);
-        }
-        throw new AppError('Invalid access token', 401);
-    }
-});
-
-// Optional authentication (user might be logged in)
-const optionalAuth = asyncHandler(async (req, res, next) => {
-    const token = req.cookies.accessToken || 
-                 req.headers.authorization?.replace('Bearer ', '');
-
-    if (token) {
-        try {
-            const decoded = tokenService.verifyAccessToken(token);
-            const user = await User.findById(decoded.id).select('-password');
-            
-            if (user && !user.isSuspended) {
-                req.user = {
-                    id: user._id,
-                    email: user.email,
-                    role: user.role,
-                    permissions: user.permissions
-                };
-            }
-        } catch (error) {
-            // Silently fail for optional auth
-        }
-    }
-
-    next();
-});
-
-// ###################### AUTHORIZATION MIDDLEWARE ##############################
-
-// Role-based authorization
-const authorize = (...allowedRoles) => {
-    return (req, res, next) => {
-        if (!req.user) {
-            throw new AppError('Authentication required', 401);
-        }
-
-        if (!allowedRoles.includes(req.user.role)) {
-            throw new AppError('Insufficient permissions', 403);
-        }
-
-        next();
-    };
-};
-
-// Permission-based authorization
-const requirePermission = (permission) => {
-    return asyncHandler(async (req, res, next) => {
-        if (!req.user) {
-            throw new AppError('Authentication required', 401);
-        }
-
-        // Check user permissions (you might fetch from database)
-        const userPermissions = req.user.permissions || [];
-        
-        if (!userPermissions.includes(permission)) {
-            throw new AppError('Insufficient permissions', 403);
-        }
-
-        next();
-    });
-};
-
-// Resource ownership check
-const checkResourceOwnership = (model, paramName = 'id') => {
-    return asyncHandler(async (req, res, next) => {
-        if (!req.user) {
-            throw new AppError('Authentication required', 401);
-        }
-
-        const resourceId = req.params[paramName];
-        const resource = await model.findById(resourceId);
-
-        if (!resource) {
-            throw new AppError('Resource not found', 404);
-        }
-
-        // Check if user owns resource or is admin
-        const isOwner = resource.userId && resource.userId.toString() === req.user.id;
-        const isAdmin = req.user.role === 'admin' || req.user.role === 'superadmin';
-
-        if (!isOwner && !isAdmin) {
-            throw new AppError('Access denied to this resource', 403);
-        }
-
-        req.resource = resource;
-        next();
-    });
-};
-
-// ###################### COMPOSITE MIDDLEWARE EXAMPLES ##############################
-
-// Admin-only middleware (composition of auth + role check)
-const requireAdmin = [authenticateToken, authorize('admin', 'superadmin')];
-
-// Verified user middleware
-const requireVerifiedUser = [
-    authenticateToken,
-    (req, res, next) => {
-        if (!req.user.isVerified) {
-            throw new AppError('Please verify your email address', 403);
-        }
-        next();
-    }
-];
-
-// Self or admin middleware (users can access their own data)
-const requireSelfOrAdmin = (paramName = 'id') => {
-    return [
-        authenticateToken,
-        (req, res, next) => {
-            const targetUserId = req.params[paramName];
-            const isSelf = targetUserId === req.user.id;
-            const isAdmin = ['admin', 'superadmin'].includes(req.user.role);
-
-            if (!isSelf && !isAdmin) {
-                throw new AppError('Access denied', 403);
-            }
-            next();
-        }
-    ];
-};
-
-// ###################### ROUTE IMPLEMENTATIONS ##############################
-
-// Public route (no auth required)
-app.get('/api/public/data', (req, res) => {
-    res.json({ message: 'This is public data' });
-});
-
-// Protected route (auth required)
-app.get('/api/profile', authenticateToken, asyncHandler(async (req, res) => {
-    const user = await User.findById(req.user.id).select('-password');
-    res.json({
-        success: true,
-        data: { user }
-    });
-}));
-
-// Admin-only route
-app.get('/api/admin/users', 
-    requireAdmin, // Composite middleware
-    asyncHandler(async (req, res) => {
-        const users = await User.find().select('-password');
-        res.json({
-            success: true,
-            data: { users }
-        });
-    })
-);
-
-// User can access their own data, admin can access any
-app.get('/api/users/:userId', 
-    requireSelfOrAdmin('userId'),
-    asyncHandler(async (req, res) => {
-        const user = await User.findById(req.params.userId).select('-password');
-        res.json({
-            success: true,
-            data: { user }
-        });
-    })
-);
-
-// Resource ownership example (user can only update their own posts)
-app.put('/api/posts/:postId',
-    [authenticateToken, checkResourceOwnership(Post, 'postId')],
-    asyncHandler(async (req, res) => {
-        const updatedPost = await Post.findByIdAndUpdate(
-            req.params.postId,
-            req.body,
-            { new: true, runValidators: true }
-        );
-        
-        res.json({
-            success: true,
-            data: { post: updatedPost }
-        });
-    })
-);
-
-// Permission-based route
-app.delete('/api/users/:userId',
-    [authenticateToken, requirePermission('users:delete')],
-    asyncHandler(async (req, res) => {
-        await User.findByIdAndDelete(req.params.userId);
-        res.json({
-            success: true,
-            message: 'User deleted successfully'
-        });
-    })
-);
-
-// ###################### ERROR HANDLING FOR AUTH ##############################
-
-// Custom error classes for auth
-class AuthenticationError extends AppError {
-    constructor(message = 'Authentication failed') {
-        super(message, 401);
-    }
-}
-
-class AuthorizationError extends AppError {
-    constructor(message = 'Insufficient permissions') {
-        super(message, 403);
-    }
-}
-
-class TokenExpiredError extends AppError {
-    constructor(message = 'Token expired') {
-        super(message, 401);
-    }
-}
-
-// Enhanced global error handler for auth errors
-app.use((err, req, res, next) => {
-    // Handle JWT errors
-    if (err.name === 'JsonWebTokenError') {
-        err = new AuthenticationError('Invalid token');
-    }
-    if (err.name === 'TokenExpiredError') {
-        err = new TokenExpiredError('Token expired');
-    }
-
-    // Handle mongoose validation errors for auth
-    if (err.name === 'ValidationError') {
-        const messages = Object.values(err.errors).map(val => val.message);
-        err = new AppError(messages.join(', '), 400);
-    }
-
-    // Handle duplicate key errors (registration)
-    if (err.code === 11000) {
-        const field = Object.keys(err.keyValue)[0];
-        err = new AppError(\`\${field} already exists\`, 409);
-    }
-
-    // Pass to default error handler
-    next(err);
-});`
-    },
-    {
-        tabTitle: "Security Practices",
-        title: "Advanced Security & Best Practices",
-        content: `// ###################### SECURITY BEST PRACTICES ##############################
-
-/*
-MODERN SECURITY MEASURES:
-
-1. Password Security:
-   - Minimum 8 characters with complexity requirements
-   - Breached password detection (Have I Been Pwned)
-   - Regular password rotation policies
-   - Secure password reset flows
-
-2. Token Security:
-   - Short-lived access tokens (15-30 minutes)
-   - Long-lived refresh tokens (7 days) with rotation
-   - Token blacklisting/revocation capabilities
-   - Secure storage (HTTP-only, Secure, SameSite cookies)
-
-3. Rate Limiting:
-   - Stricter limits on authentication endpoints
-   - Account lockout after failed attempts
-   - IP-based and user-based rate limiting
-*/
-
-// ###################### ENHANCED RATE LIMITING ##############################
-
-const rateLimit = require('express-rate-limit');
-
-// General API rate limiting
-const apiLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // Limit each IP to 100 requests per windowMs
-    message: {
-        error: 'Too many requests from this IP, please try again later.'
-    },
-    standardHeaders: true,
-    legacyHeaders: false
-});
-
-// Stricter limits for auth endpoints
-const authLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 5, // 5 attempts per window for sensitive endpoints
-    message: {
-        error: 'Too many authentication attempts, please try again later.'
-    },
-    skipSuccessfulRequests: true, // Only count failed attempts
-    keyGenerator: (req) => {
-        // Use IP + user agent for more precise limiting
-        return \`\${req.ip}-\${req.get('User-Agent')}\`;
-    }
-});
-
-// Bruteforce protection for login
-const loginLimiter = rateLimit({
-    windowMs: 60 * 60 * 1000, // 1 hour
-    max: 10, // Max 10 failed attempts per hour
-    skipSuccessfulRequests: true,
-    handler: (req, res) => {
-        // Log security event
-        console.warn(\`Bruteforce attempt detected from IP: \${req.ip}\`);
-        res.status(429).json({
-            error: 'Too many failed login attempts. Please try again in an hour.'
-        });
-    }
-});
-
-// Apply rate limiting
-app.use('/api/', apiLimiter);
-app.use('/api/auth/login', [authLimiter, loginLimiter]);
-app.use('/api/auth/register', authLimiter);
-app.use('/api/auth/forgot-password', authLimiter);
-
-// ###################### ACCOUNT LOCKOUT MECHANISM ##############################
-
-const accountLockout = {
-    async handleFailedLogin(userId) {
-        const user = await User.findById(userId);
-        if (!user) return;
-
-        user.failedLoginAttempts = (user.failedLoginAttempts || 0) + 1;
-        
-        // Lock account after 5 failed attempts
-        if (user.failedLoginAttempts >= 5) {
-            user.isLocked = true;
-            user.lockedUntil = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes
-        }
-
-        await user.save();
-    },
-
-    async resetFailedAttempts(userId) {
-        await User.findByIdAndUpdate(userId, {
-            failedLoginAttempts: 0,
-            isLocked: false,
-            lockedUntil: null
-        });
-    },
-
-    async isAccountLocked(userId) {
-        const user = await User.findById(userId);
-        if (!user) return false;
-
-        // Check if lock period has expired
-        if (user.lockedUntil && user.lockedUntil > new Date()) {
-            return true;
-        }
-
-        // Auto-unlock if lock period expired
-        if (user.isLocked && user.lockedUntil && user.lockedUntil <= new Date()) {
-            user.isLocked = false;
-            user.lockedUntil = null;
-            user.failedLoginAttempts = 0;
-            await user.save();
-            return false;
-        }
-
-        return user.isLocked;
-    }
-};
-
-// ###################### PASSWORD SECURITY ENHANCEMENTS ##############################
-
-const passwordPolicy = {
-    async isPasswordBreached(password) {
-        // In production, integrate with Have I Been Pwned API
-        // This is a simplified version
-        const breachedPasswords = ['password123', '12345678', 'qwerty'];
-        return breachedPasswords.includes(password);
-    },
-
-    validatePasswordHistory(userId, newPassword) {
-        // Check if password was used before (simplified)
-        // In reality, you'd check against previously hashed passwords
-        return false;
-    },
-
-    generatePasswordRequirements() {
-        return {
-            minLength: 8,
-            requireUppercase: true,
-            requireLowercase: true,
-            requireNumbers: true,
-            requireSpecialChars: true,
-            maxAge: 90 // days until password expiry
-        };
-    }
-};
-
-// ###################### SECURITY HEADERS ENHANCEMENT ##############################
-
-// Enhanced security headers specifically for auth
-app.use(helmet({
-    contentSecurityPolicy: {
-        directives: {
-            defaultSrc: ["'self'"],
-            styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-            scriptSrc: ["'self'", "'unsafe-inline'"],
-            imgSrc: ["'self'", "data:", "https:"],
-            connectSrc: ["'self'", "https://api.yourdomain.com"],
-            fontSrc: ["'self'", "https://fonts.gstatic.com"],
-            frameAncestors: ["'none'"], // Prevent clickjacking
-            formAction: ["'self'"] // Restrict form submissions
-        },
-    },
-    crossOriginEmbedderPolicy: false,
-    hsts: {
-        maxAge: 31536000, // 1 year
-        includeSubDomains: true,
-        preload: true
-    },
-    referrerPolicy: { policy: 'strict-origin-when-cross-origin' }
-}));
-
-// Additional security headers
-app.use((req, res, next) => {
-    // Prevent MIME type sniffing
-    res.setHeader('X-Content-Type-Options', 'nosniff');
-    
-    // Prevent clickjacking
-    res.setHeader('X-Frame-Options', 'DENY');
-    
-    // Enable XSS filter
-    res.setHeader('X-XSS-Protection', '1; mode=block');
-    
-    // Remove server information
-    res.removeHeader('X-Powered-By');
-    
-    next();
-});
-
-// ###################### SECURITY MONITORING & AUDITING ##############################
-
-const securityLogger = {
-    logAuthAttempt(email, success, ip, userAgent) {
-        const logEntry = {
-            timestamp: new Date(),
-            event: success ? 'LOGIN_SUCCESS' : 'LOGIN_FAILED',
-            email: success ? email : undefined, // Don't log failed emails for privacy
-            ip,
-            userAgent: userAgent?.substring(0, 100), // Limit length
-            success
-        };
-
-        console.log('AUTH_ATTEMPT:', logEntry);
-        
-        // In production, send to security monitoring service
-        // await SecurityLog.create(logEntry);
-    },
-
-    logTokenRefresh(userId, success) {
-        console.log(\`TOKEN_REFRESH: user=\${userId} success=\${success}\`);
-    },
-
-    logSecurityEvent(event, details) {
-        const securityEvent = {
-            timestamp: new Date(),
-            event,
-            ...details
-        };
-
-        console.warn('SECURITY_EVENT:', securityEvent);
-    }
-};
-
-// ###################### PRODUCTION SECURITY CHECKLIST ##############################
-
-/*
-✅ Environment Variables:
-   - JWT secrets set and strong
-   - Database credentials secure
-   - API keys not in code
-
-✅ HTTPS Enforcement:
-   - SSL certificate valid
-   - HTTP to HTTPS redirect
-   - HSTS headers enabled
-
-✅ Cookie Security:
-   - HTTP-only flag set
-   - Secure flag in production
-   - SameSite policy configured
-   - Proper domain and path settings
-
-✅ Rate Limiting:
-   - Authentication endpoints protected
-   - API endpoints limited
-   - Bruteforce protection enabled
-
-✅ Input Validation:
-   - Request body validation
-   - SQL injection prevention
-   - XSS protection
-
-✅ Error Handling:
-   - No sensitive data in errors
-   - Proper logging
-   - Generic error messages in production
-
-✅ Dependency Security:
-   - Regular dependency updates
-   - Security audits
-   - Vulnerability monitoring
-
-✅ Monitoring:
-   - Failed login attempts logged
-   - Suspicious activity detection
-   - Regular security audits
-*/
-
-// ###################### REGULAR SECURITY AUDITS ##############################
-
-const securityAudit = {
-    async runSecurityCheck() {
-        const checks = {
-            weakPasswords: await this.checkWeakPasswords(),
-            expiredTokens: await this.cleanExpiredTokens(),
-            oldSessions: await this.checkOldSessions(),
-            adminUsers: await this.auditAdminUsers()
-        };
-
-        return checks;
-    },
-
-    async checkWeakPasswords() {
-        // Check for users with weak passwords (simplified)
-        // In reality, you'd check password strength
-        return { checked: true, issues: [] };
-    },
-
-    async cleanExpiredTokens() {
-        // Clean up expired refresh tokens
-        const result = await RefreshToken.deleteMany({
-            expiresAt: { $lt: new Date() }
-        });
-        return \`Cleaned \${result.deletedCount} expired tokens\`;
-    },
-
-    async checkOldSessions() {
-        // Check for suspiciously long sessions
-        const oldSessions = await RefreshToken.find({
-            createdAt: { $lt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) } // 30 days
-        });
-        return oldSessions.length;
-    },
-
-    async auditAdminUsers() {
-        // Audit admin users and their activity
-        const adminUsers = await User.find({ role: { $in: ['admin', 'superadmin'] } });
-        return adminUsers.map(user => ({
-            id: user._id,
-            email: user.email,
-            lastLogin: user.lastLogin
-        }));
-    }
-};`
-    },{
-        tabTitle: "Advanced Express",
-        title: "Production-Ready Express Applications",
-        content: `/*
-Production Best Practices:
-• Environment configuration
-• Security headers
-• Rate limiting
-• Request sanitization
-• Proper error handling
-• Logging
-• Performance optimization
-*/
-
-const cors = require('cors');
-const helmet = require('helmet');
-const rateLimit = require('express-rate-limit');
-const compression = require('compression');
-
-// Security middleware
-app.use(helmet({
-    contentSecurityPolicy: {
-        directives: {
-            defaultSrc: ["'self'"],
-            styleSrc: ["'self'", "'unsafe-inline'"],
-            scriptSrc: ["'self'"],
-            imgSrc: ["'self'", "data:", "https:"],
-        },
-    },
-    crossOriginEmbedderPolicy: false
-}));
-
-// CORS configuration
-app.use(cors({
-    origin: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000'],
-    credentials: true
-}));
-
-// Rate limiting
-const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // limit each IP to 100 requests per windowMs
-    message: {
-        error: 'Too many requests from this IP, please try again later.'
-    }
-});
-app.use('/api/', limiter);
-
-// Compression
-app.use(compression());
-
-// Environment-based configuration
-const config = {
-    development: {
-        port: 4000,
-        host: 'localhost',
-        logLevel: 'debug'
-    },
-    production: {
-        port: process.env.PORT || 80,
-        host: '0.0.0.0',
-        logLevel: 'warn'
-    }
-};
-
-const environment = process.env.NODE_ENV || 'development';
-const currentConfig = config[environment];
-
-// Advanced error handling
-class AppError extends Error {
-    constructor(message, statusCode) {
-        super(message);
-        this.statusCode = statusCode;
-        this.isOperational = true;
-        Error.captureStackTrace(this, this.constructor);
-    }
-}
-
-// Async error wrapper (avoid try-catch in every route)
-const asyncHandler = (fn) => (req, res, next) => {
-    Promise.resolve(fn(req, res, next)).catch(next);
-};
-
-// Example with async handler
-app.get('/api/async-users', asyncHandler(async (req, res) => {
-    // Simulate async operation
-    const users = await Promise.resolve([...users]);
-    res.json({ success: true, data: users });
-}));
-
-// Global error handler
-app.use((err, req, res, next) => {
-    err.statusCode = err.statusCode || 500;
-    err.status = err.status || 'error';
-
-    if (process.env.NODE_ENV === 'development') {
-        res.status(err.statusCode).json({
-            status: err.status,
-            error: err,
-            message: err.message,
-            stack: err.stack
-        });
-    } else {
-        // Production: don't leak error details
-        if (err.isOperational) {
-            res.status(err.statusCode).json({
-                status: err.status,
-                message: err.message
-            });
-        } else {
-            console.error('ERROR 💥', err);
-            res.status(500).json({
-                status: 'error',
-                message: 'Something went wrong!'
-            });
-        }
-    }
-});
-
-// Graceful shutdown
-process.on('SIGTERM', () => {
-    console.log('SIGTERM received. Shutting down gracefully...');
-    server.close(() => {
-        console.log('Process terminated');
-    });
-});`
-    },
         ];
 
-// Updated Questions array aligned with the new topics
+// Updated Questions array aligned with authentication & security topics
 const questions = [
-    // MongoDB Setup
+    // Authentication Fundamentals
     {
         type: "question",
-        question: "What is the main advantage of using MongoDB Atlas over local MongoDB installation?",
+        question: "What is the key difference between Authentication and Authorization?",
         options: [
-            "It's always free with unlimited storage",
-            "It provides automated backups, scaling, and managed infrastructure",
-            "It doesn't require any configuration",
-            "It only works with JavaScript applications"
+            "Authentication checks permissions, Authorization verifies identity",
+            "Authentication verifies identity, Authorization checks permissions",
+            "They are the same concept with different names",
+            "Authentication is for users, Authorization is for applications"
         ],
         correctIndex: 1
     },
     {
         type: "question",
-        question: "Which connection string format is used for MongoDB Atlas clusters?",
+        question: "In the hotel key card analogy, what represents Authorization?",
         options: [
-            "mongodb://localhost:27017",
-            "mysql://username:password@host:port/database",
-            "mongodb+srv://username:password@cluster.mongodb.net/database",
-            "postgresql://user:pass@host/db"
-        ],
-        correctIndex: 2
-    },
-
-    // MongoDB Compass
-    {
-        type: "question",
-        question: "What is the primary purpose of MongoDB Compass?",
-        options: [
-            "To write Node.js application code",
-            "To provide a graphical interface for database management and query building",
-            "To deploy applications to production servers",
-            "To monitor server CPU and memory usage"
-        ],
-        correctIndex: 1
-    },
-    {
-        type: "question",
-        question: "Which feature in MongoDB Compass allows you to visually build aggregation pipelines?",
-        options: [
-            "Document Validation",
-            "Aggregation Pipeline Builder", 
-            "Index Manager",
-            "Schema Analyzer"
+            "Checking your ID at the front desk",
+            "Your key card only opening your specific room",
+            "The hotel receptionist verifying your reservation",
+            "The hotel building security system"
         ],
         correctIndex: 1
     },
 
-    // Mongoose Basics
+    // JWT Deep Dive
     {
         type: "question",
-        question: "What is Mongoose in the context of Node.js and MongoDB?",
+        question: "What are the three main parts of a JWT token?",
         options: [
-            "A template engine for rendering HTML",
-            "An Object Data Modeling (ODM) library that provides schema-based solution",
-            "A testing framework for JavaScript applications",
-            "A package manager for Node.js"
+            "Username, Password, Signature",
+            "Header, Payload, Signature",
+            "Token, Secret, Algorithm",
+            "Public Key, Private Key, Certificate"
         ],
         correctIndex: 1
     },
     {
         type: "question",
-        question: "Which Mongoose connection option controls the maximum number of sockets in the connection pool?",
+        question: "Why should access tokens have short expiration times (15-30 minutes)?",
         options: [
-            "socketTimeoutMS",
-            "maxPoolSize",
-            "connectTimeoutMS", 
-            "serverSelectionTimeoutMS"
-        ],
-        correctIndex: 1
-    },
-
-    // Mongoose Schemas
-    {
-        type: "question",
-        question: "What is the purpose of the 'timestamps' option in a Mongoose schema?",
-        options: [
-            "It automatically adds createdAt and updatedAt fields to documents",
-            "It creates indexes on all date fields",
-            "It validates that all dates are in the correct format",
-            "It converts all dates to UTC timezone"
-        ],
-        correctIndex: 0
-    },
-    {
-        type: "question",
-        question: "Which Mongoose feature allows you to create properties that are computed from other fields but not stored in the database?",
-        options: [
-            "Instance methods",
-            "Static methods",
-            "Virtual properties",
-            "Middleware hooks"
+            "To force users to login frequently",
+            "To reduce server load",
+            "To limit exposure if token is compromised",
+            "To comply with legal requirements"
         ],
         correctIndex: 2
     },
     {
         type: "question",
-        question: "What is the main purpose of Mongoose middleware (pre and post hooks)?",
+        question: "Which SameSite cookie setting provides the strongest CSRF protection?",
         options: [
-            "To create database indexes automatically",
-            "To execute logic before or after specific operations like save, find, etc.",
-            "To generate API documentation from schemas",
-            "To optimize database queries for better performance"
-        ],
-        correctIndex: 1
-    },
-
-    // Mongoose CRUD
-    {
-        type: "question",
-        question: "What is the difference between findOne() and findById() in Mongoose?",
-        options: [
-            "findOne() is faster than findById()",
-            "findById() specifically searches by the _id field while findOne() can search by any field",
-            "findOne() returns an array while findById() returns a single document",
-            "There is no difference, they are aliases for the same method"
-        ],
-        correctIndex: 1
-    },
-    {
-        type: "question",
-        question: "Which method is used to update a document and return the updated version in a single operation?",
-        options: [
-            "updateOne()",
-            "updateMany()",
-            "findOneAndUpdate() with {new: true}",
-            "save() after modification"
+            "'none'",
+            "'lax'",
+            "'strict'",
+            "'secure'"
         ],
         correctIndex: 2
     },
     {
         type: "question",
-        question: "What is the purpose of the populate() method in Mongoose?",
+        question: "Why is localStorage NOT recommended for storing authentication tokens?",
         options: [
-            "To fill a collection with sample data for testing",
-            "To replace document references with actual documents from other collections",
-            "To increase database performance by caching queries",
-            "To validate all documents in a collection"
+            "It has limited storage capacity",
+            "It's vulnerable to XSS attacks",
+            "It doesn't work in all browsers",
+            "It requires manual token management"
         ],
         correctIndex: 1
     },
 
-    // Advanced Mongoose
+    // Auth Middleware
     {
         type: "question",
-        question: "What are Mongoose discriminators used for?",
+        question: "What does Role-Based Access Control (RBAC) primarily manage?",
         options: [
-            "To distinguish between different error types",
-            "To create schema inheritance and model different types of documents in the same collection",
-            "To discriminate between valid and invalid queries",
-            "To create different database connections for different environments"
-        ],
-        correctIndex: 1
-    },
-    {
-        type: "question",
-        question: "Which Mongoose feature allows you to group multiple database operations into a single atomic transaction?",
-        options: [
-            "Aggregation pipelines",
-            "Middleware hooks",
-            "Sessions with transactions",
-            "Query builders"
+            "User authentication methods",
+            "Token expiration times",
+            "User permissions based on roles",
+            "Password complexity requirements"
         ],
         correctIndex: 2
     },
     {
         type: "question",
-        question: "What is the purpose of the lean() method in Mongoose queries?",
+        question: "In the token refresh flow, why do we implement token rotation?",
         options: [
-            "To make queries run faster by returning plain JavaScript objects instead of Mongoose documents",
-            "To reduce the memory usage of the Node.js application",
-            "To remove all validation from the query results",
-            "To automatically remove sensitive fields from returned documents"
+            "To reduce database queries",
+            "To automatically extend token expiration",
+            "To enhance security by issuing new refresh tokens",
+            "To support multiple devices simultaneously"
         ],
-        correctIndex: 0
+        correctIndex: 2
     },
 
-    // Advanced Express
+    // Security Practices
     {
         type: "question",
-        question: "What is the main purpose of the Helmet.js middleware in Express applications?",
+        question: "What is the recommended bcrypt salt rounds value for modern applications?",
         options: [
-            "To compress response bodies",
-            "To set various HTTP headers for security protection",
-            "To rate limit incoming requests",
-            "To handle CORS configuration"
+            "8",
+            "10",
+            "12",
+            "16"
+        ],
+        correctIndex: 2
+    },
+    {
+        type: "question",
+        question: "Which security measure helps prevent brute force attacks on login endpoints?",
+        options: [
+            "JWT tokens",
+            "Rate limiting",
+            "CORS configuration",
+            "Cookie flags"
         ],
         correctIndex: 1
     },
     {
         type: "question",
-        question: "In Express error handling, what is the advantage of using asyncHandler?",
+        question: "What is the purpose of the 'jti' (JWT ID) claim in tokens?",
         options: [
-            "It makes all routes run asynchronously by default",
-            "It automatically catches both synchronous and asynchronous errors in route handlers",
-            "It converts callback-based functions to promise-based ones",
-            "It adds retry logic for failed database operations"
+            "To identify the token type",
+            "To enable token revocation capabilities",
+            "To specify the token algorithm",
+            "To indicate token creation time"
         ],
         correctIndex: 1
     },
 
-    // Practical Tasks - MongoDB & Tools
+    // Practical Implementation Tasks
     {
         type: "task",
-        title: "MongoDB Atlas Cluster Setup",
-        content: "Create a MongoDB Atlas cluster, configure database access with proper security settings, set up network access rules, and test the connection. Create separate database users for development and production environments."
-    },
-    {
-        type: "task",
-        title: "MongoDB Compass Mastery",
-        content: "Use MongoDB Compass to explore your database, create and edit documents visually, build complex queries using the GUI, analyze query performance, create indexes, and use the aggregation pipeline builder. Export your database schema analysis."
-    },
-
-    // Practical Tasks - Mongoose Basics
-    {
-        type: "task",
-        title: "Mongoose Connection Management",
-        content: "Implement a robust database connection module with connection pooling, proper error handling, reconnection logic, and graceful shutdown. Add connection state monitoring and environment-specific configurations."
-    },
-    {
-        type: "task", 
-        title: "Advanced Schema Design",
-        content: "Design and implement comprehensive Mongoose schemas for a social media application including users, posts, comments, and reactions. Add proper validation, virtual properties, instance/static methods, and middleware hooks."
-    },
-
-    // Practical Tasks - Mongoose CRUD
-    {
-        type: "task",
-        title: "Complete CRUD API Implementation",
-        content: "Build a complete REST API with full CRUD operations using Mongoose. Implement filtering, sorting, pagination, population of related data, and proper error handling. Add transaction support for complex operations."
+        title: "JWT Token Service Implementation",
+        content: "Implement a complete JWT token service with access/refresh tokens, proper payload structure, token verification, error handling, and secure configuration. Include token blacklisting and rotation mechanisms."
     },
     {
         type: "task",
-        title: "Advanced Query Building",
-        content: "Create advanced Mongoose queries including aggregation pipelines, text search, geospatial queries, and complex filtering. Implement query performance optimization and indexing strategies."
+        title: "Cookie-Based Authentication System",
+        content: "Build a complete authentication system using HTTP-only cookies. Implement login, logout, token refresh endpoints with proper cookie security flags (httpOnly, secure, sameSite)."
     },
-
-    // Practical Tasks - Advanced Mongoose
-    {
-        type: "task",
-        title: "Mongoose Plugins & Middleware",
-        content: "Create reusable Mongoose plugins for common functionality like soft delete, audit logging, and data encryption. Implement advanced middleware patterns for cross-cutting concerns."
-    },
-    {
-        type: "task",
-        title: "Database Transactions & Change Streams",
-        content: "Implement complex database transactions for multi-document operations and set up change streams for real-time data updates. Create proper error handling and rollback mechanisms."
-    },
-
-    // Search & Research Tasks
     {
         type: "search-task",
-        title: "Research: Mongoose Performance Optimization",
-        content: "Research and document Mongoose performance optimization techniques including connection pooling, query optimization, indexing strategies, and memory management. Create performance benchmarks for different query patterns."
+        title: "Research: OAuth 2.0 & Social Authentication",
+        content: "Research OAuth 2.0 flows and social authentication providers. Compare implementation strategies for Google, GitHub, and Facebook OAuth. Document security considerations and best practices."
     },
     {
-        type: "search-task", 
-        title: "Research: MongoDB Best Practices",
-        content: "Research MongoDB best practices for schema design, indexing, aggregation pipelines, and data modeling. Compare different approaches for common use cases and create implementation guidelines."
-    },
-
-    // Integration & Production Tasks
-    {
-        type: "task",
-        title: "Full Stack Application Integration",
-        content: "Build a complete full-stack application integrating Express.js, Mongoose, and MongoDB Atlas. Implement user authentication, real-time features, proper error handling, and production-ready configurations."
+        type: "search-task",
+        title: "Research: Advanced Security Threats",
+        content: "Research modern authentication security threats including JWT vulnerabilities, timing attacks, session fixation, and token sidejacking. Document prevention strategies and mitigation techniques."
     },
     {
-        type: "task",
-        title: "Production Deployment & Monitoring",
-        content: "Prepare your Mongoose/Express application for production deployment. Configure environment variables, set up monitoring, implement health checks, create backup strategies, and set up performance monitoring."
-    }
-];    // Set lecture title and subtitle
-        document.getElementById('lecture-title').textContent = lectureConfig.title;
+        type: "search-task",
+        title: "Research: Passwordless Authentication",
+        content: "Research passwordless authentication methods including magic links, WebAuthn, and biometric authentication. Compare security, user experience, and implementation complexity across different approaches."
+    },
+];     document.getElementById('lecture-title').textContent = lectureConfig.title;
         document.getElementById('lecture-subtitle').textContent = lectureConfig.subtitle;
         
         // Render tabs and content
