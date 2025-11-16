@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Focal X - Node.js Bootcamp: Lecture 24 </title>
+    <title>Focal X - Node.js Bootcamp: Lecture 25 </title>
     <link rel="manifest" href="./manifest.json" />
     <link rel="apple-touch-icon" href="./logo.jpg">
     <meta name="apple-mobile-web-app-status-bar" content="#aa7700">
@@ -320,61 +320,10 @@ const lectureContent = [
         tabTitle: "Last Lesson",
         title: "Last Lesson Recap",
         content: `/*
-1- Authentication & Authorization Fundamentals
-2- JWT Tokens & Implementation
-3- Secure Cookie Management 
+1- Password Security
+2- Login & Signup Endpoints
 */`
     },  
-    {
-        tabTitle: "Password Security",
-        title: "Password Security",
-        content: `// ###################### PASSWORD SECURITY ##############################
-Hashing vs Encryption - Key Difference:
-- Hashing: One-way function (cannot be reversed)
-
-- Encryption: Two-way function (can be decrypted with key)
-
-=> Passwords should always be HASHED, never encrypted.
-
-=> There are many Hashing algorithms but Argon2 is the current winner of the Password Hashing 
-Competition and is considered the most secure option for modern applications.
-
-const bcrypt = require('bcryptjs');
-
-const passwordService = {
-    async hashPassword(password) {
-        const saltRounds = 12; // Modern standard (was 10 previously)
-        return await bcrypt.hash(password, saltRounds);
-    },
-
-    async verifyPassword(password, hashedPassword) {
-        return await bcrypt.compare(password, hashedPassword);
-    },
-
-    validatePasswordStrength(password) {
-        const minLength = 8;
-        const hasUpperCase = /[A-Z]/.test(password);
-        const hasLowerCase = /[a-z]/.test(password);
-        const hasNumbers = /\d/.test(password);
-        const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
-
-        if (password.length < minLength) {
-            throw new Error('Password must be at least 8 characters long');
-        }
-        if (!hasUpperCase || !hasLowerCase) {
-            throw new Error('Password must contain both uppercase and lowercase letters');
-        }
-        if (!hasNumbers) {
-            throw new Error('Password must contain at least one number');
-        }
-        if (!hasSpecialChar) {
-            throw new Error('Password must contain at least one special character');
-        }
-
-        return true;
-    }
-};`
-    },
     {
         tabTitle: "Auth Endpoints",
         title: "Auth Endpoints",
@@ -558,7 +507,735 @@ const cookieSecurity = {
     }
 };`
     },
+    {
+        tabTitle: "Auth Middleware",
+        title: "Authentication Middleware & Authorization",
+        content: `// ###################### AUTHENTICATION MIDDLEWARE ##############################
+
+// Main authentication middleware
+const authenticateToken = asyncHandler(async (req, res, next) => {
+    // Get token from cookie (preferred) or Authorization header
+    const token = req.cookies.accessToken || 
+                 req.headers.authorization?.replace('Bearer ', '');
+
+    if (!token) {
+        throw new AppError('Access token required', 401);
+    }
+
+    try {
+        const decoded = tokenService.verifyAccessToken(token);
+        
+        // Optional: Verify user still exists and is active
+        const user = await User.findById(decoded.id).select('-password');
+        if (!user) {
+            throw new AppError('User no longer exists', 401);
+        }
+        
+        if (user.isSuspended) {
+            throw new AppError('Account suspended', 403);
+        }
+
+        // Attach user to request object
+        req.user = {
+            id: user._id,
+            email: user.email,
+            role: user.role,
+            permissions: user.permissions,
+            isVerified: user.isVerified
+        };
+
+        next();
+    } catch (error) {
+        if (error.name === 'TokenExpiredError') {
+            throw new AppError('Access token expired', 401);
+        }
+        throw new AppError('Invalid access token', 401);
+    }
+});
+
+// Optional authentication (user might be logged in)
+const optionalAuth = asyncHandler(async (req, res, next) => {
+    const token = req.cookies.accessToken || 
+                 req.headers.authorization?.replace('Bearer ', '');
+
+    if (token) {
+        try {
+            const decoded = tokenService.verifyAccessToken(token);
+            const user = await User.findById(decoded.id).select('-password');
+            
+            if (user && !user.isSuspended) {
+                req.user = {
+                    id: user._id,
+                    email: user.email,
+                    role: user.role,
+                    permissions: user.permissions
+                };
+            }
+        } catch (error) {
+            // Silently fail for optional auth
+        }
+    }
+
+    next();
+});
+
+// ###################### AUTHORIZATION MIDDLEWARE ##############################
+
+// Role-based authorization
+const authorize = (...allowedRoles) => {
+    return (req, res, next) => {
+        if (!req.user) {
+            throw new AppError('Authentication required', 401);
+        }
+
+        if (!allowedRoles.includes(req.user.role)) {
+            throw new AppError('Insufficient permissions', 403);
+        }
+
+        next();
+    };
+};
+
+// Permission-based authorization
+const requirePermission = (permission) => {
+    return asyncHandler(async (req, res, next) => {
+        if (!req.user) {
+            throw new AppError('Authentication required', 401);
+        }
+
+        // Check user permissions (you might fetch from database)
+        const userPermissions = req.user.permissions || [];
+        
+        if (!userPermissions.includes(permission)) {
+            throw new AppError('Insufficient permissions', 403);
+        }
+
+        next();
+    });
+};
+
+// Resource ownership check
+const checkResourceOwnership = (model, paramName = 'id') => {
+    return asyncHandler(async (req, res, next) => {
+        if (!req.user) {
+            throw new AppError('Authentication required', 401);
+        }
+
+        const resourceId = req.params[paramName];
+        const resource = await model.findById(resourceId);
+
+        if (!resource) {
+            throw new AppError('Resource not found', 404);
+        }
+
+        // Check if user owns resource or is admin
+        const isOwner = resource.userId && resource.userId.toString() === req.user.id;
+        const isAdmin = req.user.role === 'admin' || req.user.role === 'superadmin';
+
+        if (!isOwner && !isAdmin) {
+            throw new AppError('Access denied to this resource', 403);
+        }
+
+        req.resource = resource;
+        next();
+    });
+};
+
+// ###################### COMPOSITE MIDDLEWARE EXAMPLES ##############################
+
+// Admin-only middleware (composition of auth + role check)
+const requireAdmin = [authenticateToken, authorize('admin', 'superadmin')];
+
+// Verified user middleware
+const requireVerifiedUser = [
+    authenticateToken,
+    (req, res, next) => {
+        if (!req.user.isVerified) {
+            throw new AppError('Please verify your email address', 403);
+        }
+        next();
+    }
 ];
+
+// Self or admin middleware (users can access their own data)
+const requireSelfOrAdmin = (paramName = 'id') => {
+    return [
+        authenticateToken,
+        (req, res, next) => {
+            const targetUserId = req.params[paramName];
+            const isSelf = targetUserId === req.user.id;
+            const isAdmin = ['admin', 'superadmin'].includes(req.user.role);
+
+            if (!isSelf && !isAdmin) {
+                throw new AppError('Access denied', 403);
+            }
+            next();
+        }
+    ];
+};
+
+// ###################### ROUTE IMPLEMENTATIONS ##############################
+
+// Public route (no auth required)
+app.get('/api/public/data', (req, res) => {
+    res.json({ message: 'This is public data' });
+});
+
+// Protected route (auth required)
+app.get('/api/profile', authenticateToken, asyncHandler(async (req, res) => {
+    const user = await User.findById(req.user.id).select('-password');
+    res.json({
+        success: true,
+        data: { user }
+    });
+}));
+
+// Admin-only route
+app.get('/api/admin/users', 
+    requireAdmin, // Composite middleware
+    asyncHandler(async (req, res) => {
+        const users = await User.find().select('-password');
+        res.json({
+            success: true,
+            data: { users }
+        });
+    })
+);
+
+// User can access their own data, admin can access any
+app.get('/api/users/:userId', 
+    requireSelfOrAdmin('userId'),
+    asyncHandler(async (req, res) => {
+        const user = await User.findById(req.params.userId).select('-password');
+        res.json({
+            success: true,
+            data: { user }
+        });
+    })
+);
+
+// Resource ownership example (user can only update their own posts)
+app.put('/api/posts/:postId',
+    [authenticateToken, checkResourceOwnership(Post, 'postId')],
+    asyncHandler(async (req, res) => {
+        const updatedPost = await Post.findByIdAndUpdate(
+            req.params.postId,
+            req.body,
+            { new: true, runValidators: true }
+        );
+        
+        res.json({
+            success: true,
+            data: { post: updatedPost }
+        });
+    })
+);
+
+// Permission-based route
+app.delete('/api/users/:userId',
+    [authenticateToken, requirePermission('users:delete')],
+    asyncHandler(async (req, res) => {
+        await User.findByIdAndDelete(req.params.userId);
+        res.json({
+            success: true,
+            message: 'User deleted successfully'
+        });
+    })
+);
+
+// ###################### ERROR HANDLING FOR AUTH ##############################
+
+// Custom error classes for auth
+class AuthenticationError extends AppError {
+    constructor(message = 'Authentication failed') {
+        super(message, 401);
+    }
+}
+
+class AuthorizationError extends AppError {
+    constructor(message = 'Insufficient permissions') {
+        super(message, 403);
+    }
+}
+
+class TokenExpiredError extends AppError {
+    constructor(message = 'Token expired') {
+        super(message, 401);
+    }
+}
+
+// Enhanced global error handler for auth errors
+app.use((err, req, res, next) => {
+    // Handle JWT errors
+    if (err.name === 'JsonWebTokenError') {
+        err = new AuthenticationError('Invalid token');
+    }
+    if (err.name === 'TokenExpiredError') {
+        err = new TokenExpiredError('Token expired');
+    }
+
+    // Handle mongoose validation errors for auth
+    if (err.name === 'ValidationError') {
+        const messages = Object.values(err.errors).map(val => val.message);
+        err = new AppError(messages.join(', '), 400);
+    }
+
+    // Handle duplicate key errors (registration)
+    if (err.code === 11000) {
+        const field = Object.keys(err.keyValue)[0];
+        err = new AppError(\`\${field} already exists\`, 409);
+    }
+
+    // Pass to default error handler
+    next(err);
+});`
+    },
+    {
+        tabTitle: "Security Practices",
+        title: "Advanced Security & Best Practices",
+        content: `// ###################### SECURITY BEST PRACTICES ##############################
+
+/*
+MODERN SECURITY MEASURES:
+
+1. Password Security:
+   - Minimum 8 characters with complexity requirements
+   - Breached password detection (Have I Been Pwned)
+   - Regular password rotation policies
+   - Secure password reset flows
+
+2. Token Security:
+   - Short-lived access tokens (15-30 minutes)
+   - Long-lived refresh tokens (7 days) with rotation
+   - Token blacklisting/revocation capabilities
+   - Secure storage (HTTP-only, Secure, SameSite cookies)
+
+3. Rate Limiting:
+   - Stricter limits on authentication endpoints
+   - Account lockout after failed attempts
+   - IP-based and user-based rate limiting
+*/
+
+// ###################### ENHANCED RATE LIMITING ##############################
+
+const rateLimit = require('express-rate-limit');
+
+// General API rate limiting
+const apiLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // Limit each IP to 100 requests per windowMs
+    message: {
+        error: 'Too many requests from this IP, please try again later.'
+    },
+    standardHeaders: true,
+    legacyHeaders: false
+});
+
+// Stricter limits for auth endpoints
+const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 5, // 5 attempts per window for sensitive endpoints
+    message: {
+        error: 'Too many authentication attempts, please try again later.'
+    },
+    skipSuccessfulRequests: true, // Only count failed attempts
+    keyGenerator: (req) => {
+        // Use IP + user agent for more precise limiting
+        return \`\${req.ip}-\${req.get('User-Agent')}\`;
+    }
+});
+
+// Bruteforce protection for login
+const loginLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000, // 1 hour
+    max: 10, // Max 10 failed attempts per hour
+    skipSuccessfulRequests: true,
+    handler: (req, res) => {
+        // Log security event
+        console.warn(\`Bruteforce attempt detected from IP: \${req.ip}\`);
+        res.status(429).json({
+            error: 'Too many failed login attempts. Please try again in an hour.'
+        });
+    }
+});
+
+// Apply rate limiting
+app.use('/api/', apiLimiter);
+app.use('/api/auth/login', [authLimiter, loginLimiter]);
+app.use('/api/auth/register', authLimiter);
+app.use('/api/auth/forgot-password', authLimiter);
+
+// ###################### ACCOUNT LOCKOUT MECHANISM ##############################
+
+const accountLockout = {
+    async handleFailedLogin(userId) {
+        const user = await User.findById(userId);
+        if (!user) return;
+
+        user.failedLoginAttempts = (user.failedLoginAttempts || 0) + 1;
+        
+        // Lock account after 5 failed attempts
+        if (user.failedLoginAttempts >= 5) {
+            user.isLocked = true;
+            user.lockedUntil = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes
+        }
+
+        await user.save();
+    },
+
+    async resetFailedAttempts(userId) {
+        await User.findByIdAndUpdate(userId, {
+            failedLoginAttempts: 0,
+            isLocked: false,
+            lockedUntil: null
+        });
+    },
+
+    async isAccountLocked(userId) {
+        const user = await User.findById(userId);
+        if (!user) return false;
+
+        // Check if lock period has expired
+        if (user.lockedUntil && user.lockedUntil > new Date()) {
+            return true;
+        }
+
+        // Auto-unlock if lock period expired
+        if (user.isLocked && user.lockedUntil && user.lockedUntil <= new Date()) {
+            user.isLocked = false;
+            user.lockedUntil = null;
+            user.failedLoginAttempts = 0;
+            await user.save();
+            return false;
+        }
+
+        return user.isLocked;
+    }
+};
+
+// ###################### PASSWORD SECURITY ENHANCEMENTS ##############################
+
+const passwordPolicy = {
+    async isPasswordBreached(password) {
+        // In production, integrate with Have I Been Pwned API
+        // This is a simplified version
+        const breachedPasswords = ['password123', '12345678', 'qwerty'];
+        return breachedPasswords.includes(password);
+    },
+
+    validatePasswordHistory(userId, newPassword) {
+        // Check if password was used before (simplified)
+        // In reality, you'd check against previously hashed passwords
+        return false;
+    },
+
+    generatePasswordRequirements() {
+        return {
+            minLength: 8,
+            requireUppercase: true,
+            requireLowercase: true,
+            requireNumbers: true,
+            requireSpecialChars: true,
+            maxAge: 90 // days until password expiry
+        };
+    }
+};
+
+// ###################### SECURITY HEADERS ENHANCEMENT ##############################
+
+// Enhanced security headers specifically for auth
+app.use(helmet({
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+            scriptSrc: ["'self'", "'unsafe-inline'"],
+            imgSrc: ["'self'", "data:", "https:"],
+            connectSrc: ["'self'", "https://api.yourdomain.com"],
+            fontSrc: ["'self'", "https://fonts.gstatic.com"],
+            frameAncestors: ["'none'"], // Prevent clickjacking
+            formAction: ["'self'"] // Restrict form submissions
+        },
+    },
+    crossOriginEmbedderPolicy: false,
+    hsts: {
+        maxAge: 31536000, // 1 year
+        includeSubDomains: true,
+        preload: true
+    },
+    referrerPolicy: { policy: 'strict-origin-when-cross-origin' }
+}));
+
+// Additional security headers
+app.use((req, res, next) => {
+    // Prevent MIME type sniffing
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    
+    // Prevent clickjacking
+    res.setHeader('X-Frame-Options', 'DENY');
+    
+    // Enable XSS filter
+    res.setHeader('X-XSS-Protection', '1; mode=block');
+    
+    // Remove server information
+    res.removeHeader('X-Powered-By');
+    
+    next();
+});
+
+// ###################### SECURITY MONITORING & AUDITING ##############################
+
+const securityLogger = {
+    logAuthAttempt(email, success, ip, userAgent) {
+        const logEntry = {
+            timestamp: new Date(),
+            event: success ? 'LOGIN_SUCCESS' : 'LOGIN_FAILED',
+            email: success ? email : undefined, // Don't log failed emails for privacy
+            ip,
+            userAgent: userAgent?.substring(0, 100), // Limit length
+            success
+        };
+
+        console.log('AUTH_ATTEMPT:', logEntry);
+        
+        // In production, send to security monitoring service
+        // await SecurityLog.create(logEntry);
+    },
+
+    logTokenRefresh(userId, success) {
+        console.log(\`TOKEN_REFRESH: user=\${userId} success=\${success}\`);
+    },
+
+    logSecurityEvent(event, details) {
+        const securityEvent = {
+            timestamp: new Date(),
+            event,
+            ...details
+        };
+
+        console.warn('SECURITY_EVENT:', securityEvent);
+    }
+};
+
+// ###################### PRODUCTION SECURITY CHECKLIST ##############################
+
+/*
+✅ Environment Variables:
+   - JWT secrets set and strong
+   - Database credentials secure
+   - API keys not in code
+
+✅ HTTPS Enforcement:
+   - SSL certificate valid
+   - HTTP to HTTPS redirect
+   - HSTS headers enabled
+
+✅ Cookie Security:
+   - HTTP-only flag set
+   - Secure flag in production
+   - SameSite policy configured
+   - Proper domain and path settings
+
+✅ Rate Limiting:
+   - Authentication endpoints protected
+   - API endpoints limited
+   - Bruteforce protection enabled
+
+✅ Input Validation:
+   - Request body validation
+   - SQL injection prevention
+   - XSS protection
+
+✅ Error Handling:
+   - No sensitive data in errors
+   - Proper logging
+   - Generic error messages in production
+
+✅ Dependency Security:
+   - Regular dependency updates
+   - Security audits
+   - Vulnerability monitoring
+
+✅ Monitoring:
+   - Failed login attempts logged
+   - Suspicious activity detection
+   - Regular security audits
+*/
+
+// ###################### REGULAR SECURITY AUDITS ##############################
+
+const securityAudit = {
+    async runSecurityCheck() {
+        const checks = {
+            weakPasswords: await this.checkWeakPasswords(),
+            expiredTokens: await this.cleanExpiredTokens(),
+            oldSessions: await this.checkOldSessions(),
+            adminUsers: await this.auditAdminUsers()
+        };
+
+        return checks;
+    },
+
+    async checkWeakPasswords() {
+        // Check for users with weak passwords (simplified)
+        // In reality, you'd check password strength
+        return { checked: true, issues: [] };
+    },
+
+    async cleanExpiredTokens() {
+        // Clean up expired refresh tokens
+        const result = await RefreshToken.deleteMany({
+            expiresAt: { $lt: new Date() }
+        });
+        return \`Cleaned \${result.deletedCount} expired tokens\`;
+    },
+
+    async checkOldSessions() {
+        // Check for suspiciously long sessions
+        const oldSessions = await RefreshToken.find({
+            createdAt: { $lt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) } // 30 days
+        });
+        return oldSessions.length;
+    },
+
+    async auditAdminUsers() {
+        // Audit admin users and their activity
+        const adminUsers = await User.find({ role: { $in: ['admin', 'superadmin'] } });
+        return adminUsers.map(user => ({
+            id: user._id,
+            email: user.email,
+            lastLogin: user.lastLogin
+        }));
+    }
+};`
+    },{
+        tabTitle: "Advanced Express",
+        title: "Production-Ready Express Applications",
+        content: `/*
+Production Best Practices:
+• Environment configuration
+• Security headers
+• Rate limiting
+• Request sanitization
+• Proper error handling
+• Logging
+• Performance optimization
+*/
+
+const cors = require('cors');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+const compression = require('compression');
+
+// Security middleware
+app.use(helmet({
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            styleSrc: ["'self'", "'unsafe-inline'"],
+            scriptSrc: ["'self'"],
+            imgSrc: ["'self'", "data:", "https:"],
+        },
+    },
+    crossOriginEmbedderPolicy: false
+}));
+
+// CORS configuration
+app.use(cors({
+    origin: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000'],
+    credentials: true
+}));
+
+// Rate limiting
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // limit each IP to 100 requests per windowMs
+    message: {
+        error: 'Too many requests from this IP, please try again later.'
+    }
+});
+app.use('/api/', limiter);
+
+// Compression
+app.use(compression());
+
+// Environment-based configuration
+const config = {
+    development: {
+        port: 4000,
+        host: 'localhost',
+        logLevel: 'debug'
+    },
+    production: {
+        port: process.env.PORT || 80,
+        host: '0.0.0.0',
+        logLevel: 'warn'
+    }
+};
+
+const environment = process.env.NODE_ENV || 'development';
+const currentConfig = config[environment];
+
+// Advanced error handling
+class AppError extends Error {
+    constructor(message, statusCode) {
+        super(message);
+        this.statusCode = statusCode;
+        this.isOperational = true;
+        Error.captureStackTrace(this, this.constructor);
+    }
+}
+
+// Async error wrapper (avoid try-catch in every route)
+const asyncHandler = (fn) => (req, res, next) => {
+    Promise.resolve(fn(req, res, next)).catch(next);
+};
+
+// Example with async handler
+app.get('/api/async-users', asyncHandler(async (req, res) => {
+    // Simulate async operation
+    const users = await Promise.resolve([...users]);
+    res.json({ success: true, data: users });
+}));
+
+// Global error handler
+app.use((err, req, res, next) => {
+    err.statusCode = err.statusCode || 500;
+    err.status = err.status || 'error';
+
+    if (process.env.NODE_ENV === 'development') {
+        res.status(err.statusCode).json({
+            status: err.status,
+            error: err,
+            message: err.message,
+            stack: err.stack
+        });
+    } else {
+        // Production: don't leak error details
+        if (err.isOperational) {
+            res.status(err.statusCode).json({
+                status: err.status,
+                message: err.message
+            });
+        } else {
+            console.error('ERROR 💥', err);
+            res.status(500).json({
+                status: 'error',
+                message: 'Something went wrong!'
+            });
+        }
+    }
+});
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+    console.log('SIGTERM received. Shutting down gracefully...');
+    server.close(() => {
+        console.log('Process terminated');
+    });
+});`
+    },
+        ];
 
 // Updated Questions array aligned with authentication & security topics
 const questions = [
