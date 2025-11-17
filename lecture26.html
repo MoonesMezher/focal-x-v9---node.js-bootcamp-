@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Focal X - Node.js Bootcamp: Lecture 25 </title>
+    <title>Focal X - Node.js Bootcamp: Lecture 26 </title>
     <link rel="manifest" href="./manifest.json" />
     <link rel="apple-touch-icon" href="./logo.jpg">
     <meta name="apple-mobile-web-app-status-bar" content="#aa7700">
@@ -320,474 +320,453 @@ const lectureContent = [
         tabTitle: "Last Lesson",
         title: "Last Lesson Recap",
         content: `/*
-1- Password Security
-2- Login & Signup Endpoints
+1- Logout & Refresh Token APIs
+2- Auth Middlewares (requireAuth, auhtorize)
 */`
     },  
     {
-        tabTitle: "Auth Endpoints",
-        title: "Auth Endpoints",
-        content: `// ###################### COOKIE-BASED AUTH ENDPOINTS ##############################
-
-// Login endpoint with secure cookies
-app.post('/api/auth/login', asyncHandler(async (req, res) => {
-    const { email, password } = req.body;
-
-    // Validate input
-    if (!email || !password) {
-        throw new AppError('Email and password are required', 400);
-    }
-
-    // Find user and verify credentials
-    const user = await User.findOne({ email }).select('+password');
-    if (!user || !(await passwordService.verifyPassword(password, user.password))) {
-        throw new AppError('Invalid credentials', 401);
-    }
-
-    // Generate tokens
-    const tokenPayload = {
-        id: user._id,
-        email: user.email,
-        role: user.role
-    };
-
-    const accessToken = tokenService.generateAccessToken(tokenPayload);
-    const refreshToken = tokenService.generateRefreshToken(tokenPayload);
-
-    // Store refresh token in database for rotation
-    await RefreshToken.create({
-        token: refreshToken,
-        userId: user._id,
-        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
-    });
-
-    // Set secure cookies
-    cookieService.setAccessToken(res, accessToken);
-    cookieService.setRefreshToken(res, refreshToken);
-
-    // Update user last login
-    user.lastLogin = new Date();
-    await user.save();
-
-    res.json({
-        success: true,
-        data: {
-            user: {
-                id: user._id,
-                email: user.email,
-                name: user.name,
-                role: user.role
-            }
-        }
-    });
-}));
-
-// Logout endpoint with token cleanup
-app.post('/api/auth/logout', asyncHandler(async (req, res) => {
-    const refreshToken = cookieService.getRefreshToken(req);
-
-    // Revoke refresh token from database
-    if (refreshToken) {
-        await RefreshToken.findOneAndUpdate(
-            { token: refreshToken },
-            { isRevoked: true, revokedAt: new Date() }
-        );
-    }
-
-    // Clear cookies
-    cookieService.clearTokens(res);
-
-    res.json({
-        success: true,
-        message: 'Logged out successfully'
-    });
-}));
-
-// Refresh token endpoint
-app.post('/api/auth/refresh', asyncHandler(async (req, res) => {
-    const refreshToken = cookieService.getRefreshToken(req);
-    
-    if (!refreshToken) {
-        throw new AppError('Refresh token required', 401);
-    }
-
-    // Verify refresh token and check database
-    const decoded = tokenService.verifyRefreshToken(refreshToken);
-    const storedToken = await RefreshToken.findOne({ 
-        token: refreshToken, 
-        userId: decoded.id 
-    });
-
-    if (!storedToken || storedToken.isRevoked) {
-        throw new AppError('Invalid refresh token', 401);
-    }
-
-    // Generate new tokens
-    const tokenPayload = {
-        id: decoded.id,
-        email: decoded.email,
-        role: decoded.role
-    };
-
-    const newAccessToken = tokenService.generateAccessToken(tokenPayload);
-    const newRefreshToken = tokenService.generateRefreshToken(tokenPayload);
-
-    // Token rotation: revoke old, store new
-    await RefreshToken.findByIdAndUpdate(storedToken._id, { 
-        isRevoked: true,
-        revokedAt: new Date()
-    });
-    
-    await RefreshToken.create({
-        token: newRefreshToken,
-        userId: decoded.id,
-        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
-    });
-
-    // Set new cookies
-    cookieService.setAccessToken(res, newAccessToken);
-    cookieService.setRefreshToken(res, newRefreshToken);
-
-    res.json({
-        success: true,
-        message: 'Tokens refreshed successfully'
-    });
-}));
-
-// ###################### CSRF PROTECTION ##############################
+        tabTitle: "Security Practices",
+        title: "Advanced Security & Best Practices",
+        content: `// ###################### SECURITY BEST PRACTICES ##############################
 
 /*
-Since we're using SameSite cookies, CSRF risk is reduced.
-For additional protection, consider:
+MODERN SECURITY MEASURES:
 
-1. CSRF Tokens:
-   const csrf = require('csurf');
-   app.use(csrf({ cookie: true }));
+1. Password Security:
+   - Minimum 8 characters with complexity requirements
+   - Breached password detection (Have I Been Pwned)
+   - Regular password rotation policies
+   - Secure password reset flows
 
-2. Double Submit Cookie Pattern:
-   - Server sends CSRF token in separate cookie
-   - Client includes token in header for state-changing requests
+2. Token Security:
+   - Short-lived access tokens (15-30 minutes)
+   - Long-lived refresh tokens (7 days) with rotation
+   - Token blacklisting/revocation capabilities
+   - Secure storage (HTTP-only, Secure, SameSite cookies)
 
-3. Additional Headers:
-   app.use((req, res, next) => {
-     res.setHeader('X-Content-Type-Options', 'nosniff');
-     res.setHeader('X-Frame-Options', 'DENY');
-     res.setHeader('X-XSS-Protection', '1; mode=block');
-     next();
-   });
+3. Rate Limiting:
+   - Stricter limits on authentication endpoints
+   - Account lockout after failed attempts
+   - IP-based and user-based rate limiting
 */
 
-// ###################### COOKIE SECURITY AUDIT ##############################
+// ###################### ENHANCED RATE LIMITING ##############################
 
-const cookieSecurity = {
-    auditCookies(req) {
-        const cookies = req.cookies;
-        const securityReport = {};
+const rateLimit = require('express-rate-limit');
 
-        for (const [name, value] of Object.entries(cookies)) {
-            securityReport[name] = {
-                hasHttpOnly: false, // We can't detect this from server-side
-                hasSecure: req.secure, // Assuming secure cookies only sent over HTTPS
-                length: value.length,
-                isJWT: value.split('.').length === 3 // Basic JWT detection
-            };
-        }
-
-        return securityReport;
+// General API rate limiting
+const apiLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // Limit each IP to 100 requests per windowMs
+    message: {
+        error: 'Too many requests from this IP, please try again later.'
     },
+    standardHeaders: true,
+    legacyHeaders: false
+});
 
-    validateCookieSecurity(res) {
-        // In real implementation, you'd check response headers
-        const securityHeaders = res.getHeaders();
-        return {
-            hasSecureFlag: securityHeaders['set-cookie']?.some(cookie => cookie.includes('Secure')),
-            hasHttpOnly: securityHeaders['set-cookie']?.some(cookie => cookie.includes('HttpOnly')),
-            hasSameSite: securityHeaders['set-cookie']?.some(cookie => cookie.includes('SameSite'))
-        };
-    }
-};`
+// Stricter limits for auth endpoints
+const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 5, // 5 attempts per window for sensitive endpoints
+    message: {
+        error: 'Too many authentication attempts, please try again later.'
     },
-    {
-        tabTitle: "Auth Middleware",
-        title: "Authentication Middleware & Authorization",
-        content: `// ###################### AUTHENTICATION MIDDLEWARE ##############################
-
-// Main authentication middleware
-const authenticateToken = asyncHandler(async (req, res, next) => {
-    // Get token from cookie (preferred) or Authorization header
-    const token = req.cookies.accessToken || 
-                 req.headers.authorization?.replace('Bearer ', '');
-
-    if (!token) {
-        throw new AppError('Access token required', 401);
-    }
-
-    try {
-        const decoded = tokenService.verifyAccessToken(token);
-        
-        // Optional: Verify user still exists and is active
-        const user = await User.findById(decoded.id).select('-password');
-        if (!user) {
-            throw new AppError('User no longer exists', 401);
-        }
-        
-        if (user.isSuspended) {
-            throw new AppError('Account suspended', 403);
-        }
-
-        // Attach user to request object
-        req.user = {
-            id: user._id,
-            email: user.email,
-            role: user.role,
-            permissions: user.permissions,
-            isVerified: user.isVerified
-        };
-
-        next();
-    } catch (error) {
-        if (error.name === 'TokenExpiredError') {
-            throw new AppError('Access token expired', 401);
-        }
-        throw new AppError('Invalid access token', 401);
+    skipSuccessfulRequests: true, // Only count failed attempts
+    keyGenerator: (req) => {
+        // Use IP + user agent for more precise limiting
+        return \`\${req.ip}-\${req.get('User-Agent')}\`;
     }
 });
 
-// Optional authentication (user might be logged in)
-const optionalAuth = asyncHandler(async (req, res, next) => {
-    const token = req.cookies.accessToken || 
-                 req.headers.authorization?.replace('Bearer ', '');
-
-    if (token) {
-        try {
-            const decoded = tokenService.verifyAccessToken(token);
-            const user = await User.findById(decoded.id).select('-password');
-            
-            if (user && !user.isSuspended) {
-                req.user = {
-                    id: user._id,
-                    email: user.email,
-                    role: user.role,
-                    permissions: user.permissions
-                };
-            }
-        } catch (error) {
-            // Silently fail for optional auth
-        }
+// Bruteforce protection for login
+const loginLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000, // 1 hour
+    max: 10, // Max 10 failed attempts per hour
+    skipSuccessfulRequests: true,
+    handler: (req, res) => {
+        // Log security event
+        console.warn(\`Bruteforce attempt detected from IP: \${req.ip}\`);
+        res.status(429).json({
+            error: 'Too many failed login attempts. Please try again in an hour.'
+        });
     }
+});
 
+// Apply rate limiting
+app.use('/api/', apiLimiter);
+app.use('/api/auth/login', [authLimiter, loginLimiter]);
+app.use('/api/auth/register', authLimiter);
+app.use('/api/auth/forgot-password', authLimiter);
+
+// ###################### ACCOUNT LOCKOUT MECHANISM ##############################
+
+const accountLockout = {
+    async handleFailedLogin(userId) {
+        const user = await User.findById(userId);
+        if (!user) return;
+
+        user.failedLoginAttempts = (user.failedLoginAttempts || 0) + 1;
+        
+        // Lock account after 5 failed attempts
+        if (user.failedLoginAttempts >= 5) {
+            user.isLocked = true;
+            user.lockedUntil = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes
+        }
+
+        await user.save();
+    },
+
+    async resetFailedAttempts(userId) {
+        await User.findByIdAndUpdate(userId, {
+            failedLoginAttempts: 0,
+            isLocked: false,
+            lockedUntil: null
+        });
+    },
+
+    async isAccountLocked(userId) {
+        const user = await User.findById(userId);
+        if (!user) return false;
+
+        // Check if lock period has expired
+        if (user.lockedUntil && user.lockedUntil > new Date()) {
+            return true;
+        }
+
+        // Auto-unlock if lock period expired
+        if (user.isLocked && user.lockedUntil && user.lockedUntil <= new Date()) {
+            user.isLocked = false;
+            user.lockedUntil = null;
+            user.failedLoginAttempts = 0;
+            await user.save();
+            return false;
+        }
+
+        return user.isLocked;
+    }
+};
+
+// ###################### PASSWORD SECURITY ENHANCEMENTS ##############################
+
+const passwordPolicy = {
+    async isPasswordBreached(password) {
+        // In production, integrate with Have I Been Pwned API
+        // This is a simplified version
+        const breachedPasswords = ['password123', '12345678', 'qwerty'];
+        return breachedPasswords.includes(password);
+    },
+
+    validatePasswordHistory(userId, newPassword) {
+        // Check if password was used before (simplified)
+        // In reality, you'd check against previously hashed passwords
+        return false;
+    },
+
+    generatePasswordRequirements() {
+        return {
+            minLength: 8,
+            requireUppercase: true,
+            requireLowercase: true,
+            requireNumbers: true,
+            requireSpecialChars: true,
+            maxAge: 90 // days until password expiry
+        };
+    }
+};
+
+// ###################### SECURITY HEADERS ENHANCEMENT ##############################
+
+// Enhanced security headers specifically for auth
+app.use(helmet({
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+            scriptSrc: ["'self'", "'unsafe-inline'"],
+            imgSrc: ["'self'", "data:", "https:"],
+            connectSrc: ["'self'", "https://api.yourdomain.com"],
+            fontSrc: ["'self'", "https://fonts.gstatic.com"],
+            frameAncestors: ["'none'"], // Prevent clickjacking
+            formAction: ["'self'"] // Restrict form submissions
+        },
+    },
+    crossOriginEmbedderPolicy: false,
+    hsts: {
+        maxAge: 31536000, // 1 year
+        includeSubDomains: true,
+        preload: true
+    },
+    referrerPolicy: { policy: 'strict-origin-when-cross-origin' }
+}));
+
+// Additional security headers
+app.use((req, res, next) => {
+    // Prevent MIME type sniffing
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    
+    // Prevent clickjacking
+    res.setHeader('X-Frame-Options', 'DENY');
+    
+    // Enable XSS filter
+    res.setHeader('X-XSS-Protection', '1; mode=block');
+    
+    // Remove server information
+    res.removeHeader('X-Powered-By');
+    
     next();
 });
 
-// ###################### AUTHORIZATION MIDDLEWARE ##############################
+// ###################### SECURITY MONITORING & AUDITING ##############################
 
-// Role-based authorization
-const authorize = (...allowedRoles) => {
-    return (req, res, next) => {
-        if (!req.user) {
-            throw new AppError('Authentication required', 401);
-        }
+const securityLogger = {
+    logAuthAttempt(email, success, ip, userAgent) {
+        const logEntry = {
+            timestamp: new Date(),
+            event: success ? 'LOGIN_SUCCESS' : 'LOGIN_FAILED',
+            email: success ? email : undefined, // Don't log failed emails for privacy
+            ip,
+            userAgent: userAgent?.substring(0, 100), // Limit length
+            success
+        };
 
-        if (!allowedRoles.includes(req.user.role)) {
-            throw new AppError('Insufficient permissions', 403);
-        }
-
-        next();
-    };
-};
-
-// Permission-based authorization
-const requirePermission = (permission) => {
-    return asyncHandler(async (req, res, next) => {
-        if (!req.user) {
-            throw new AppError('Authentication required', 401);
-        }
-
-        // Check user permissions (you might fetch from database)
-        const userPermissions = req.user.permissions || [];
+        console.log('AUTH_ATTEMPT:', logEntry);
         
-        if (!userPermissions.includes(permission)) {
-            throw new AppError('Insufficient permissions', 403);
-        }
+        // In production, send to security monitoring service
+        // await SecurityLog.create(logEntry);
+    },
 
-        next();
-    });
-};
+    logTokenRefresh(userId, success) {
+        console.log(\`TOKEN_REFRESH: user=\${userId} success=\${success}\`);
+    },
 
-// Resource ownership check
-const checkResourceOwnership = (model, paramName = 'id') => {
-    return asyncHandler(async (req, res, next) => {
-        if (!req.user) {
-            throw new AppError('Authentication required', 401);
-        }
+    logSecurityEvent(event, details) {
+        const securityEvent = {
+            timestamp: new Date(),
+            event,
+            ...details
+        };
 
-        const resourceId = req.params[paramName];
-        const resource = await model.findById(resourceId);
-
-        if (!resource) {
-            throw new AppError('Resource not found', 404);
-        }
-
-        // Check if user owns resource or is admin
-        const isOwner = resource.userId && resource.userId.toString() === req.user.id;
-        const isAdmin = req.user.role === 'admin' || req.user.role === 'superadmin';
-
-        if (!isOwner && !isAdmin) {
-            throw new AppError('Access denied to this resource', 403);
-        }
-
-        req.resource = resource;
-        next();
-    });
-};
-
-// ###################### COMPOSITE MIDDLEWARE EXAMPLES ##############################
-
-// Admin-only middleware (composition of auth + role check)
-const requireAdmin = [authenticateToken, authorize('admin', 'superadmin')];
-
-// Verified user middleware
-const requireVerifiedUser = [
-    authenticateToken,
-    (req, res, next) => {
-        if (!req.user.isVerified) {
-            throw new AppError('Please verify your email address', 403);
-        }
-        next();
+        console.warn('SECURITY_EVENT:', securityEvent);
     }
-];
-
-// Self or admin middleware (users can access their own data)
-const requireSelfOrAdmin = (paramName = 'id') => {
-    return [
-        authenticateToken,
-        (req, res, next) => {
-            const targetUserId = req.params[paramName];
-            const isSelf = targetUserId === req.user.id;
-            const isAdmin = ['admin', 'superadmin'].includes(req.user.role);
-
-            if (!isSelf && !isAdmin) {
-                throw new AppError('Access denied', 403);
-            }
-            next();
-        }
-    ];
 };
 
-// ###################### ROUTE IMPLEMENTATIONS ##############################
+// ###################### PRODUCTION SECURITY CHECKLIST ##############################
 
-// Public route (no auth required)
-app.get('/api/public/data', (req, res) => {
-    res.json({ message: 'This is public data' });
-});
+/*
+✅ Environment Variables:
+   - JWT secrets set and strong
+   - Database credentials secure
+   - API keys not in code
 
-// Protected route (auth required)
-app.get('/api/profile', authenticateToken, asyncHandler(async (req, res) => {
-    const user = await User.findById(req.user.id).select('-password');
-    res.json({
-        success: true,
-        data: { user }
-    });
+✅ HTTPS Enforcement:
+   - SSL certificate valid
+   - HTTP to HTTPS redirect
+   - HSTS headers enabled
+
+✅ Cookie Security:
+   - HTTP-only flag set
+   - Secure flag in production
+   - SameSite policy configured
+   - Proper domain and path settings
+
+✅ Rate Limiting:
+   - Authentication endpoints protected
+   - API endpoints limited
+   - Bruteforce protection enabled
+
+✅ Input Validation:
+   - Request body validation
+   - SQL injection prevention
+   - XSS protection
+
+✅ Error Handling:
+   - No sensitive data in errors
+   - Proper logging
+   - Generic error messages in production
+
+✅ Dependency Security:
+   - Regular dependency updates
+   - Security audits
+   - Vulnerability monitoring
+
+✅ Monitoring:
+   - Failed login attempts logged
+   - Suspicious activity detection
+   - Regular security audits
+*/
+
+// ###################### REGULAR SECURITY AUDITS ##############################
+
+const securityAudit = {
+    async runSecurityCheck() {
+        const checks = {
+            weakPasswords: await this.checkWeakPasswords(),
+            expiredTokens: await this.cleanExpiredTokens(),
+            oldSessions: await this.checkOldSessions(),
+            adminUsers: await this.auditAdminUsers()
+        };
+
+        return checks;
+    },
+
+    async checkWeakPasswords() {
+        // Check for users with weak passwords (simplified)
+        // In reality, you'd check password strength
+        return { checked: true, issues: [] };
+    },
+
+    async cleanExpiredTokens() {
+        // Clean up expired refresh tokens
+        const result = await RefreshToken.deleteMany({
+            expiresAt: { $lt: new Date() }
+        });
+        return \`Cleaned \${result.deletedCount} expired tokens\`;
+    },
+
+    async checkOldSessions() {
+        // Check for suspiciously long sessions
+        const oldSessions = await RefreshToken.find({
+            createdAt: { $lt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) } // 30 days
+        });
+        return oldSessions.length;
+    },
+
+    async auditAdminUsers() {
+        // Audit admin users and their activity
+        const adminUsers = await User.find({ role: { $in: ['admin', 'superadmin'] } });
+        return adminUsers.map(user => ({
+            id: user._id,
+            email: user.email,
+            lastLogin: user.lastLogin
+        }));
+    }
+};`
+    },{
+        tabTitle: "Advanced Express",
+        title: "Production-Ready Express Applications",
+        content: `/*
+Production Best Practices:
+• Environment configuration
+• Security headers
+• Rate limiting
+• Request sanitization
+• Proper error handling
+• Logging
+• Performance optimization
+*/
+
+const cors = require('cors');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+const compression = require('compression');
+
+// Security middleware
+app.use(helmet({
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            styleSrc: ["'self'", "'unsafe-inline'"],
+            scriptSrc: ["'self'"],
+            imgSrc: ["'self'", "data:", "https:"],
+        },
+    },
+    crossOriginEmbedderPolicy: false
 }));
 
-// Admin-only route
-app.get('/api/admin/users', 
-    requireAdmin, // Composite middleware
-    asyncHandler(async (req, res) => {
-        const users = await User.find().select('-password');
-        res.json({
-            success: true,
-            data: { users }
-        });
-    })
-);
+// CORS configuration
+app.use(cors({
+    origin: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000'],
+    credentials: true
+}));
 
-// User can access their own data, admin can access any
-app.get('/api/users/:userId', 
-    requireSelfOrAdmin('userId'),
-    asyncHandler(async (req, res) => {
-        const user = await User.findById(req.params.userId).select('-password');
-        res.json({
-            success: true,
-            data: { user }
-        });
-    })
-);
+// Rate limiting
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // limit each IP to 100 requests per windowMs
+    message: {
+        error: 'Too many requests from this IP, please try again later.'
+    }
+});
+app.use('/api/', limiter);
 
-// Resource ownership example (user can only update their own posts)
-app.put('/api/posts/:postId',
-    [authenticateToken, checkResourceOwnership(Post, 'postId')],
-    asyncHandler(async (req, res) => {
-        const updatedPost = await Post.findByIdAndUpdate(
-            req.params.postId,
-            req.body,
-            { new: true, runValidators: true }
-        );
-        
-        res.json({
-            success: true,
-            data: { post: updatedPost }
-        });
-    })
-);
+// Compression
+app.use(compression());
 
-// Permission-based route
-app.delete('/api/users/:userId',
-    [authenticateToken, requirePermission('users:delete')],
-    asyncHandler(async (req, res) => {
-        await User.findByIdAndDelete(req.params.userId);
-        res.json({
-            success: true,
-            message: 'User deleted successfully'
-        });
-    })
-);
+// Environment-based configuration
+const config = {
+    development: {
+        port: 4000,
+        host: 'localhost',
+        logLevel: 'debug'
+    },
+    production: {
+        port: process.env.PORT || 80,
+        host: '0.0.0.0',
+        logLevel: 'warn'
+    }
+};
 
-// ###################### ERROR HANDLING FOR AUTH ##############################
+const environment = process.env.NODE_ENV || 'development';
+const currentConfig = config[environment];
 
-// Custom error classes for auth
-class AuthenticationError extends AppError {
-    constructor(message = 'Authentication failed') {
-        super(message, 401);
+// Advanced error handling
+class AppError extends Error {
+    constructor(message, statusCode) {
+        super(message);
+        this.statusCode = statusCode;
+        this.isOperational = true;
+        Error.captureStackTrace(this, this.constructor);
     }
 }
 
-class AuthorizationError extends AppError {
-    constructor(message = 'Insufficient permissions') {
-        super(message, 403);
-    }
-}
+// Async error wrapper (avoid try-catch in every route)
+const asyncHandler = (fn) => (req, res, next) => {
+    Promise.resolve(fn(req, res, next)).catch(next);
+};
 
-class TokenExpiredError extends AppError {
-    constructor(message = 'Token expired') {
-        super(message, 401);
-    }
-}
+// Example with async handler
+app.get('/api/async-users', asyncHandler(async (req, res) => {
+    // Simulate async operation
+    const users = await Promise.resolve([...users]);
+    res.json({ success: true, data: users });
+}));
 
-// Enhanced global error handler for auth errors
+// Global error handler
 app.use((err, req, res, next) => {
-    // Handle JWT errors
-    if (err.name === 'JsonWebTokenError') {
-        err = new AuthenticationError('Invalid token');
-    }
-    if (err.name === 'TokenExpiredError') {
-        err = new TokenExpiredError('Token expired');
-    }
+    err.statusCode = err.statusCode || 500;
+    err.status = err.status || 'error';
 
-    // Handle mongoose validation errors for auth
-    if (err.name === 'ValidationError') {
-        const messages = Object.values(err.errors).map(val => val.message);
-        err = new AppError(messages.join(', '), 400);
+    if (process.env.NODE_ENV === 'development') {
+        res.status(err.statusCode).json({
+            status: err.status,
+            error: err,
+            message: err.message,
+            stack: err.stack
+        });
+    } else {
+        // Production: don't leak error details
+        if (err.isOperational) {
+            res.status(err.statusCode).json({
+                status: err.status,
+                message: err.message
+            });
+        } else {
+            console.error('ERROR 💥', err);
+            res.status(500).json({
+                status: 'error',
+                message: 'Something went wrong!'
+            });
+        }
     }
+});
 
-    // Handle duplicate key errors (registration)
-    if (err.code === 11000) {
-        const field = Object.keys(err.keyValue)[0];
-        err = new AppError(\`\${field} already exists\`, 409);
-    }
-
-    // Pass to default error handler
-    next(err);
+// Graceful shutdown
+process.on('SIGTERM', () => {
+    console.log('SIGTERM received. Shutting down gracefully...');
+    server.close(() => {
+        console.log('Process terminated');
+    });
 });`
     },
         ];
