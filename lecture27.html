@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Focal X - Node.js Bootcamp: Lecture 26 </title>
+    <title>Focal X - Node.js Bootcamp: Lecture 27 </title>
     <link rel="manifest" href="./manifest.json" />
     <link rel="apple-touch-icon" href="./logo.jpg">
     <meta name="apple-mobile-web-app-status-bar" content="#aa7700">
@@ -311,7 +311,7 @@
         // Lecture metadata
         const lectureConfig = {
             title: "Focal X - Node.js Bootcamp",
-            subtitle: "Seeds & Security Practices"
+            subtitle: "Authentication & Authorization"
         };
         
        // Lecture content organized by tabs
@@ -320,328 +320,136 @@ const lectureContent = [
         tabTitle: "Last Lesson",
         title: "Last Lesson Recap",
         content: `/*
-1- Logout & Refresh Token APIs
-2- Auth Middlewares (requireAuth, auhtorize)
+1- Create Superadmin Account by Seeds
+2- Advanced Security & Best Practices
 */`
     },  
     {
-        tabTitle: "Security Practices",
-        title: "Advanced Security & Best Practices",
-        content: `// ###################### SECURITY BEST PRACTICES ##############################
-
-/*
-MODERN SECURITY MEASURES:
-
-1. Password Security:
-   - Minimum 8 characters with complexity requirements
-   - Breached password detection (Have I Been Pwned)
-   - Regular password rotation policies
-   - Secure password reset flows
-
-2. Token Security:
-   - Short-lived access tokens (15-30 minutes)
-   - Long-lived refresh tokens (7 days) with rotation
-   - Token blacklisting/revocation capabilities
-   - Secure storage (HTTP-only, Secure, SameSite cookies)
-
-3. Rate Limiting:
-   - Stricter limits on authentication endpoints
-   - Account lockout after failed attempts
-   - IP-based and user-based rate limiting
+        tabTitle: "Advanced Express",
+        title: "Production-Ready Express Applications",
+        content: `/*
+Production Best Practices:
+• Environment configuration
+• Security headers
+• Rate limiting
+• Request sanitization
+• Proper error handling
+• Logging
+• Performance optimization
 */
 
-// ###################### ENHANCED RATE LIMITING ##############################
-
+const cors = require('cors');
+const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
+const compression = require('compression');
 
-// General API rate limiting
-const apiLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // Limit each IP to 100 requests per windowMs
-    message: {
-        error: 'Too many requests from this IP, please try again later.'
-    },
-    standardHeaders: true,
-    legacyHeaders: false
-});
-
-// Stricter limits for auth endpoints
-const authLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 5, // 5 attempts per window for sensitive endpoints
-    message: {
-        error: 'Too many authentication attempts, please try again later.'
-    },
-    skipSuccessfulRequests: true, // Only count failed attempts
-    keyGenerator: (req) => {
-        // Use IP + user agent for more precise limiting
-        return \`\${req.ip}-\${req.get('User-Agent')}\`;
-    }
-});
-
-// Bruteforce protection for login
-const loginLimiter = rateLimit({
-    windowMs: 60 * 60 * 1000, // 1 hour
-    max: 10, // Max 10 failed attempts per hour
-    skipSuccessfulRequests: true,
-    handler: (req, res) => {
-        // Log security event
-        console.warn(\`Bruteforce attempt detected from IP: \${req.ip}\`);
-        res.status(429).json({
-            error: 'Too many failed login attempts. Please try again in an hour.'
-        });
-    }
-});
-
-// Apply rate limiting
-app.use('/api/', apiLimiter);
-app.use('/api/auth/login', [authLimiter, loginLimiter]);
-app.use('/api/auth/register', authLimiter);
-app.use('/api/auth/forgot-password', authLimiter);
-
-// ###################### ACCOUNT LOCKOUT MECHANISM ##############################
-
-const accountLockout = {
-    async handleFailedLogin(userId) {
-        const user = await User.findById(userId);
-        if (!user) return;
-
-        user.failedLoginAttempts = (user.failedLoginAttempts || 0) + 1;
-        
-        // Lock account after 5 failed attempts
-        if (user.failedLoginAttempts >= 5) {
-            user.isLocked = true;
-            user.lockedUntil = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes
-        }
-
-        await user.save();
-    },
-
-    async resetFailedAttempts(userId) {
-        await User.findByIdAndUpdate(userId, {
-            failedLoginAttempts: 0,
-            isLocked: false,
-            lockedUntil: null
-        });
-    },
-
-    async isAccountLocked(userId) {
-        const user = await User.findById(userId);
-        if (!user) return false;
-
-        // Check if lock period has expired
-        if (user.lockedUntil && user.lockedUntil > new Date()) {
-            return true;
-        }
-
-        // Auto-unlock if lock period expired
-        if (user.isLocked && user.lockedUntil && user.lockedUntil <= new Date()) {
-            user.isLocked = false;
-            user.lockedUntil = null;
-            user.failedLoginAttempts = 0;
-            await user.save();
-            return false;
-        }
-
-        return user.isLocked;
-    }
-};
-
-// ###################### PASSWORD SECURITY ENHANCEMENTS ##############################
-
-const passwordPolicy = {
-    async isPasswordBreached(password) {
-        // In production, integrate with Have I Been Pwned API
-        // This is a simplified version
-        const breachedPasswords = ['password123', '12345678', 'qwerty'];
-        return breachedPasswords.includes(password);
-    },
-
-    validatePasswordHistory(userId, newPassword) {
-        // Check if password was used before (simplified)
-        // In reality, you'd check against previously hashed passwords
-        return false;
-    },
-
-    generatePasswordRequirements() {
-        return {
-            minLength: 8,
-            requireUppercase: true,
-            requireLowercase: true,
-            requireNumbers: true,
-            requireSpecialChars: true,
-            maxAge: 90 // days until password expiry
-        };
-    }
-};
-
-// ###################### SECURITY HEADERS ENHANCEMENT ##############################
-
-// Enhanced security headers specifically for auth
+// Security middleware
 app.use(helmet({
     contentSecurityPolicy: {
         directives: {
             defaultSrc: ["'self'"],
-            styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-            scriptSrc: ["'self'", "'unsafe-inline'"],
+            styleSrc: ["'self'", "'unsafe-inline'"],
+            scriptSrc: ["'self'"],
             imgSrc: ["'self'", "data:", "https:"],
-            connectSrc: ["'self'", "https://api.yourdomain.com"],
-            fontSrc: ["'self'", "https://fonts.gstatic.com"],
-            frameAncestors: ["'none'"], // Prevent clickjacking
-            formAction: ["'self'"] // Restrict form submissions
         },
     },
-    crossOriginEmbedderPolicy: false,
-    hsts: {
-        maxAge: 31536000, // 1 year
-        includeSubDomains: true,
-        preload: true
-    },
-    referrerPolicy: { policy: 'strict-origin-when-cross-origin' }
+    crossOriginEmbedderPolicy: false
 }));
 
-// Additional security headers
-app.use((req, res, next) => {
-    // Prevent MIME type sniffing
-    res.setHeader('X-Content-Type-Options', 'nosniff');
-    
-    // Prevent clickjacking
-    res.setHeader('X-Frame-Options', 'DENY');
-    
-    // Enable XSS filter
-    res.setHeader('X-XSS-Protection', '1; mode=block');
-    
-    // Remove server information
-    res.removeHeader('X-Powered-By');
-    
-    next();
+// CORS configuration
+app.use(cors({
+    origin: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000'],
+    credentials: true
+}));
+
+// Rate limiting
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // limit each IP to 100 requests per windowMs
+    message: {
+        error: 'Too many requests from this IP, please try again later.'
+    }
 });
+app.use('/api/', limiter);
 
-// ###################### SECURITY MONITORING & AUDITING ##############################
+// Compression
+app.use(compression());
 
-const securityLogger = {
-    logAuthAttempt(email, success, ip, userAgent) {
-        const logEntry = {
-            timestamp: new Date(),
-            event: success ? 'LOGIN_SUCCESS' : 'LOGIN_FAILED',
-            email: success ? email : undefined, // Don't log failed emails for privacy
-            ip,
-            userAgent: userAgent?.substring(0, 100), // Limit length
-            success
-        };
-
-        console.log('AUTH_ATTEMPT:', logEntry);
-        
-        // In production, send to security monitoring service
-        // await SecurityLog.create(logEntry);
+// Environment-based configuration
+const config = {
+    development: {
+        port: 4000,
+        host: 'localhost',
+        logLevel: 'debug'
     },
-
-    logTokenRefresh(userId, success) {
-        console.log(\`TOKEN_REFRESH: user=\${userId} success=\${success}\`);
-    },
-
-    logSecurityEvent(event, details) {
-        const securityEvent = {
-            timestamp: new Date(),
-            event,
-            ...details
-        };
-
-        console.warn('SECURITY_EVENT:', securityEvent);
+    production: {
+        port: process.env.PORT || 80,
+        host: '0.0.0.0',
+        logLevel: 'warn'
     }
 };
 
-// ###################### PRODUCTION SECURITY CHECKLIST ##############################
+const environment = process.env.NODE_ENV || 'development';
+const currentConfig = config[environment];
 
-/*
-✅ Environment Variables:
-   - JWT secrets set and strong
-   - Database credentials secure
-   - API keys not in code
-
-✅ HTTPS Enforcement:
-   - SSL certificate valid
-   - HTTP to HTTPS redirect
-   - HSTS headers enabled
-
-✅ Cookie Security:
-   - HTTP-only flag set
-   - Secure flag in production
-   - SameSite policy configured
-   - Proper domain and path settings
-
-✅ Rate Limiting:
-   - Authentication endpoints protected
-   - API endpoints limited
-   - Bruteforce protection enabled
-
-✅ Input Validation:
-   - Request body validation
-   - SQL injection prevention
-   - XSS protection
-
-✅ Error Handling:
-   - No sensitive data in errors
-   - Proper logging
-   - Generic error messages in production
-
-✅ Dependency Security:
-   - Regular dependency updates
-   - Security audits
-   - Vulnerability monitoring
-
-✅ Monitoring:
-   - Failed login attempts logged
-   - Suspicious activity detection
-   - Regular security audits
-*/
-
-// ###################### REGULAR SECURITY AUDITS ##############################
-
-const securityAudit = {
-    async runSecurityCheck() {
-        const checks = {
-            weakPasswords: await this.checkWeakPasswords(),
-            expiredTokens: await this.cleanExpiredTokens(),
-            oldSessions: await this.checkOldSessions(),
-            adminUsers: await this.auditAdminUsers()
-        };
-
-        return checks;
-    },
-
-    async checkWeakPasswords() {
-        // Check for users with weak passwords (simplified)
-        // In reality, you'd check password strength
-        return { checked: true, issues: [] };
-    },
-
-    async cleanExpiredTokens() {
-        // Clean up expired refresh tokens
-        const result = await RefreshToken.deleteMany({
-            expiresAt: { $lt: new Date() }
-        });
-        return \`Cleaned \${result.deletedCount} expired tokens\`;
-    },
-
-    async checkOldSessions() {
-        // Check for suspiciously long sessions
-        const oldSessions = await RefreshToken.find({
-            createdAt: { $lt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) } // 30 days
-        });
-        return oldSessions.length;
-    },
-
-    async auditAdminUsers() {
-        // Audit admin users and their activity
-        const adminUsers = await User.find({ role: { $in: ['admin', 'superadmin'] } });
-        return adminUsers.map(user => ({
-            id: user._id,
-            email: user.email,
-            lastLogin: user.lastLogin
-        }));
+// Advanced error handling
+class AppError extends Error {
+    constructor(message, statusCode) {
+        super(message);
+        this.statusCode = statusCode;
+        this.isOperational = true;
+        Error.captureStackTrace(this, this.constructor);
     }
-};`
+}
+
+// Async error wrapper (avoid try-catch in every route)
+const asyncHandler = (fn) => (req, res, next) => {
+    Promise.resolve(fn(req, res, next)).catch(next);
+};
+
+// Example with async handler
+app.get('/api/async-users', asyncHandler(async (req, res) => {
+    // Simulate async operation
+    const users = await Promise.resolve([...users]);
+    res.json({ success: true, data: users });
+}));
+
+// Global error handler
+app.use((err, req, res, next) => {
+    err.statusCode = err.statusCode || 500;
+    err.status = err.status || 'error';
+
+    if (process.env.NODE_ENV === 'development') {
+        res.status(err.statusCode).json({
+            status: err.status,
+            error: err,
+            message: err.message,
+            stack: err.stack
+        });
+    } else {
+        // Production: don't leak error details
+        if (err.isOperational) {
+            res.status(err.statusCode).json({
+                status: err.status,
+                message: err.message
+            });
+        } else {
+            console.error('ERROR 💥', err);
+            res.status(500).json({
+                status: 'error',
+                message: 'Something went wrong!'
+            });
+        }
+    }
+});
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+    console.log('SIGTERM received. Shutting down gracefully...');
+    server.close(() => {
+        console.log('Process terminated');
+    });
+});`
     },
         ];
 
